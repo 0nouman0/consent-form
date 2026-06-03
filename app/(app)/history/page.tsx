@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-export default function HistoryPage() {
+function HistoryContent() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -341,5 +341,17 @@ export default function HistoryPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-nq-bg flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-nq-border border-t-nq-purple rounded-full animate-spin" />
+      </div>
+    }>
+      <HistoryContent />
+    </Suspense>
   );
 }
