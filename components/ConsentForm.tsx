@@ -194,6 +194,29 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
     }
   }, [patientCompetent, form]);
 
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("consentgen_doctor_profile");
+    if (savedProfile) {
+      try {
+        const parsed = JSON.parse(savedProfile);
+        if (parsed.doctorName && !form.getValues("clinical.doctorName")) {
+          form.setValue("clinical.doctorName", parsed.doctorName, { shouldValidate: true });
+        }
+        if (parsed.doctorRegistrationNo && !form.getValues("clinical.doctorRegistrationNo")) {
+          form.setValue("clinical.doctorRegistrationNo", parsed.doctorRegistrationNo, { shouldValidate: true });
+        }
+        if (parsed.hospitalName && !form.getValues("clinical.hospitalName")) {
+          form.setValue("clinical.hospitalName", parsed.hospitalName, { shouldValidate: true });
+        }
+        if (parsed.hospitalAddress && !form.getValues("clinical.hospitalAddress")) {
+          form.setValue("clinical.hospitalAddress", parsed.hospitalAddress, { shouldValidate: true });
+        }
+      } catch (e) {
+        console.error("Failed to parse profile data", e);
+      }
+    }
+  }, [form]);
+
   const handleClauseChange = (field: string, value: boolean) => {
     form.setValue(`clauses.${field}` as `clauses.${keyof ConsentFormSchema["clauses"]}`, value, { shouldValidate: true });
   };

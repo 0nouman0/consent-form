@@ -157,104 +157,82 @@ function GenerateContent() {
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left panel — form (always visible when idle/error) */}
-        <div className="flex-1 min-w-0">
-          <AnimatePresence mode="wait">
-            {(status === "idle" || status === "error") && (
-              <motion.div
-                key="form"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25 }}
-              >
-                {status === "error" && error && (
-                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
-                    {error}
-                  </div>
-                )}
-                {templateId && (
-                  <div className="mb-4 p-4 bg-nq-purple-soft border border-nq-purple/30 rounded-xl flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-nq-purple/20 flex items-center justify-center text-nq-purple">✓</div>
-                    <div>
-                      <p className="text-sm font-bold text-nq-text">Template Applied</p>
-                      <p className="text-xs text-nq-text-muted">Fields have been pre-filled for {PREBUILT_TEMPLATES.find(t => t.id === templateId)?.title}</p>
-                    </div>
-                  </div>
-                )}
-                <ConsentForm form={form} onSubmit={onSubmit} status={status} />
-              </motion.div>
+      <AnimatePresence mode="wait">
+        {(status === "idle" || status === "error") ? (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25 }}
+            className="max-w-4xl mx-auto"
+          >
+            {status === "error" && error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
+                {error}
+              </div>
             )}
-          </AnimatePresence>
-        </div>
-
-        {/* Right panel — document + checklist */}
-        <div className="w-full lg:w-[700px] shrink-0">
-          <AnimatePresence mode="wait">
-            {status === "idle" || status === "error" ? (
-              <motion.div
-                key="placeholder"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="border-2 border-dashed border-nq-border rounded-2xl h-96 flex flex-col items-center justify-center text-nq-text-light bg-white"
-              >
-                <div className="text-4xl mb-3 opacity-50">📄</div>
-                <p className="font-semibold text-nq-text-muted">Your consent form will appear here</p>
-                <p className="text-sm mt-1">Fill in the form and click Generate</p>
-              </motion.div>
-            ) : status === "loading" ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <LoadingState />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="document"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35 }}
-                className="space-y-6"
-              >
-                {/* Status indicator */}
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      status === "streaming"
-                        ? "bg-nq-purple animate-pulse"
-                        : "bg-green-500"
-                    }`}
-                  />
-                  <span className="text-sm font-semibold text-nq-text-muted">
-                    {status === "streaming"
-                      ? "Generating your consent form..."
-                      : "Consent form ready"}
-                  </span>
+            {templateId && (
+              <div className="mb-4 p-4 bg-nq-purple-soft border border-nq-purple/30 rounded-xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-nq-purple/20 flex items-center justify-center text-nq-purple">✓</div>
+                <div>
+                  <p className="text-sm font-bold text-nq-text">Template Applied</p>
+                  <p className="text-xs text-nq-text-muted">Fields have been pre-filled for {PREBUILT_TEMPLATES.find(t => t.id === templateId)?.title}</p>
                 </div>
-
-                <ConsentDocument
-                  markdown={markdown}
-                  consentId={consentId}
-                  hospitalName={form.getValues("clinical.hospitalName")}
-                  isComplete={status === "complete"}
-                  onReset={reset}
-                  formData={form.getValues()}
-                />
-
-                <ClauseChecklist
-                  detectedClauses={detectedClauses}
-                  consentType={consentType}
-                />
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </div>
-      </div>
+            <ConsentForm form={form} onSubmit={onSubmit} status={status} />
+          </motion.div>
+        ) : status === "loading" ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="max-w-4xl mx-auto"
+          >
+            <LoadingState />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="document"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="max-w-4xl mx-auto space-y-6"
+          >
+            {/* Status indicator */}
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  status === "streaming"
+                    ? "bg-nq-purple animate-pulse"
+                    : "bg-green-500"
+                }`}
+              />
+              <span className="text-sm font-semibold text-nq-text-muted">
+                {status === "streaming"
+                  ? "Generating your consent form..."
+                  : "Consent form ready"}
+              </span>
+            </div>
+
+            <ConsentDocument
+              markdown={markdown}
+              consentId={consentId}
+              hospitalName={form.getValues("clinical.hospitalName")}
+              isComplete={status === "complete"}
+              onReset={reset}
+              formData={form.getValues()}
+            />
+
+            <ClauseChecklist
+              detectedClauses={detectedClauses}
+              consentType={consentType}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
