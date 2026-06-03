@@ -147,7 +147,7 @@ export default function HistoryPage() {
           >
             <option value="all">All Types</option>
             {consentTypes.map((type) => (
-              <option key={type} value={type}>
+              <option key={type || "unknown"} value={type || ""}>
                 {(type ?? "").replace(/_/g, " ")}
               </option>
             ))}
