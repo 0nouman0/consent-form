@@ -4,8 +4,12 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800;
-    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    @apply bg-clay-base text-clay-text;
+    font-family: var(--font-inter), var(--font-dm-sans), system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-clay-text;
   }
 
   .consent-document p,
@@ -16,7 +20,209 @@
   }
 }
 
-/* Blinking streaming cursor */
+@layer components {
+  /* ─── EXISTING CLAY DESIGN SYSTEM (internal app pages) ─── */
+
+  .clay-card {
+    @apply bg-clay-card rounded-3xl;
+    box-shadow: 8px 8px 16px rgba(163,177,198,0.25), -8px -8px 16px rgba(255,255,255,0.85);
+  }
+
+  .clay-card-lg {
+    @apply bg-clay-card rounded-[2rem];
+    box-shadow: 12px 12px 24px rgba(163,177,198,0.3), -12px -12px 24px rgba(255,255,255,0.9);
+  }
+
+  .clay-card-sm {
+    @apply bg-clay-card rounded-2xl;
+    box-shadow: 4px 4px 8px rgba(163,177,198,0.2), -4px -4px 8px rgba(255,255,255,0.8);
+  }
+
+  .clay-inset {
+    box-shadow: inset 6px 6px 12px rgba(163,177,198,0.15), inset -6px -6px 12px rgba(255,255,255,0.95);
+  }
+
+  .clay-pressed {
+    box-shadow: inset 4px 4px 8px rgba(163,177,198,0.25), inset -4px -4px 8px rgba(255,255,255,1);
+  }
+
+  .clay-inner {
+    box-shadow: inset 2px 2px 5px rgba(163,177,198,0.18), inset -2px -2px 5px rgba(255,255,255,0.9);
+  }
+
+  .clay-button {
+    @apply bg-clay-card rounded-2xl px-6 py-3 font-medium transition-all duration-200;
+    box-shadow: 6px 6px 12px rgba(163,177,198,0.25), -6px -6px 12px rgba(255,255,255,0.9);
+  }
+
+  .clay-button:hover {
+    box-shadow: 8px 8px 16px rgba(163,177,198,0.3), -8px -8px 16px rgba(255,255,255,0.95);
+    transform: translateY(-1px);
+  }
+
+  .clay-button:active {
+    box-shadow: inset 4px 4px 8px rgba(163,177,198,0.25), inset -4px -4px 8px rgba(255,255,255,1);
+    transform: translateY(0);
+  }
+
+  .clay-button-primary {
+    @apply bg-clay-primary text-white rounded-2xl px-6 py-3 font-medium transition-all duration-200;
+    box-shadow: 6px 6px 12px rgba(109,179,166,0.35), -6px -6px 12px rgba(255,255,255,0.4);
+  }
+
+  .clay-button-primary:hover {
+    box-shadow: 8px 8px 18px rgba(109,179,166,0.4), -8px -8px 18px rgba(255,255,255,0.5);
+    @apply bg-clay-primary-light;
+    transform: translateY(-1px);
+  }
+
+  .clay-button-primary:active {
+    box-shadow: inset 4px 4px 8px rgba(80,140,130,0.4), inset -4px -4px 8px rgba(150,220,210,0.3);
+    transform: translateY(0);
+  }
+
+  .clay-input {
+    @apply bg-clay-base rounded-xl px-4 py-3 text-sm w-full outline-none transition-all;
+    box-shadow: inset 3px 3px 6px rgba(163,177,198,0.2), inset -3px -3px 6px rgba(255,255,255,0.9);
+    border: 1px solid transparent;
+  }
+
+  .clay-input:focus {
+    border-color: rgba(109,179,166,0.4);
+    box-shadow: inset 3px 3px 6px rgba(163,177,198,0.25), inset -3px -3px 6px rgba(255,255,255,1), 0 0 0 3px rgba(109,179,166,0.1);
+  }
+
+  .clay-input::placeholder {
+    @apply text-clay-text-muted;
+  }
+
+  .clay-toggle-track {
+    @apply relative w-12 h-7 rounded-full transition-colors duration-300;
+    background: #dce4ec;
+    box-shadow: inset 2px 2px 5px rgba(163,177,198,0.3), inset -2px -2px 5px rgba(255,255,255,0.8);
+  }
+
+  .clay-toggle-track.active {
+    background: #6DB3A6;
+    box-shadow: inset 2px 2px 5px rgba(80,140,130,0.4), inset -2px -2px 5px rgba(150,220,210,0.3);
+  }
+
+  .clay-toggle-thumb {
+    @apply absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white transition-transform duration-300;
+    box-shadow: 2px 2px 4px rgba(163,177,198,0.3), -1px -1px 3px rgba(255,255,255,0.8);
+  }
+
+  .clay-toggle-thumb.active {
+    transform: translateX(20px);
+  }
+
+  /* ─── NOTIQ-INSPIRED DESIGN SYSTEM (landing page) ─── */
+
+  /* Noise/grain texture overlay for bento cards */
+  .nq-noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px;
+  }
+
+  /* Bento card base */
+  .nq-card {
+    @apply relative bg-white rounded-3xl border border-nq-border overflow-hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .nq-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+  }
+
+  /* Gradient text utility */
+  .nq-gradient-text {
+    background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Keyword highlight pill (like "notes" on NotiQ) */
+  .nq-keyword-highlight {
+    @apply relative inline-block px-4 py-1 rounded-2xl;
+    background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+    color: white;
+  }
+
+  /* Primary CTA button – purple gradient */
+  .nq-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold rounded-full transition-all duration-200;
+    background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  }
+
+  .nq-btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .nq-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+
+  /* Secondary CTA button – white pill */
+  .nq-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-nq-text font-semibold rounded-full border border-nq-border transition-all duration-200;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .nq-btn-secondary:hover {
+    @apply border-nq-border-dark;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Badge pill */
+  .nq-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-nq-border text-sm font-medium text-nq-text-muted;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* Section label */
+  .nq-section-label {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-nq-purple;
+  }
+
+  /* Dark CTA card */
+  .nq-dark-card {
+    @apply relative overflow-hidden rounded-3xl;
+    background: linear-gradient(135deg, #0d0d0f 0%, #1a1a2e 60%, #12082a 100%);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c8d4e0;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9DB5C9;
+  }
+}
+
+/* ─── ANIMATIONS ─── */
+
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
@@ -25,12 +231,11 @@
 .streaming-cursor::after {
   content: "|";
   animation: blink 1s step-end infinite;
-  color: #0d9488;
+  color: #6DB3A6;
   font-weight: 300;
   margin-left: 2px;
 }
 
-/* Shimmer loading skeleton */
 @keyframes shimmer {
   0% { background-position: -700px 0; }
   100% { background-position: 700px 0; }
@@ -39,13 +244,22 @@
 .shimmer {
   background: linear-gradient(
     90deg,
-    #f1f5f9 25%,
-    #e2e8f0 50%,
-    #f1f5f9 75%
+    #e8edf2 25%,
+    #dce4ec 50%,
+    #e8edf2 75%
   );
   background-size: 700px 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }
 
 /* Print styles — hide everything except the document */
@@ -54,6 +268,7 @@
   .clause-checklist,
   .action-toolbar,
   nav,
+  .navbar,
   .lg\:w-\[700px\] > *:not(.consent-document) {
     display: none !important;
   }

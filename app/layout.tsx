@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { DM_Sans, Crimson_Pro } from "next/font/google";
+import { Inter, Crimson_Pro } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-inter",
+  display: "swap",
 });
 
 const crimsonPro = Crimson_Pro({
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${crimsonPro.variable}`}>
+    <html lang="en" className={`${inter.variable} ${crimsonPro.variable}`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

@@ -27,23 +27,23 @@ export default function ClauseChecklist({
   const progressPercent = totalCount > 0 ? (detectedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4 clause-checklist">
+    <div className="nq-card p-5 space-y-4 clause-checklist">
       {/* Title row */}
       <div className="flex items-center gap-2">
-        <Shield className="w-4 h-4 text-slate-600" />
-        <h3 className="font-semibold text-slate-800">Medico-Legal Clause Verification</h3>
+        <Shield className="w-4 h-4 text-nq-purple" />
+        <h3 className="font-bold text-nq-text tracking-tight">Medico-Legal Clause Verification</h3>
       </div>
 
       {/* Subtitle */}
-      <p className="text-sm text-slate-600">
-        <span className="font-medium">{detectedCount}</span> /{" "}
-        <span className="font-medium">{totalCount}</span> required clauses detected
+      <p className="text-sm font-medium text-nq-text-muted">
+        <span className="font-bold text-nq-text">{detectedCount}</span> /{" "}
+        <span className="font-bold text-nq-text">{totalCount}</span> required clauses detected
       </p>
 
       {/* Progress bar */}
-      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-nq-purple-soft rounded-full overflow-hidden">
         <div
-          className="bg-teal-500 h-full rounded-full transition-all duration-500"
+          className="bg-nq-purple h-full rounded-full transition-all duration-500"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -56,10 +56,10 @@ export default function ClauseChecklist({
           return (
             <div
               key={c.id}
-              className={`flex items-start gap-3 p-3 rounded-lg border ${
+              className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
                 isDetected
-                  ? "bg-green-50 border-green-200"
-                  : "bg-white border-slate-100"
+                  ? "bg-green-50/50 border-green-200"
+                  : "bg-slate-50 border-nq-border"
               }`}
             >
               <motion.div
@@ -70,14 +70,14 @@ export default function ClauseChecklist({
                 {isDetected ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600" />
                 ) : (
-                  <Circle className="w-5 h-5 text-slate-300" />
+                  <Circle className="w-5 h-5 text-nq-border" />
                 )}
               </motion.div>
               <div>
-                <span className={`font-medium ${isDetected ? "text-green-700" : "text-slate-400"}`}>
+                <span className={`text-sm font-bold block ${isDetected ? "text-green-800" : "text-nq-text-light"}`}>
                   {c.title}
                 </span>
-                <span className="text-xs text-slate-500 ml-2">{c.partLabel}</span>
+                <span className="text-xs font-medium text-nq-text-muted">{c.partLabel}</span>
               </div>
             </div>
           );
@@ -85,7 +85,7 @@ export default function ClauseChecklist({
       </div>
 
       {/* Warning box */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs font-semibold text-amber-700 shadow-sm">
         ⚠ Missing clause or timestamp = medico-legal loophole — Narayan Reddy
       </div>
     </div>

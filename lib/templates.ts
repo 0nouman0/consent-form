@@ -1,0 +1,278 @@
+export type TemplateCategory =
+  | "General Surgery"
+  | "Orthopedics"
+  | "Cardiology"
+  | "Obstetrics & Gynecology"
+  | "Gastroenterology"
+  | "Neurology & Spine"
+  | "Ophthalmology"
+  | "ENT"
+  | "Urology"
+  | "Oncology"
+  | "Diagnostics"
+  | "Dental"
+  | "Psychiatry";
+
+export interface ConsentTemplate {
+  id: string;
+  category: TemplateCategory;
+  title: string;
+  description: string;
+  procedureName: string;
+  consentType: string;
+  specificRisks: string;
+  alternatives: string;
+}
+
+export const PREBUILT_TEMPLATES: ConsentTemplate[] = [
+  {
+    id: "appendectomy",
+    category: "General Surgery",
+    title: "Appendectomy",
+    description: "Surgical removal of the appendix, typically performed for acute appendicitis.",
+    procedureName: "Laparoscopic / Open Appendectomy",
+    consentType: "surgical",
+    specificRisks: "Bleeding, infection (wound or intra-abdominal abscess), damage to nearby organs (bowel, bladder), conversion from laparoscopic to open surgery, anesthetic complications, incisional hernia.",
+    alternatives: "Antibiotic therapy (in selected cases), observation (rarely recommended for acute appendicitis).",
+  },
+  {
+    id: "cholecystectomy",
+    category: "General Surgery",
+    title: "Laparoscopic Cholecystectomy",
+    description: "Removal of the gallbladder, usually for gallstones or inflammation.",
+    procedureName: "Laparoscopic Cholecystectomy",
+    consentType: "surgical",
+    specificRisks: "Bile duct injury requiring reconstructive surgery, bile leak, bleeding, infection, retained gallstones, injury to bowel or blood vessels, conversion to open surgery.",
+    alternatives: "Medication to dissolve stones (rarely effective), dietary modification, observation (for asymptomatic stones).",
+  },
+  {
+    id: "hernia_repair",
+    category: "General Surgery",
+    title: "Inguinal Hernia Repair",
+    description: "Surgical repair of a groin hernia, often using synthetic mesh.",
+    procedureName: "Inguinal Hernia Repair with Mesh",
+    consentType: "surgical",
+    specificRisks: "Chronic groin pain, recurrence of the hernia, infection (including mesh infection), bleeding, damage to the spermatic cord or testicle (in males) leading to testicular atrophy, numbness.",
+    alternatives: "Observation (watchful waiting) if asymptomatic, truss (supportive garment).",
+  },
+  {
+    id: "knee_replacement",
+    category: "Orthopedics",
+    title: "Total Knee Replacement",
+    description: "Replacement of a damaged knee joint with artificial implants.",
+    procedureName: "Total Knee Arthroplasty (TKA)",
+    consentType: "surgical",
+    specificRisks: "Infection of the joint requiring implant removal, deep vein thrombosis (DVT) or pulmonary embolism (PE), stiffness, nerve or blood vessel damage, implant wear or loosening over time.",
+    alternatives: "Physical therapy, weight loss, NSAIDs, corticosteroid or hyaluronic acid injections, knee bracing.",
+  },
+  {
+    id: "hip_replacement",
+    category: "Orthopedics",
+    title: "Total Hip Replacement",
+    description: "Replacement of a damaged hip joint with a prosthetic implant.",
+    procedureName: "Total Hip Arthroplasty (THA)",
+    consentType: "surgical",
+    specificRisks: "Hip dislocation, leg length discrepancy, infection, deep vein thrombosis (DVT), nerve injury (sciatic nerve), implant loosening, fracture during surgery.",
+    alternatives: "Pain medication, physical therapy, walking aids, weight loss.",
+  },
+  {
+    id: "arthroscopy_knee",
+    category: "Orthopedics",
+    title: "Knee Arthroscopy",
+    description: "Minimally invasive procedure to diagnose and treat knee joint problems.",
+    procedureName: "Diagnostic/Therapeutic Knee Arthroscopy",
+    consentType: "surgical",
+    specificRisks: "Bleeding into the joint (hemarthrosis), infection, blood clots, stiffness, failure to relieve symptoms, cartilage damage.",
+    alternatives: "Conservative management (rest, ice, physical therapy, injections).",
+  },
+  {
+    id: "cabg",
+    category: "Cardiology",
+    title: "Coronary Artery Bypass Grafting (CABG)",
+    description: "Open-heart surgery to bypass blocked coronary arteries.",
+    procedureName: "Coronary Artery Bypass Grafting (CABG)",
+    consentType: "surgical",
+    specificRisks: "Myocardial infarction (heart attack) during or after surgery, stroke, bleeding requiring transfusion, sternal wound infection, arrhythmias (e.g., atrial fibrillation), death.",
+    alternatives: "Percutaneous coronary intervention (Angioplasty/Stenting), optimal medical therapy.",
+  },
+  {
+    id: "angioplasty",
+    category: "Cardiology",
+    title: "Angioplasty & Stenting",
+    description: "Procedure to open clogged heart arteries using a balloon and stent.",
+    procedureName: "Percutaneous Coronary Intervention (PCI) with Stent",
+    consentType: "minor_procedure",
+    specificRisks: "Bleeding or hematoma at the puncture site (groin or wrist), damage to the blood vessel, allergic reaction to contrast dye, kidney injury from dye, arrhythmias, heart attack, stroke.",
+    alternatives: "Medical management, Coronary Artery Bypass Grafting (CABG).",
+  },
+  {
+    id: "pacemaker",
+    category: "Cardiology",
+    title: "Pacemaker Insertion",
+    description: "Implantation of a device to regulate the heartbeat.",
+    procedureName: "Permanent Pacemaker Implantation",
+    consentType: "minor_procedure",
+    specificRisks: "Pneumothorax (collapsed lung), lead dislodgement, infection of the pocket or leads, bleeding, cardiac perforation, device malfunction.",
+    alternatives: "Medication (limited efficacy for certain bradycardias), temporary pacing.",
+  },
+  {
+    id: "c_section",
+    category: "Obstetrics & Gynecology",
+    title: "Cesarean Section (C-Section)",
+    description: "Surgical delivery of a baby through incisions in the abdomen and uterus.",
+    procedureName: "Lower Segment Cesarean Section (LSCS)",
+    consentType: "obstetric",
+    specificRisks: "Heavy bleeding requiring transfusion or hysterectomy, infection (endometritis, wound), injury to bladder or bowel, blood clots (DVT/PE), respiratory issues for the baby, risks in future pregnancies (placenta accreta, uterine rupture).",
+    alternatives: "Vaginal delivery, instrumental vaginal delivery (forceps/vacuum) if appropriate.",
+  },
+  {
+    id: "hysterectomy",
+    category: "Obstetrics & Gynecology",
+    title: "Total Hysterectomy",
+    description: "Surgical removal of the uterus.",
+    procedureName: "Total Abdominal/Laparoscopic Hysterectomy",
+    consentType: "surgical",
+    specificRisks: "Bleeding, infection, injury to the ureters, bladder, or bowel, early menopause (if ovaries are removed), pelvic organ prolapse later in life, deep vein thrombosis.",
+    alternatives: "Hormonal therapy, endometrial ablation, uterine artery embolization, myomectomy.",
+  },
+  {
+    id: "colonoscopy",
+    category: "Gastroenterology",
+    title: "Colonoscopy",
+    description: "Endoscopic examination of the large bowel and distal part of the small bowel.",
+    procedureName: "Diagnostic and Therapeutic Colonoscopy",
+    consentType: "diagnostic",
+    specificRisks: "Bowel perforation requiring emergency surgery, bleeding (especially if polyps are removed), adverse reaction to sedation, missed lesions or polyps.",
+    alternatives: "CT colonography, barium enema, stool tests (FIT/FOBT).",
+  },
+  {
+    id: "endoscopy",
+    category: "Gastroenterology",
+    title: "Upper GI Endoscopy (OGD)",
+    description: "Visual examination of the esophagus, stomach, and duodenum.",
+    procedureName: "Esophagogastroduodenoscopy (EGD / OGD)",
+    consentType: "diagnostic",
+    specificRisks: "Sore throat, bleeding from biopsy sites, perforation of the esophagus or stomach, aspiration pneumonia, adverse reaction to sedation.",
+    alternatives: "Barium swallow, CT scan, empirical medical treatment.",
+  },
+  {
+    id: "cataract",
+    category: "Ophthalmology",
+    title: "Cataract Surgery",
+    description: "Removal of the cloudy lens of the eye and replacement with an artificial lens.",
+    procedureName: "Phacoemulsification with Intraocular Lens (IOL) Implantation",
+    consentType: "minor_procedure",
+    specificRisks: "Endophthalmitis (severe eye infection leading to vision loss), posterior capsule rupture, retinal detachment, glaucoma, corneal swelling, need for glasses post-surgery.",
+    alternatives: "Observation, updating prescription glasses (temporary solution).",
+  },
+  {
+    id: "lasik",
+    category: "Ophthalmology",
+    title: "LASIK Eye Surgery",
+    description: "Laser refractive surgery to correct myopia, hyperopia, and astigmatism.",
+    procedureName: "LASIK (Laser-Assisted In Situ Keratomileusis)",
+    consentType: "minor_procedure",
+    specificRisks: "Dry eyes, glare, halos, double vision, undercorrections or overcorrections, flap complications, infection, vision loss.",
+    alternatives: "Eyeglasses, contact lenses, PRK (Photorefractive keratectomy).",
+  },
+  {
+    id: "tonsillectomy",
+    category: "ENT",
+    title: "Tonsillectomy",
+    description: "Surgical removal of the tonsils.",
+    procedureName: "Tonsillectomy",
+    consentType: "surgical",
+    specificRisks: "Primary or secondary hemorrhage (bleeding) requiring return to the operating room, severe throat pain, dehydration, infection, voice changes, anesthetic risks.",
+    alternatives: "Antibiotics (for recurrent infections), observation.",
+  },
+  {
+    id: "fess",
+    category: "ENT",
+    title: "Sinus Surgery (FESS)",
+    description: "Endoscopic surgery to open sinus passages.",
+    procedureName: "Functional Endoscopic Sinus Surgery (FESS)",
+    consentType: "surgical",
+    specificRisks: "Bleeding, infection, cerebrospinal fluid (CSF) leak, injury to the eye or optic nerve (leading to vision changes), loss of smell.",
+    alternatives: "Nasal corticosteroids, saline irrigations, systemic antibiotics/steroids.",
+  },
+  {
+    id: "lumbar_puncture",
+    category: "Neurology & Spine",
+    title: "Lumbar Puncture (Spinal Tap)",
+    description: "Needle inserted into the spinal canal to collect cerebrospinal fluid.",
+    procedureName: "Lumbar Puncture",
+    consentType: "diagnostic",
+    specificRisks: "Post-dural puncture headache, back pain, bleeding (epidural hematoma), infection (meningitis), nerve root irritation, brain herniation (rare, if elevated intracranial pressure).",
+    alternatives: "CT/MRI brain (provides different information), empirical treatment.",
+  },
+  {
+    id: "spinal_fusion",
+    category: "Neurology & Spine",
+    title: "Spinal Fusion",
+    description: "Surgery to permanently connect two or more vertebrae in your spine.",
+    procedureName: "Spinal Fusion with Instrumentation",
+    consentType: "surgical",
+    specificRisks: "Nerve damage causing weakness or paralysis, dural tear (CSF leak), failure of bone fusion (pseudoarthrosis), implant failure or migration, infection, bleeding.",
+    alternatives: "Physical therapy, pain management, epidural steroid injections, decompression without fusion.",
+  },
+  {
+    id: "prostate_biopsy",
+    category: "Urology",
+    title: "Prostate Biopsy",
+    description: "Removal of small samples of prostate tissue for examination.",
+    procedureName: "Transrectal / Transperineal Ultrasound-Guided Prostate Biopsy",
+    consentType: "diagnostic",
+    specificRisks: "Blood in urine, stool, or semen, severe infection (sepsis) requiring hospitalization, acute urinary retention, pain.",
+    alternatives: "PSA monitoring, MRI of the prostate, observation.",
+  },
+  {
+    id: "chemotherapy",
+    category: "Oncology",
+    title: "Chemotherapy Administration",
+    description: "Systemic treatment using chemical substances to kill cancer cells.",
+    procedureName: "Intravenous Chemotherapy",
+    consentType: "minor_procedure",
+    specificRisks: "Nausea, vomiting, hair loss, immunosuppression (increased risk of severe infection), anemia, bleeding, organ toxicity (heart, liver, kidneys), allergic reaction.",
+    alternatives: "Radiation therapy, targeted therapy, immunotherapy, palliative care without active treatment.",
+  },
+  {
+    id: "mri_contrast",
+    category: "Diagnostics",
+    title: "MRI with Contrast",
+    description: "Magnetic Resonance Imaging with intravenous gadolinium contrast.",
+    procedureName: "MRI with IV Contrast",
+    consentType: "diagnostic",
+    specificRisks: "Allergic reaction to contrast media, nephrogenic systemic fibrosis (in patients with severe kidney disease), retention of gadolinium in the body, discomfort from claustrophobia.",
+    alternatives: "MRI without contrast, CT scan, Ultrasound.",
+  },
+  {
+    id: "blood_transfusion",
+    category: "General Surgery",
+    title: "Blood Transfusion",
+    description: "Intravenous administration of whole blood or blood components.",
+    procedureName: "Blood / Blood Product Transfusion",
+    consentType: "blood_transfusion",
+    specificRisks: "Allergic reaction, fever, hemolytic transfusion reaction (mismatched blood), transmission of infectious diseases (HIV, Hepatitis B/C), fluid overload (TACO), acute lung injury (TRALI).",
+    alternatives: "Iron or vitamin B12 supplementation, Erythropoietin (EPO), autologous blood donation, volume expanders (saline).",
+  },
+  {
+    id: "ect",
+    category: "Psychiatry",
+    title: "Electroconvulsive Therapy (ECT)",
+    description: "Brief electrical stimulation of the brain while the patient is under anesthesia.",
+    procedureName: "Electroconvulsive Therapy (ECT)",
+    consentType: "psychiatric",
+    specificRisks: "Memory loss (retrograde and anterograde amnesia), confusion, headache, muscle soreness, cardiovascular changes (arrhythmias, hypertension) during the procedure, anesthetic risks.",
+    alternatives: "Pharmacotherapy (antidepressants, antipsychotics), psychotherapy, Transcranial Magnetic Stimulation (TMS).",
+  },
+  {
+    id: "dental_extraction",
+    category: "Dental",
+    title: "Tooth Extraction / Wisdom Tooth Removal",
+    description: "Surgical removal of a tooth from its socket in the bone.",
+    procedureName: "Surgical / Simple Tooth Extraction",
+    consentType: "minor_procedure",
+    specificRisks: "Dry socket (alveolar osteitis), infection, bleeding, nerve injury leading to numbness of lip/tongue/chin (temporary or permanent), sinus communication (for upper teeth).",
+    alternatives: "Root canal therapy (if restorable), observation (for asymptomatic impacted wisdom teeth).",
+  }
+];

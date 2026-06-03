@@ -56,9 +56,9 @@ const LANGUAGE_LEVELS = [
 ] as const;
 
 const INPUT_CLASSES =
-  "border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full bg-white";
-const LABEL_CLASSES = "text-sm font-medium text-slate-700 mb-1 block";
-const ERROR_CLASSES = "text-sm text-red-600 mt-1";
+  "w-full px-4 py-3 rounded-xl border border-nq-border bg-white text-nq-text placeholder-nq-text-light outline-none focus:border-nq-purple focus:ring-1 focus:ring-nq-purple transition-all text-sm font-medium";
+const LABEL_CLASSES = "text-sm font-bold text-nq-text mb-1.5 block tracking-tight";
+const ERROR_CLASSES = "text-xs font-semibold text-red-600 mt-1.5";
 
 function SectionHeader({
   icon: Icon,
@@ -75,16 +75,18 @@ function SectionHeader({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-inset rounded-lg p-1 -m-1"
+      className="w-full flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-nq-purple focus:ring-inset rounded-xl p-1 -m-1 transition-all"
     >
-      <div className="flex items-center gap-2">
-        <Icon className="w-5 h-5 text-teal-600" />
-        <span className="font-semibold text-slate-900">{title}</span>
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-lg bg-nq-purple-soft flex items-center justify-center">
+          <Icon className="w-4.5 h-4.5 text-nq-purple" />
+        </div>
+        <span className="font-bold text-nq-text tracking-tight">{title}</span>
       </div>
       {isOpen ? (
-        <ChevronUp className="w-5 h-5 text-slate-400" />
+        <ChevronUp className="w-5 h-5 text-nq-text-light" />
       ) : (
-        <ChevronDown className="w-5 h-5 text-slate-400" />
+        <ChevronDown className="w-5 h-5 text-nq-text-light" />
       )}
     </button>
   );
@@ -109,12 +111,12 @@ function ToggleSwitch({
         className="sr-only peer"
       />
       <div
-        className={`w-11 h-6 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-teal-500 ${
-          checked ? "bg-teal-600" : "bg-slate-200"
+        className={`w-11 h-6 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-nq-purple ${
+          checked ? "bg-nq-purple" : "bg-nq-border"
         } ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
       >
         <div
-          className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform shadow ${
+          className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform shadow-sm ${
             checked ? "translate-x-5" : "translate-x-0"
           }`}
         />
@@ -125,13 +127,13 @@ function ToggleSwitch({
 
 function LockedClauseCard({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200 opacity-60 cursor-not-allowed">
-      <div className="flex-shrink-0 w-5 h-5 rounded border-2 border-slate-400 bg-slate-200 flex items-center justify-center">
-        <Check className="w-3 h-3 text-slate-600" />
+    <div className="flex items-start gap-3 p-4 bg-slate-50/50 rounded-xl border border-nq-border opacity-60 cursor-not-allowed">
+      <div className="flex-shrink-0 w-5 h-5 rounded-md border-2 border-nq-text-light bg-slate-100 flex items-center justify-center mt-0.5">
+        <Check className="w-3.5 h-3.5 text-nq-text-muted" />
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-700">{title}</p>
-        <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+        <p className="text-sm font-bold text-nq-text">{title}</p>
+        <p className="text-xs font-medium text-nq-text-muted mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
@@ -151,17 +153,17 @@ function ClauseCard({
   disabled?: boolean;
 }) {
   return (
-    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+    <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
       checked
-        ? "border-teal-300 bg-teal-50"
-        : "border-slate-200 bg-white hover:bg-slate-50"
+        ? "border-nq-purple/30 bg-nq-purple-soft"
+        : "border-nq-border bg-white hover:bg-slate-50"
     } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}>
       <div
-        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5 transition-colors ${
-          checked ? "border-teal-600 bg-teal-600" : "border-slate-300 bg-white"
+        className={`flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 transition-colors ${
+          checked ? "border-nq-purple bg-nq-purple" : "border-nq-text-light bg-white"
         }`}
       >
-        {checked && <Check className="w-3 h-3 text-white" />}
+        {checked && <Check className="w-3.5 h-3.5 text-white" />}
       </div>
       <input
         type="checkbox"
@@ -171,8 +173,8 @@ function ClauseCard({
         className="sr-only"
       />
       <div>
-        <p className="text-sm font-medium text-slate-700">{label}</p>
-        {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+        <p className={`text-sm font-bold ${checked ? "text-nq-text" : "text-nq-text"}`}>{label}</p>
+        {subtitle && <p className="text-xs font-medium text-nq-text-muted mt-0.5">{subtitle}</p>}
       </div>
     </label>
   );
@@ -203,7 +205,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
       {/* Section 1: Patient Information */}
       <motion.div
         initial={false}
-        className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+        className="nq-card p-6"
       >
         <div className="mb-4">
           <SectionHeader
@@ -223,7 +225,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
               transition={{ duration: 0.2 }}
               style={{ overflow: "hidden" }}
             >
-              <div className="space-y-4 pt-2">
+              <div className="space-y-5 pt-3">
                 {/* Patient Full Name */}
                 <div>
                   <label htmlFor="patient.patientName" className={LABEL_CLASSES}>
@@ -242,44 +244,46 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                   )}
                 </div>
 
-                {/* Age */}
-                <div>
-                  <label htmlFor="patient.age" className={LABEL_CLASSES}>
-                    Age <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="patient.age"
-                    type="number"
-                    {...form.register("patient.age")}
-                    className={INPUT_CLASSES}
-                  />
-                  {form.formState.errors.patient?.age && (
-                    <p className={ERROR_CLASSES}>
-                      {form.formState.errors.patient.age.message as string}
-                    </p>
-                  )}
-                </div>
+                <div className="grid grid-cols-2 gap-5">
+                  {/* Age */}
+                  <div>
+                    <label htmlFor="patient.age" className={LABEL_CLASSES}>
+                      Age <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="patient.age"
+                      type="number"
+                      {...form.register("patient.age")}
+                      className={INPUT_CLASSES}
+                    />
+                    {form.formState.errors.patient?.age && (
+                      <p className={ERROR_CLASSES}>
+                        {form.formState.errors.patient.age.message as string}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Sex */}
-                <div>
-                  <label htmlFor="patient.sex" className={LABEL_CLASSES}>
-                    Sex <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="patient.sex"
-                    {...form.register("patient.sex")}
-                    className={INPUT_CLASSES}
-                  >
-                    <option value="">Select...</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  {form.formState.errors.patient?.sex && (
-                    <p className={ERROR_CLASSES}>
-                      {form.formState.errors.patient.sex.message as string}
-                    </p>
-                  )}
+                  {/* Sex */}
+                  <div>
+                    <label htmlFor="patient.sex" className={LABEL_CLASSES}>
+                      Sex <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="patient.sex"
+                      {...form.register("patient.sex")}
+                      className={INPUT_CLASSES}
+                    >
+                      <option value="">Select...</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    {form.formState.errors.patient?.sex && (
+                      <p className={ERROR_CLASSES}>
+                        {form.formState.errors.patient.sex.message as string}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Hospital OPD/IPD Number */}
@@ -336,7 +340,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                     {...form.register("patient.aadhaarLast4")}
                     className={INPUT_CLASSES}
                   />
-                  <p className="text-sm text-amber-600 mt-1">
+                  <p className="text-xs font-semibold text-amber-600 mt-1.5">
                     ⚠ Only last 4 digits — full Aadhaar storage is prohibited for private
                     entities (Aadhaar Act 2016)
                   </p>
@@ -347,39 +351,41 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                   )}
                 </div>
 
-                {/* Insurance Provider */}
-                <div>
-                  <label htmlFor="patient.insuranceProvider" className={LABEL_CLASSES}>
-                    Insurance Provider
-                  </label>
-                  <input
-                    id="patient.insuranceProvider"
-                    type="text"
-                    {...form.register("patient.insuranceProvider")}
-                    className={INPUT_CLASSES}
-                  />
-                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* Insurance Provider */}
+                  <div>
+                    <label htmlFor="patient.insuranceProvider" className={LABEL_CLASSES}>
+                      Insurance Provider
+                    </label>
+                    <input
+                      id="patient.insuranceProvider"
+                      type="text"
+                      {...form.register("patient.insuranceProvider")}
+                      className={INPUT_CLASSES}
+                    />
+                  </div>
 
-                {/* Insurance Policy Number */}
-                <div>
-                  <label htmlFor="patient.insurancePolicyNo" className={LABEL_CLASSES}>
-                    Insurance Policy Number
-                  </label>
-                  <input
-                    id="patient.insurancePolicyNo"
-                    type="text"
-                    {...form.register("patient.insurancePolicyNo")}
-                    className={INPUT_CLASSES}
-                  />
+                  {/* Insurance Policy Number */}
+                  <div>
+                    <label htmlFor="patient.insurancePolicyNo" className={LABEL_CLASSES}>
+                      Insurance Policy Number
+                    </label>
+                    <input
+                      id="patient.insurancePolicyNo"
+                      type="text"
+                      {...form.register("patient.insurancePolicyNo")}
+                      className={INPUT_CLASSES}
+                    />
+                  </div>
                 </div>
 
                 {/* Patient Competency Toggle */}
-                <div className="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between py-4 px-5 bg-slate-50/70 rounded-xl border border-nq-border mt-2">
                   <div>
-                    <p className="text-sm font-medium text-slate-700">
+                    <p className="text-sm font-bold text-nq-text">
                       Patient is competent (adult, sound mind, not intoxicated)
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs font-medium text-nq-text-muted mt-0.5">
                       IPC §87-90 — minor or intoxicated consent is invalid
                     </p>
                   </div>
@@ -401,7 +407,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                       transition={{ duration: 0.2 }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="space-y-4 pl-4 border-l-2 border-teal-200">
+                      <div className="space-y-5 pl-5 border-l-2 border-nq-purple/30 mt-4">
                         {/* Guardian Full Name */}
                         <div>
                           <label htmlFor="patient.guardianName" className={LABEL_CLASSES}>
@@ -450,7 +456,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
       {/* Section 2: Clinical Details */}
       <motion.div
         initial={false}
-        className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+        className="nq-card p-6"
       >
         <div className="mb-4">
           <SectionHeader
@@ -470,7 +476,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
               transition={{ duration: 0.2 }}
               style={{ overflow: "hidden" }}
             >
-              <div className="space-y-4 pt-2">
+              <div className="space-y-5 pt-3">
                 {/* Doctor / Surgeon Full Name */}
                 <div>
                   <label htmlFor="clinical.doctorName" className={LABEL_CLASSES}>
@@ -554,7 +560,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                     {...form.register("clinical.procedureName")}
                     className={INPUT_CLASSES}
                   />
-                  <p className="text-sm text-amber-600 mt-1">
+                  <p className="text-xs font-semibold text-amber-600 mt-1.5">
                     ⚠ Be specific. Narayan Reddy: blanket consent is legally void in India.
                   </p>
                   {form.formState.errors.clinical?.procedureName && (
@@ -582,52 +588,54 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                   )}
                 </div>
 
-                {/* Consent Type */}
-                <div>
-                  <label htmlFor="clinical.consentType" className={LABEL_CLASSES}>
-                    Consent Type <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="clinical.consentType"
-                    {...form.register("clinical.consentType")}
-                    className={INPUT_CLASSES}
-                  >
-                    <option value="">Select...</option>
-                    {CONSENT_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                  {form.formState.errors.clinical?.consentType && (
-                    <p className={ERROR_CLASSES}>
-                      {form.formState.errors.clinical.consentType.message as string}
-                    </p>
-                  )}
-                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* Consent Type */}
+                  <div>
+                    <label htmlFor="clinical.consentType" className={LABEL_CLASSES}>
+                      Consent Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="clinical.consentType"
+                      {...form.register("clinical.consentType")}
+                      className={INPUT_CLASSES}
+                    >
+                      <option value="">Select...</option>
+                      {CONSENT_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                    {form.formState.errors.clinical?.consentType && (
+                      <p className={ERROR_CLASSES}>
+                        {form.formState.errors.clinical.consentType.message as string}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Document Language Level */}
-                <div>
-                  <label htmlFor="languageLevel" className={LABEL_CLASSES}>
-                    Document Language Level <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="languageLevel"
-                    {...form.register("languageLevel")}
-                    className={INPUT_CLASSES}
-                  >
-                    <option value="">Select...</option>
-                    {LANGUAGE_LEVELS.map((level) => (
-                      <option key={level.value} value={level.value}>
-                        {level.label}
-                      </option>
-                    ))}
-                  </select>
-                  {form.formState.errors.languageLevel && (
-                    <p className={ERROR_CLASSES}>
-                      {form.formState.errors.languageLevel.message as string}
-                    </p>
-                  )}
+                  {/* Document Language Level */}
+                  <div>
+                    <label htmlFor="languageLevel" className={LABEL_CLASSES}>
+                      Document Language Level <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="languageLevel"
+                      {...form.register("languageLevel")}
+                      className={INPUT_CLASSES}
+                    >
+                      <option value="">Select...</option>
+                      {LANGUAGE_LEVELS.map((level) => (
+                        <option key={level.value} value={level.value}>
+                          {level.label}
+                        </option>
+                      ))}
+                    </select>
+                    {form.formState.errors.languageLevel && (
+                      <p className={ERROR_CLASSES}>
+                        {form.formState.errors.languageLevel.message as string}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* eDAR Victim ID and NHA TMS Patient ID - conditional */}
@@ -640,36 +648,38 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                       transition={{ duration: 0.2 }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
-                        <p className="text-sm text-blue-700 font-medium">
+                      <div className="p-5 bg-blue-50 border border-blue-100 rounded-xl space-y-4">
+                        <p className="text-sm text-blue-700 font-bold">
                           MoRTH Cashless Treatment Scheme 2025 — enter IDs from the eDAR and TMS
                           systems
                         </p>
 
-                        {/* eDAR Victim ID */}
-                        <div>
-                          <label htmlFor="clinical.edarVictimId" className={LABEL_CLASSES}>
-                            eDAR Victim ID
-                          </label>
-                          <input
-                            id="clinical.edarVictimId"
-                            type="text"
-                            {...form.register("clinical.edarVictimId")}
-                            className={INPUT_CLASSES}
-                          />
-                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                          {/* eDAR Victim ID */}
+                          <div>
+                            <label htmlFor="clinical.edarVictimId" className={LABEL_CLASSES}>
+                              eDAR Victim ID
+                            </label>
+                            <input
+                              id="clinical.edarVictimId"
+                              type="text"
+                              {...form.register("clinical.edarVictimId")}
+                              className={INPUT_CLASSES}
+                            />
+                          </div>
 
-                        {/* NHA TMS Patient ID */}
-                        <div>
-                          <label htmlFor="clinical.tmsPatientId" className={LABEL_CLASSES}>
-                            NHA TMS Patient ID
-                          </label>
-                          <input
-                            id="clinical.tmsPatientId"
-                            type="text"
-                            {...form.register("clinical.tmsPatientId")}
-                            className={INPUT_CLASSES}
-                          />
+                          {/* NHA TMS Patient ID */}
+                          <div>
+                            <label htmlFor="clinical.tmsPatientId" className={LABEL_CLASSES}>
+                              NHA TMS Patient ID
+                            </label>
+                            <input
+                              id="clinical.tmsPatientId"
+                              type="text"
+                              {...form.register("clinical.tmsPatientId")}
+                              className={INPUT_CLASSES}
+                            />
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -729,7 +739,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
       {/* Section 3: Clause Selections */}
       <motion.div
         initial={false}
-        className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+        className="nq-card p-6"
       >
         <div className="mb-4">
           <SectionHeader
@@ -749,7 +759,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
               transition={{ duration: 0.2 }}
               style={{ overflow: "hidden" }}
             >
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3 pt-3">
                 {/* Locked Clauses */}
                 <LockedClauseCard
                   title="Voluntariness & Right to Withdraw"
@@ -782,7 +792,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 />
 
                 {/* Separator */}
-                <div className="border-t border-slate-200 my-4" />
+                <div className="border-t border-nq-border my-5" />
 
                 {/* Include Witness Signature Block */}
                 <ClauseCard
@@ -817,10 +827,10 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white rounded-lg px-4 py-3 font-medium transition-colors flex items-center justify-center gap-2"
+        className="nq-btn-primary w-full justify-center py-4 text-base disabled:opacity-70 mt-4"
       >
         {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-        {isLoading ? "Generating..." : "Generate Consent Form"}
+        {isLoading ? "Generating Form..." : "Generate Consent Form"}
       </button>
     </form>
   );

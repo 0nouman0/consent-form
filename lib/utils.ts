@@ -1,5 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 import { format } from "date-fns";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export function generateConsentId(hospitalName: string): string {
   const prefix = hospitalName
