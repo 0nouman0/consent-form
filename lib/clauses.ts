@@ -13,7 +13,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     id: "authorization",
     title: "Authorization",
     partLabel: "Part B — Clause 1",
-    legalBasis: "Narayan Reddy — treating without consent is assault in law",
+    legalBasis: "Standard legal precedent — treating without consent is assault in law",
     description:
       "Patient authorizes the named doctor and team to perform the specific named procedure only.",
     requiredFor: ["all"],
@@ -23,7 +23,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Disclosure & Comprehension",
     partLabel: "Part B — Clause 2",
     legalBasis:
-      "Narayan Reddy — all disclosures must be in language the patient understands; IMC Regulation 3.1",
+      "Legal precedent — all disclosures must be in language the patient understands; IMC Regulation 3.1",
     description:
       "Procedure explained in the patient's own language. Counseling language must be recorded.",
     requiredFor: ["all"],
@@ -33,7 +33,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Risks & Complications",
     partLabel: "Part B — Clause 3",
     legalBasis:
-      "Narayan Reddy Informed Consent element 5 — risks and benefits of both proposed and alternative procedures",
+      "Standard Informed Consent element 5 — risks and benefits of both proposed and alternative procedures",
     description:
       "Specific and general risks disclosed including unforeseen events requiring additional interventions.",
     requiredFor: ["all"],
@@ -43,7 +43,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Alternatives to Treatment",
     partLabel: "Part B — Clause 4",
     legalBasis:
-      "Narayan Reddy Informed Consent element 4 — details of alternative treatment courses",
+      "Standard Informed Consent element 4 — details of alternative treatment courses",
     description:
       "Available alternatives and consequences of declining all treatment explained.",
     requiredFor: ["all"],
@@ -53,7 +53,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Anaesthesia & Blood Transfusion",
     partLabel: "Part B — Clause 5",
     legalBasis:
-      "Narayan Reddy Rule 3 — consent form must include specific consent to anaesthesia; Rule 4 — blood transfusion requires express consent",
+      "Legal Rule 3 — consent form must include specific consent to anaesthesia; Rule 4 — blood transfusion requires express consent",
     description:
       "Consent for anaesthesia and blood products if clinically necessary.",
     requiredFor: [
@@ -70,7 +70,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Disposal of Tissues",
     partLabel: "Part B — Clause 6",
     legalBasis:
-      "Narayan Reddy Rule 30 — pathological examination requires consent",
+      "Standard legal practice — pathological examination requires consent",
     description:
       "Consent for pathological examination and disposal of removed tissues or specimens.",
     requiredFor: ["surgical", "obstetric", "diagnostic"],
@@ -80,7 +80,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Photography / Academic Use",
     partLabel: "Part B — Clause 7",
     legalBasis:
-      "IMC Ethics Regulations — patient identity must remain confidential; Narayan Reddy Rule 23",
+      "IMC Ethics Regulations — patient identity must remain confidential; Legal Rule 23",
     description:
       "Optional consent for photography or video for educational purposes with identity confidentiality.",
     requiredFor: ["surgical", "diagnostic", "research"],
@@ -90,7 +90,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Voluntariness & Right to Withdraw",
     partLabel: "Part B — Clause 8",
     legalBasis:
-      "Narayan Reddy Rule 7 — consent must be free, voluntary, clear, intelligent; IPC §90 — fear vitiates consent",
+      "Legal Rule 7 — consent must be free, voluntary, clear, intelligent; IPC §90 — fear vitiates consent",
     description:
       "Consent given freely without coercion. Right to withdraw before procedure begins.",
     requiredFor: ["all"],
@@ -112,7 +112,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Information Receipt",
     partLabel: "Part B — Clause 10",
     legalBasis:
-      "Narayan Reddy — physicians have legal and ethical duty to provide all relevant information",
+      "Legal precedent — physicians have legal and ethical duty to provide all relevant information",
     description:
       "Patient confirms they received adequate information and had opportunity to ask questions.",
     requiredFor: ["all"],
@@ -132,7 +132,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Signatures (Parts C & D)",
     partLabel: "Parts C & D",
     legalBasis:
-      "Narayan Reddy — missing timestamp is a common loophole in negligence cases; Rule 3 — written consent must be witnessed",
+      "Legal precedent — missing timestamp is a common loophole in negligence cases; Rule 3 — written consent must be witnessed",
     description:
       "Patient, witness, guardian (if minor), and doctor signatures with exact date and time.",
     requiredFor: ["all"],

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { User, Mail, Shield, LogOut, Settings, Save, Check, Stethoscope } from "lucide-react";
 
 export default function ProfilePage() {
-  const [email, setEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   
   const [profileData, setProfileData] = useState({
@@ -21,32 +21,68 @@ export default function ProfilePage() {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
-        setEmail(user.email ?? null);
+        setUser(user as any);
+        
+        // Fetch profile from supabase
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (profile) {
+          setProfileData({
+            doctorName: profile.doctor_name || "",
+            doctorRegistrationNo: profile.doctor_registration_no || "",
+            hospitalName: profile.hospital_name || "",
+            hospitalAddress: profile.hospital_address || "",
+          });
+          // sync to localstorage for fast loads in other components
+          localStorage.setItem("consentgen_doctor_profile", JSON.stringify({
+            doctorName: profile.doctor_name || "",
+            doctorRegistrationNo: profile.doctor_registration_no || "",
+            hospitalName: profile.hospital_name || "",
+            hospitalAddress: profile.hospital_address || "",
+          }));
+        } else {
+          // fallback to localstorage
+          const savedProfile = localStorage.getItem("consentgen_doctor_profile");
+          if (savedProfile) {
+            try {
+              setProfileData(JSON.parse(savedProfile));
+            } catch (e) {
+              console.error("Failed to parse profile data", e);
+            }
+          }
+        }
       } else {
         router.push("/login?redirect=/profile");
       }
       setLoading(false);
     });
-
-    const savedProfile = localStorage.getItem("consentgen_doctor_profile");
-    if (savedProfile) {
-      try {
-        setProfileData(JSON.parse(savedProfile));
-      } catch (e) {
-        console.error("Failed to parse profile data", e);
-      }
-    }
-  }, [supabase.auth, router]);
+  }, [supabase, router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     localStorage.setItem("consentgen_doctor_profile", JSON.stringify(profileData));
+    
+    if (user) {
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        doctor_name: profileData.doctorName,
+        doctor_registration_no: profileData.doctorRegistrationNo,
+        hospital_name: profileData.hospitalName,
+        hospital_address: profileData.hospitalAddress,
+        updated_at: new Date().toISOString(),
+      });
+    }
+
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
@@ -87,14 +123,14 @@ export default function ProfilePage() {
           <div className="flex items-start gap-6">
             <div className="w-20 h-20 rounded-2xl bg-nq-purple-soft border-2 border-nq-purple/20 flex items-center justify-center flex-shrink-0">
               <span className="text-3xl font-black text-nq-purple">
-                {email?.charAt(0).toUpperCase()}
+                {user?.email?.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-nq-text mb-1 tracking-tight">Doctor Account</h2>
               <div className="flex items-center gap-2 text-nq-text-muted text-sm font-medium mb-4">
                 <Mail className="w-4 h-4" />
-                {email}
+                {user?.email}
               </div>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg">
                 <Shield className="w-3 h-3" />

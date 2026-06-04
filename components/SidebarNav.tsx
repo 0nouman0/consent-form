@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, LayoutTemplate, History, User } from "lucide-react";
+import { LayoutDashboard, FileText, LayoutTemplate, History, User, MessageSquare } from "lucide-react";
 
 export default function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
@@ -12,6 +12,7 @@ export default function SidebarNav({ isMobile = false }: { isMobile?: boolean })
     { href: "/generate", label: "Generate Consent", icon: FileText },
     { href: "/templates", label: "Templates", icon: LayoutTemplate },
     { href: "/history", label: "History", icon: History },
+    { href: "/chat", label: "Chat", icon: MessageSquare },
     { href: "/profile", label: "Profile", icon: User },
   ];
 

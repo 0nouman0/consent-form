@@ -22,9 +22,15 @@ export async function saveConsentToHistory(
   entry: Omit<HistoryEntry, "id" | "user_id" | "created_at" | "updated_at">
 ) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("You must be logged in to save history");
+  }
+
   const { data, error } = await supabase
     .from(TABLE)
     .insert({
+      user_id: user.id,
       consent_id: entry.consent_id,
       hospital_name: entry.hospital_name,
       patient_name: entry.patient_name,

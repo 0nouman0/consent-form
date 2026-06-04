@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 const messages = [
   "Verifying patient information and competency status...",
   "Building medico-legal clause structure...",
-  "Applying Narayan Reddy compliance guidelines...",
+  "Applying Indian Medical compliance guidelines...",
   "Translating to requested language level...",
   "Finalising your consent form...",
 ];

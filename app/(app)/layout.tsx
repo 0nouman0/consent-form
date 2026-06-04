@@ -2,7 +2,6 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { Shield, LayoutDashboard, FileText, LayoutTemplate, History, User } from "lucide-react";
 import SidebarNav from "@/components/SidebarNav";
-import ChatAssistant from "@/components/ChatAssistant";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -61,9 +60,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-nq-border z-50 px-2 pb-safe pt-1">
         <SidebarNav isMobile />
       </nav>
-
-      {/* Floating Chat Assistant */}
-      <ChatAssistant />
     </div>
   );
 }

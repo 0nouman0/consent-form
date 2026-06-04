@@ -86,7 +86,7 @@ export default function ClauseChecklist({
 
       {/* Warning box */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs font-semibold text-amber-700 shadow-sm">
-        ⚠ Missing clause or timestamp = medico-legal loophole — Narayan Reddy
+        ⚠ Missing clause or timestamp = medico-legal loophole
       </div>
     </div>
   );

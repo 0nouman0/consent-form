@@ -21,6 +21,7 @@ const clinicalSchema = z.object({
   doctorRegistrationNo: z.string().min(2, "Registration number is required"),
   hospitalName: z.string().min(2, "Hospital name is required"),
   hospitalAddress: z.string().min(5, "Hospital address is required"),
+  diagnosis: z.string().default(""),
   procedureName: z
     .string()
     .min(5, "Procedure name must be specific (min 5 characters)"),

@@ -33,7 +33,7 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    title: "Narayan Reddy Aligned",
+    title: "Legally Aligned",
     description:
       "Built on the 7 essential elements of informed consent and all 30 rules from the authoritative medico-legal reference.",
   },
@@ -62,7 +62,7 @@ const COMPLIANCE_BADGES = [
   "IPC §§87-93",
   "MoRTH 2025",
   "Consumer Protection Act 2019",
-  "Narayan Reddy Guidelines",
+  "Legal Guidelines",
   "Aadhaar Act 2016",
 ];
 
@@ -99,7 +99,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The Narayan Reddy alignment and IMC 2002 compliance gave our hospital legal confidence. We've standardized all our consent forms with ConsentGen.",
+      "The medico-legal alignment and IMC 2002 compliance gave our hospital legal confidence. We've standardized all our consent forms with ConsentGen.",
     highlight: "We've standardized all our consent forms.",
     name: "Dr. Priya Mehta",
     role: "Medical Superintendent",
@@ -230,7 +230,7 @@ export default function Home() {
               className="text-lg sm:text-xl text-nq-text-muted mb-10 max-w-2xl mx-auto leading-relaxed"
             >
               ConsentGen helps Indian doctors create medico-legal informed consent forms
-              that comply with IMC&nbsp;2002, Narayan Reddy guidelines, and MoRTH&nbsp;2025
+              that comply with IMC&nbsp;2002, Indian Medical Guidelines, and MoRTH&nbsp;2025
               emergency treatment regulations.
             </motion.p>
 
@@ -447,7 +447,7 @@ export default function Home() {
                 <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
                   <BookOpen className="w-[18px] h-[18px] text-amber-600" />
                 </div>
-                <h3 className="text-lg font-black text-nq-text mb-2 tracking-tight">Narayan Reddy Aligned</h3>
+                <h3 className="text-lg font-black text-nq-text mb-2 tracking-tight">Legally Aligned</h3>
                 <p className="text-sm text-nq-text-muted leading-relaxed flex-1">
                   All 7 elements of informed consent and 30 rules from the authoritative medico-legal reference.
                 </p>

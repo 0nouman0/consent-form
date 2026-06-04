@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import { ConsentFormSchema } from "@/lib/schema";
 import { GenerationStatus } from "@/lib/types";
+import { PREBUILT_TEMPLATES } from "@/lib/templates";
+import diagnosesData from "@/lib/diagnoses.json";
+
+const typedDiagnoses = diagnosesData as Record<string, string[]>;
 
 interface ConsentFormProps {
   form: UseFormReturn<ConsentFormSchema>;
@@ -572,6 +576,35 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                   )}
                 </div>
 
+                {/* Diagnosis */}
+                <div>
+                  <label htmlFor="clinical.diagnosis" className={LABEL_CLASSES}>
+                    Diagnosis / Underlying Condition <span className="text-nq-text-light font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    id="clinical.diagnosis"
+                    type="text"
+                    list="diagnoses-list"
+                    placeholder="e.g. Acute appendicitis"
+                    {...form.register("clinical.diagnosis")}
+                    className={INPUT_CLASSES}
+                  />
+                  <datalist id="diagnoses-list">
+                    {Object.entries(typedDiagnoses).map(([dept, diags]) => (
+                      <optgroup key={dept} label={dept}>
+                        {diags.map((d) => (
+                          <option key={d} value={d} />
+                        ))}
+                      </optgroup>
+                    ))}
+                  </datalist>
+                  {form.formState.errors.clinical?.diagnosis && (
+                    <p className={ERROR_CLASSES}>
+                      {form.formState.errors.clinical.diagnosis.message as string}
+                    </p>
+                  )}
+                </div>
+
                 {/* Procedure Name */}
                 <div>
                   <label htmlFor="clinical.procedureName" className={LABEL_CLASSES}>
@@ -584,7 +617,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                     className={INPUT_CLASSES}
                   />
                   <p className="text-xs font-semibold text-amber-600 mt-1.5">
-                    ⚠ Be specific. Narayan Reddy: blanket consent is legally void in India.
+                    ⚠ Be specific. Legal note: blanket consent is legally void in India.
                   </p>
                   {form.formState.errors.clinical?.procedureName && (
                     <p className={ERROR_CLASSES}>
@@ -786,7 +819,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 {/* Locked Clauses */}
                 <LockedClauseCard
                   title="Voluntariness & Right to Withdraw"
-                  subtitle="Narayan Reddy Rule 7 — mandatory"
+                  subtitle="Legal requirement — mandatory"
                 />
                 <LockedClauseCard
                   title="Capacity Validation"
@@ -794,7 +827,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 />
                 <LockedClauseCard
                   title="Information Receipt"
-                  subtitle="Narayan Reddy Informed Consent doctrine"
+                  subtitle="Standard Informed Consent doctrine"
                 />
 
                 {/* Toggleable Clauses */}
@@ -820,7 +853,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 {/* Include Witness Signature Block */}
                 <ClauseCard
                   label="Include Witness Signature Block"
-                  subtitle="Narayan Reddy Rule 3 — recommended"
+                  subtitle="Legal best practice — recommended"
                   checked={form.watch("includeWitnessBlock") ?? false}
                   onChange={(checked) =>
                     form.setValue("includeWitnessBlock", checked, { shouldValidate: true })
