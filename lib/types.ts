@@ -44,6 +44,7 @@ export interface ClinicalDetails {
   doctorRegistrationNo: string;
   hospitalName: string;
   hospitalAddress: string;
+  diagnosis?: string;
   procedureName: string;
   procedureDate: string;
   consentType: ConsentType;
