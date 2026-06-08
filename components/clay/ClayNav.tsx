@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, Menu, X } from "lucide-react";
+import { ShieldCheck, List, X } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
 
 interface NavLink {
@@ -34,7 +34,7 @@ export default function ClayNav({
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 bg-clay-primary rounded-xl flex items-center justify-center shadow-clay-sm">
-              <Shield className="w-5 h-5 text-white" />
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg font-bold text-clay-text">
               ConsentGen
@@ -97,7 +97,7 @@ export default function ClayNav({
             {mobileOpen ? (
               <X className="w-5 h-5" />
             ) : (
-              <Menu className="w-5 h-5" />
+              <List className="w-5 h-5" />
             )}
           </button>
         </div>

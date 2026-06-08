@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2,
-  ChevronDown,
-  ChevronUp,
+  CircleNotch,
+  CaretDown,
+  CaretUp,
   User,
   Stethoscope,
-  ClipboardList,
+  ClipboardText,
   Check,
-} from "lucide-react";
+} from "@phosphor-icons/react/dist/ssr";
 import { ConsentFormSchema } from "@/lib/schema";
 import { GenerationStatus } from "@/lib/types";
 import { PREBUILT_TEMPLATES } from "@/lib/templates";
@@ -88,9 +88,9 @@ function SectionHeader({
         <span className="font-bold text-nq-text tracking-tight">{title}</span>
       </div>
       {isOpen ? (
-        <ChevronUp className="w-5 h-5 text-nq-text-light" />
+        <CaretUp className="w-5 h-5 text-nq-text-light" />
       ) : (
-        <ChevronDown className="w-5 h-5 text-nq-text-light" />
+        <CaretDown className="w-5 h-5 text-nq-text-light" />
       )}
     </button>
   );
@@ -799,7 +799,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
       >
         <div className="mb-4">
           <SectionHeader
-            icon={ClipboardList}
+            icon={ClipboardText}
             title="Clause Selections"
             isOpen={section3Open}
             onClick={() => setSection3Open(!section3Open)}
@@ -885,7 +885,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
         disabled={isLoading}
         className="nq-btn-primary w-full justify-center py-4 text-base disabled:opacity-70 mt-4"
       >
-        {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+        {isLoading && <CircleNotch className="w-5 h-5 animate-spin" />}
         {isLoading ? "Generating Form..." : "Generate Consent Form"}
       </button>
     </form>

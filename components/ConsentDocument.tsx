@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
-import { Printer, Download, Copy, RotateCcw, Save, CheckCircle2 } from "lucide-react";
+import { Printer, DownloadSimple, Copy, ArrowCounterClockwise, FloppyDisk, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { nowIST } from "@/lib/utils";
 import { ConsentFormSchema } from "@/lib/schema";
 import { saveConsentToHistory } from "@/lib/history";
@@ -183,7 +183,7 @@ export default function ConsentDocument({
             onClick={handleDownloadPDF}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-nq-border text-nq-text text-sm font-bold rounded-xl shadow-sm hover:border-nq-purple hover:text-nq-purple transition-all"
           >
-            <Download className="w-4 h-4" />
+            <DownloadSimple className="w-4 h-4" />
             Download PDF
           </button>
           <button
@@ -205,12 +205,12 @@ export default function ConsentDocument({
             >
               {saved ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle className="w-4 h-4" weight="fill" />
                   Saved!
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <FloppyDisk className="w-4 h-4" />
                   {saving ? "Saving..." : "Save to History"}
                 </>
               )}
@@ -220,7 +220,7 @@ export default function ConsentDocument({
             onClick={onReset}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-nq-border text-nq-text text-sm font-bold rounded-xl shadow-sm hover:border-nq-purple hover:text-nq-purple transition-all"
           >
-            <RotateCcw className="w-4 h-4" />
+            <ArrowCounterClockwise className="w-4 h-4" />
             New Form
           </button>
         </motion.div>

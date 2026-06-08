@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { CircleNotch } from "@phosphor-icons/react/dist/ssr";
 
 const messages = [
   "Verifying patient information and competency status...",
@@ -28,7 +28,8 @@ export default function LoadingState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 space-y-6">
       {/* Spinning loader */}
-      <Loader2 className="w-12 h-12 text-teal-600 animate-spin" />
+      <CircleNotch className="w-12 h-12 text-primary animate-spin" />
+
 
       {/* Animated message */}
       <AnimatePresence mode="wait">

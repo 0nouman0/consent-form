@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { Shield } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { consentFormSchema, ConsentFormSchema } from "@/lib/schema";
@@ -173,11 +172,11 @@ function GenerateContent() {
               </div>
             )}
             {templateId && (
-              <div className="mb-4 p-4 bg-nq-purple-soft border border-nq-purple/30 rounded-xl flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-nq-purple/20 flex items-center justify-center text-nq-purple">✓</div>
+              <div className="mb-4 p-4 rounded-xl flex items-center gap-3 border" style={{ background: 'hsl(var(--primary) / 0.06)', borderColor: 'hsl(var(--primary) / 0.2)' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-primary" style={{ background: 'hsl(var(--primary) / 0.12)' }}>✓</div>
                 <div>
-                  <p className="text-sm font-bold text-nq-text">Template Applied</p>
-                  <p className="text-xs text-nq-text-muted">Fields have been pre-filled for {PREBUILT_TEMPLATES.find(t => t.id === templateId)?.title}</p>
+                  <p className="text-sm font-semibold text-foreground font-body">Template Applied</p>
+                  <p className="text-xs text-muted-foreground font-body">Fields have been pre-filled for {PREBUILT_TEMPLATES.find(t => t.id === templateId)?.title}</p>
                 </div>
               </div>
             )}
@@ -203,14 +202,10 @@ function GenerateContent() {
           >
             {/* Status indicator */}
             <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  status === "streaming"
-                    ? "bg-nq-purple animate-pulse"
-                    : "bg-green-500"
-                }`}
-              />
-              <span className="text-sm font-semibold text-nq-text-muted">
+              <div className={`w-2 h-2 rounded-full ${
+                  status === "streaming" ? "bg-primary animate-pulse" : "bg-green-500"
+                }`} />
+              <span className="text-sm font-medium text-muted-foreground font-body">
                 {status === "streaming"
                   ? "Generating your consent form..."
                   : "Consent form ready"}
@@ -239,10 +234,10 @@ function GenerateContent() {
 
 export default function GeneratePage() {
   return (
-    <div className="min-h-screen bg-nq-bg font-inter">
+    <div className="min-h-screen font-body" style={{ background: 'hsl(var(--muted))' }}>
       <Suspense fallback={
         <div className="flex justify-center items-center h-96">
-          <div className="w-8 h-8 border-2 border-nq-border border-t-nq-purple rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin" />
         </div>
       }>
         <GenerateContent />
