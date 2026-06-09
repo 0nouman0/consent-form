@@ -12,8 +12,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1 w-full relative pb-20 md:pb-0 min-w-0 overflow-hidden">
-        {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-50">
+        {/* Mobile Header — floating */}
+        <header className="md:hidden fixed top-3 left-3 right-3 z-50 flex items-center justify-between px-4 py-3 rounded-2xl border border-border/50 shadow-lg" style={{ background: "hsl(var(--background) / 0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg gradient-bg flex items-center justify-center">
               <ShieldCheck className="w-4 h-4 text-white" weight="fill" />
@@ -25,7 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="h-full">
+        <div className="h-full pt-20 md:pt-0">
           {children}
         </div>
       </main>

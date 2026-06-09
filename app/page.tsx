@@ -205,29 +205,9 @@ function ConsentPreview() {
 export default function Home() {
   return (
     <>
-      {/* ─── PAGE FRAME ─── */}
-      <div className="min-h-screen w-full p-3 sm:p-4" style={{ backgroundColor: "#ededed", fontFamily: "Inter, sans-serif" }}>
-
-        {/* ─── HERO CONTAINER (clips everything) ─── */}
-        <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl" style={{ height: "calc(100vh - 24px)", backgroundColor: "#d9d9d9" }}>
-
-          {/* Background Video */}
-          <video
-            autoPlay loop muted playsInline
-            preload="auto"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
-            onEnded={(e) => { (e.target as HTMLVideoElement).play(); }}
-          />
-          {/* Light overlay */}
-          <div className="absolute inset-0 z-0 bg-white/10" />
-
-          {/* Foreground */}
-          <div className="relative z-10 flex flex-col h-full">
-
-            {/* ─── FLOATING PILL NAVBAR ─── */}
-            <div className="flex justify-center pt-4 sm:pt-6 px-3 sm:px-4">
-              <div className="flex items-center bg-white rounded-full shadow-sm border border-neutral-200 pl-2 pr-2 py-2 w-full max-w-[760px] relative">
+      {/* ─── FLOATING PILL NAVBAR (fixed, always on top) ─── */}
+      <div className="fixed top-3 sm:top-4 left-0 right-0 z-[100] flex justify-center px-3 sm:px-4">
+              <div className="flex items-center rounded-full pl-2 pr-2 py-2 w-full max-w-[760px] relative" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 2px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.08)" }}>
 
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 shrink-0 pr-4">
@@ -263,10 +243,30 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-            </div>
+      </div>
+
+      {/* ─── PAGE FRAME ─── */}
+      <div className="min-h-screen w-full p-3 sm:p-4" style={{ backgroundColor: "#ededed", fontFamily: "Inter, sans-serif" }}>
+
+        {/* ─── HERO CONTAINER (clips everything) ─── */}
+        <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl" style={{ height: "calc(100vh - 24px)", backgroundColor: "#d9d9d9" }}>
+
+          {/* Background Video */}
+          <video
+            autoPlay loop muted playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
+            onEnded={(e) => { (e.target as HTMLVideoElement).play(); }}
+          />
+          {/* Light overlay */}
+          <div className="absolute inset-0 z-0 bg-white/10" />
+
+          {/* Foreground */}
+          <div className="relative z-10 flex flex-col h-full">
 
             {/* ─── HERO CONTENT — centered ─── */}
-            <div className="flex flex-col items-center px-4 pt-10 sm:pt-14 pb-6 sm:pb-10 text-center">
+            <div className="flex flex-col items-center px-4 pt-24 sm:pt-28 pb-6 sm:pb-10 text-center">
 
               {/* Badge */}
               <motion.div
