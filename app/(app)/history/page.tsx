@@ -20,6 +20,11 @@ function HistoryContent() {
   const [filterType, setFilterType] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
+  const [activeTab, setActiveTab] = useState<"english" | "other">("english");
+
+  useEffect(() => {
+    setActiveTab("english");
+  }, [selectedEntry]);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -212,10 +217,51 @@ function HistoryContent() {
                 </button>
               </div>
               <div className="flex-1 overflow-auto p-6 sm:p-10 bg-background">
+                {/* Tabs inside modal */}
+                {selectedEntry.form_data?.clinical?.counselingLanguage && selectedEntry.form_data.clinical.counselingLanguage !== "English" && (
+                  <div className="flex border-b border-border mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("english")}
+                      className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                        activeTab === "english"
+                          ? "border-foreground text-foreground"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      English Form
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedEntry.markdown?.includes("__LANG_SEPARATOR__")) {
+                          setActiveTab("other");
+                        }
+                      }}
+                      disabled={!selectedEntry.markdown?.includes("__LANG_SEPARATOR__")}
+                      className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                        !selectedEntry.markdown?.includes("__LANG_SEPARATOR__")
+                          ? "opacity-50 cursor-not-allowed border-transparent text-muted-foreground"
+                          : activeTab === "other"
+                          ? "border-foreground text-foreground"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {selectedEntry.form_data.clinical.counselingLanguage} Form
+                    </button>
+                  </div>
+                )}
                 <div className="prose prose-slate prose-sm sm:prose-base max-w-none
                   prose-headings:font-sans prose-headings:font-bold prose-headings:text-foreground
                   prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground">
-                  <ReactMarkdown>{selectedEntry.markdown}</ReactMarkdown>
+                  <ReactMarkdown>
+                    {(() => {
+                      const hasMultiple = selectedEntry.markdown?.includes("__LANG_SEPARATOR__");
+                      if (!hasMultiple) return selectedEntry.markdown;
+                      const parts = selectedEntry.markdown.split("__LANG_SEPARATOR__");
+                      return activeTab === "english" ? (parts[0] || "") : (parts[1] || "");
+                    })()}
+                  </ReactMarkdown>
                 </div>
               </div>
             </motion.div>

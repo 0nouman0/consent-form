@@ -25,20 +25,33 @@ export default function ConsentDocument({
   onReset,
   formData,
 }: ConsentDocumentProps) {
+  const [activeTab, setActiveTab] = useState<"english" | "other">("english");
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const hasMultipleLanguages = markdown.includes("__LANG_SEPARATOR__");
+  const parts = markdown.split("__LANG_SEPARATOR__");
+  const englishMarkdown = parts[0] || "";
+  const otherMarkdown = parts[1] || "";
+
+  const activeMarkdown = (activeTab === "english" || !hasMultipleLanguages)
+    ? englishMarkdown.trim()
+    : otherMarkdown.trim();
 
   const handleDownloadPDF = async () => {
     // @ts-expect-error html2pdf.js has no types
     const html2pdf = (await import("html2pdf.js")).default;
     const element = document.getElementById("consent-document-body");
     if (!element) return;
+    const fileSuffix = activeTab === "other" && formData?.clinical.counselingLanguage
+      ? `-${formData.clinical.counselingLanguage.toLowerCase()}`
+      : "-english";
     await html2pdf()
       .set({
         margin: 15,
-        filename: `consent-${consentId}.pdf`,
+        filename: `consent-${consentId}${fileSuffix}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -48,7 +61,7 @@ export default function ConsentDocument({
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(markdown);
+    navigator.clipboard.writeText(activeMarkdown);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -127,6 +140,44 @@ export default function ConsentDocument({
         </div>
       )}
 
+      {/* Language Tabs */}
+      {formData?.clinical.counselingLanguage && formData.clinical.counselingLanguage !== "English" && (
+        <div className="flex border-b border-border mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTab("english")}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "english"
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            English Form (Default)
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (otherMarkdown.trim()) {
+                setActiveTab("other");
+              }
+            }}
+            disabled={!otherMarkdown.trim()}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
+              !otherMarkdown.trim()
+                ? "opacity-50 cursor-not-allowed border-transparent text-muted-foreground"
+                : activeTab === "other"
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {formData.clinical.counselingLanguage} Form
+            {!otherMarkdown.trim() && (
+              <span className="w-3.5 h-3.5 border-2 border-t-transparent border-muted-foreground rounded-full animate-spin" />
+            )}
+          </button>
+        </div>
+      )}
+
       <motion.div
         id="consent-document-body"
         className="consent-document nq-card p-8 sm:p-12"
@@ -155,7 +206,7 @@ export default function ConsentDocument({
 
         {/* Markdown Content */}
         <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-nq-text prose-p:font-medium">
-          <ReactMarkdown components={components}>{markdown}</ReactMarkdown>
+          <ReactMarkdown components={components}>{activeMarkdown}</ReactMarkdown>
         </div>
 
         {/* Streaming cursor */}

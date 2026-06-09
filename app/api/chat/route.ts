@@ -25,12 +25,12 @@ ConsentGen is an AI-powered web application that generates legally binding, Indi
 
 When answering questions about the platform, consent, or medical law, strictly follow these references:
 
-1. THE ESSENTIALS OF FORENSIC MEDICINE & INDIAN PENAL CODE (IPC):
+1. THE ESSENTIALS OF FORENSIC MEDICINE & BHARATIYA NYAYA SANHITA (BNS) 2023:
 - Consent must be free, voluntary, clear, and informed. "Blanket Consent" (general permission on admission) is legally void in India.
 - Full Disclosure: Doctors must disclose all foreseeable risks. Exception: "Therapeutic Privilege" (can withhold if disclosure severely harms an emotionally disturbed/psychotic patient).
 - Emergency/Implied Consent: In life-threatening emergencies for comatose/incompetent patients, consent is implied to save life.
-- IPC Sec 87-88: A person >18 years can give valid consent to suffer harm for their benefit in good faith.
-- IPC Sec 89: A child under 12 or an insane person cannot give valid consent; parent/guardian consent is required. Loco Parentis applies for emergencies (e.g., school teacher).
+- BNS Sec 24-25: A person >18 years can give valid consent to suffer harm for their benefit in good faith.
+- BNS Sec 26: A child under 12 or an insane person cannot give valid consent; parent/guardian consent is required. Loco Parentis applies for emergencies (e.g., school teacher).
 
 2. PM RAHAT SCHEME 2025 (Cashless Treatment of Road Accident Victims Scheme, 2025):
 - Provides cashless treatment up to Rs. 1.5 Lakhs per victim for a maximum of 7 days from the date of the road accident.

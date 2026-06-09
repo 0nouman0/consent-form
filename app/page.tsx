@@ -10,7 +10,7 @@ import {
 
 /* ─── DATA ─── */
 const COMPLIANCE_BADGES = [
-  "IMC 2002", "IPC §§87-93", "MoRTH 2025",
+  "IMC 2002", "BNS §§24-30", "MoRTH 2025",
   "Consumer Protection Act 2019", "Aadhaar Act 2016",
 ];
 
@@ -134,7 +134,7 @@ function ConsentPreview() {
             </div>
           ))}
           <div className="mt-3 pt-3 border-t border-border text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">Compliance</div>
-          {["IMC 2002", "IPC §87-93", "MoRTH 2025"].map(b => (
+          {["IMC 2002", "BNS §24-30", "MoRTH 2025"].map(b => (
             <div key={b} className="px-2.5 py-1 text-[9px] text-muted-foreground">{b}</div>
           ))}
         </div>
@@ -206,116 +206,80 @@ export default function Home() {
   return (
     <div className="min-h-screen font-body" style={{ background: "hsl(var(--background))" }}>
 
-      {/* ─── NAVBAR ─── */}
-      <nav className="flex items-center justify-between px-6 md:px-12 lg:px-20 py-5 font-body bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded bg-foreground flex items-center justify-center transition-transform group-hover:scale-105">
-            <ShieldCheck className="w-[17px] h-[17px] text-background" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-foreground">ConsentGen</span>
-        </Link>
 
-        {/* Nav links */}
-        <div className="hidden md:flex items-center gap-8">
-          {["Features", "Compliance", "How It Works"].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
-              {item}
-            </a>
-          ))}
-        </div>
+{/* ─── HERO ─── */}
+      <section id="hero" className="relative h-screen overflow-hidden">
+        {/* Background Video */}
+        <video
+          autoPlay muted loop playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
+        />
+        {/* Gradient overlay — strong at bottom for text legibility */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
 
-        {/* CTA */}
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Sign In
-          </Link>
-          <Link href="/generate" className="btn-primary rounded-full px-5 py-2.5 text-sm">
-            Get Started
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </nav>
-
-      {/* ─── HERO ─── */}
-      <section id="hero" className="relative overflow-hidden flex flex-col items-center justify-start pt-16 md:pt-20 bg-background border-b border-border pb-16">
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center w-full px-5 sm:px-8 overflow-hidden">
-
-          {/* Badge */}
+        {/* Badge — top center */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex justify-center">
           <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-6"
+            className="bg-black/70 backdrop-blur-md rounded-b-2xl px-6 py-2.5"
           >
-            <span className="badge">
+            <span className="text-xs text-white/80 tracking-wide font-body">
               India&rsquo;s AI Medico-Legal Consent Platform ✨
             </span>
           </motion.div>
+        </div>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-center font-display text-5xl md:text-6xl lg:text-[5rem] leading-[0.95] tracking-tight text-foreground max-w-3xl mb-4 font-bold"
-          >
-            Generate{" "}
-            <em style={{ fontStyle: "italic" }}>compliant</em>
-            {" "}consent forms
-            <br className="hidden sm:block" />
-            {" "}in{" "}
-            <em style={{ fontStyle: "italic" }}>seconds</em>
-          </motion.h1>
+        {/* Bottom content — 12-col grid */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 grid grid-cols-12 items-end px-4 md:px-8 pb-6 md:pb-10">
 
-          {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-2 text-center text-base md:text-lg text-muted-foreground max-w-[600px] leading-relaxed font-body"
-          >
-            ConsentGen helps Indian doctors create medico-legal informed consent forms that comply with IMC&nbsp;2002, IPC&nbsp;§§87-93, and MoRTH&nbsp;2025—so your team can focus on patient care.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 flex items-center gap-3"
-          >
-            <Link href="/generate" className="btn-primary px-7 py-3 text-sm">
-              Generate Consent Form
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </motion.div>
-
-          {/* Compliance badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-2"
-          >
-            {COMPLIANCE_BADGES.map(b => (
-              <span key={b} className="px-3 py-1.5 text-xs font-medium rounded bg-muted text-muted-foreground border border-border">
-                {b}
-              </span>
-            ))}
-          </motion.div>
-
-          {/* Consent Preview "Dashboard" */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-12 w-full max-w-5xl"
-          >
-            <div
-              className="rounded overflow-hidden border border-border shadow-dashboard bg-background"
+          {/* Left 8 cols — giant title */}
+          <div className="col-span-12 lg:col-span-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="font-bold leading-[0.85] tracking-[-0.05em] text-[22vw] sm:text-[20vw] md:text-[18vw] lg:text-[17vw]"
+              style={{ color: "#FFFFFF", textShadow: "0 2px 40px rgba(0,0,0,0.4)" }}
             >
-              <ConsentPreview />
-            </div>
-          </motion.div>
+              Consent
+              <span className="relative inline-block">
+                Gen
+                <sup className="absolute text-[0.3em] top-[0.7em] -right-[0.15em]" style={{ color: "#ffffff" }}>✦</sup>
+              </span>
+            </motion.h1>
+          </div>
+
+          {/* Right 4 cols — description + CTA */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 pb-3 lg:pl-6 mt-4 lg:mt-0">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="text-xs sm:text-sm md:text-base font-body leading-[1.4]"
+              style={{ color: "rgba(255,255,255,0.85)", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
+            >
+              ConsentGen helps Indian doctors create medico-legal informed consent forms that comply with IMC&nbsp;2002, BNS&nbsp;§§24-30, and MoRTH&nbsp;2025—so your team can focus on patient care.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link
+                href="/generate"
+                className="group inline-flex items-center gap-2 rounded-full font-medium text-sm sm:text-base font-body transition-all hover:gap-3"
+                style={{ backgroundColor: "#E1E0CC", color: "#000", paddingLeft: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", paddingRight: "0.35rem" }}
+              >
+                Get Started
+                <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black transition-transform group-hover:scale-110">
+                  <ArrowRight className="w-4 h-4" style={{ color: "#E1E0CC" }} />
+                </span>
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </section>
+
 
       {/* ─── BENTO FEATURES ─── */}
       <section id="features" className="py-20 sm:py-28" style={{ background: "hsl(var(--muted))" }}>
@@ -366,7 +330,7 @@ export default function Home() {
             {/* 2×2 right grid */}
             <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { Icon: Scales, bg: "bg-muted", text: "text-foreground", title: "India Compliant", desc: "IMC 2002, IPC §§87-93, Consumer Protection Act 2019, and MoRTH 2025 — all covered.", extra: <div className="mt-4 flex flex-wrap gap-1.5">{["IMC 2002","IPC","MoRTH"].map(b=><span key={b} className="px-2 py-1 text-xs font-semibold rounded bg-muted text-foreground border border-border">{b}</span>)}</div> },
+                { Icon: Scales, bg: "bg-muted", text: "text-foreground", title: "India Compliant", desc: "IMC 2002, BNS §§24-30 (Bharatiya Nyaya Sanhita), Consumer Protection Act 2019, and MoRTH 2025 — all covered.", extra: <div className="mt-4 flex flex-wrap gap-1.5">{["IMC 2002","BNS","MoRTH"].map(b=><span key={b} className="px-2 py-1 text-xs font-semibold rounded bg-muted text-foreground border border-border">{b}</span>)}</div> },
                 { Icon: BookOpen, bg: "bg-muted", text: "text-foreground", title: "Legally Aligned", desc: "All 7 elements of informed consent and 30 rules from the authoritative medico-legal reference.", extra: <><div className="mt-4 h-1.5 rounded bg-border overflow-hidden"><div className="h-full bg-foreground w-full" /></div><span className="text-xs text-muted-foreground mt-1.5 block">100% guideline coverage</span></> },
                 { Icon: Stethoscope, bg: "bg-muted", text: "text-foreground", title: "10+ Consent Types", desc: "Surgical, anaesthesia, diagnostic, blood transfusion, telemedicine, obstetric, psychiatric & more.", extra: <div className="mt-4 grid grid-cols-3 gap-1.5">{["Surgical","Anaes.","Telemd.","Obstetric","Psych.","Emerg."].map(t=><span key={t} className="px-1.5 py-1 text-[10px] font-medium rounded text-muted-foreground bg-muted border border-border text-center">{t}</span>)}</div> },
                 { Icon: CheckCircle, bg: "bg-muted", text: "text-foreground", title: "Clause Verification", desc: "Real-time checklist ensures every required medico-legal clause is present before sign-off.", extra: <div className="mt-4 space-y-1.5">{[{label:"Risks disclosed",ok:true},{label:"Alternatives listed",ok:true},{label:"Witness signed",ok:false}].map(({label,ok})=><div key={label} className="flex items-center gap-2"><div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${ok?"bg-muted border border-border":"bg-border"}`}>{ok&&<div className="w-1.5 h-1.5 rounded bg-foreground" />}</div><span className={`text-xs ${ok?"text-muted-foreground":"text-muted-foreground/50"}`}>{label}</span></div>)}</div> },
@@ -547,7 +511,7 @@ export default function Home() {
                 AI-powered medico-legal consent form generator for Indian doctors. IMC 2002 compliant. Generate, verify, and export in seconds.
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
-                {["IMC 2002", "IPC §§87-93", "MoRTH 2025"].map(b => (
+                {["IMC 2002", "BNS §§24-30", "MoRTH 2025"].map(b => (
                   <span key={b} className="px-3 py-1 text-xs font-medium rounded bg-muted text-foreground border border-border">
                     {b}
                   </span>

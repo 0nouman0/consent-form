@@ -331,10 +331,9 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                   )}
                 </div>
 
-                {/* Counseling Language */}
                 <div>
                   <label htmlFor="clinical.counselingLanguage" className={LABEL_CLASSES}>
-                    Counseling Language <span className="text-red-500">*</span>
+                    Second Language (Bilingual generation — English is always included) <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="clinical.counselingLanguage"
@@ -348,12 +347,17 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Select an Indian language to generate a bilingual consent form. Select &apos;English&apos; for English-only.
+                  </p>
                   {form.formState.errors.clinical?.counselingLanguage && (
                     <p className={ERROR_CLASSES}>
                       {form.formState.errors.clinical.counselingLanguage.message as string}
                     </p>
                   )}
                 </div>
+
+
 
                 {/* Aadhaar Last 4 Digits */}
                 <div>
@@ -413,7 +417,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                       Patient is competent (adult, sound mind, not intoxicated)
                     </p>
                     <p className="text-xs font-medium text-nq-text-muted mt-0.5">
-                      IPC §87-90 — minor or intoxicated consent is invalid
+                      BNS §24-27 (Bharatiya Nyaya Sanhita) — minor or intoxicated consent is invalid
                     </p>
                   </div>
                   <ToggleSwitch
@@ -823,7 +827,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 />
                 <LockedClauseCard
                   title="Capacity Validation"
-                  subtitle="IPC §87-90 — mandatory"
+                  subtitle="BNS §24-27 (Bharatiya Nyaya Sanhita) — mandatory"
                 />
                 <LockedClauseCard
                   title="Information Receipt"

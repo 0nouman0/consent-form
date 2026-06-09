@@ -90,7 +90,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Voluntariness & Right to Withdraw",
     partLabel: "Part B — Clause 8",
     legalBasis:
-      "Legal Rule 7 — consent must be free, voluntary, clear, intelligent; IPC §90 — fear vitiates consent",
+      "Legal Rule 7 — consent must be free, voluntary, clear, intelligent; BNS §27 (Bharatiya Nyaya Sanhita) — fear vitiates consent",
     description:
       "Consent given freely without coercion. Right to withdraw before procedure begins.",
     requiredFor: ["all"],
@@ -101,7 +101,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Capacity Validation",
     partLabel: "Part B — Clause 9",
     legalBasis:
-      "IPC §87 — valid consent requires person above 18; IPC §89 — minor or insane cannot consent; IPC §90 — intoxicated consent invalid",
+      "BNS §24 (Bharatiya Nyaya Sanhita) — valid consent requires person above 18; BNS §26 — minor or insane cannot consent; BNS §27 — intoxicated consent invalid",
     description:
       "Patient is of sound mind, not intoxicated, above 18 years. Guardian block activated otherwise.",
     requiredFor: ["all"],
@@ -122,7 +122,7 @@ export const REQUIRED_CLAUSES: Clause[] = [
     title: "Road Accident Emergency Clause",
     partLabel: "Part B — Clause 11",
     legalBasis:
-      "MoRTH Gazette S.O.2489(E) June 2025 — Cashless Treatment of Road Accident Victims Scheme 2025; MV Act 1988 §162; IPC §92 emergency implied consent",
+      "MoRTH Gazette S.O.2489(E) June 2025 — Cashless Treatment of Road Accident Victims Scheme 2025; MV Act 1988 §162; BNS §29 (Bharatiya Nyaya Sanhita) emergency implied consent",
     description:
       "Emergency treatment under MoRTH Scheme 2025. Coverage: ₹1.5 lakh per victim, 7 days from accident date.",
     requiredFor: ["road_accident_emergency"],

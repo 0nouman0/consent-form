@@ -6,7 +6,7 @@ export function buildSystemPrompt(): string {
   return `You are a senior medico-legal documentation specialist in India.
 You draft patient informed consent forms that comply with:
 - Standard Medical Law & Ethics (Rules of Consent, Informed Consent elements)
-- Indian Penal Code §§87-93 (consent capacity and validity)
+- Bharatiya Nyaya Sanhita (BNS) 2023 §§24-30 (consent capacity and validity)
 - Indian Medical Council (Professional Conduct) Regulations 2002
 - MoRTH Gazette S.O.2489(E) June 2025 — Cashless Treatment of Road Accident Victims Scheme 2025
 - Consumer Protection Act 2019 (medical negligence provisions)
@@ -60,8 +60,17 @@ export function buildUserPrompt(
       "Write in clear professional English. Medical terms allowed but explain each on first use.",
     formal_legal:
       "Write in formal medico-legal English per Indian court standards. " +
-      "Use 'the patient' and 'the attending physician'. Reference IPC sections where relevant.",
+      "Use 'the patient' and 'the attending physician'. Reference BNS sections where relevant.",
   }[input.languageLevel];
+
+  const bilingualInstruction = clinical.counselingLanguage !== "English"
+    ? `\nCRITICAL MULTI-LANGUAGE DOCUMENT REQUIREMENT:\n` +
+      `Since the counseling language is ${clinical.counselingLanguage}, you MUST generate TWO SEPARATE complete consent forms.\n` +
+      `First, generate the entire form in English, complying fully with all clinical specifications, legal requirements, and signature blocks.\n` +
+      `Once the English form is fully complete, output the exact separator token on a single line: __LANG_SEPARATOR__\n` +
+      `Immediately after the separator, generate the complete consent form fully translated into ${clinical.counselingLanguage} (e.g. Hindi, Tamil, etc.).\n` +
+      `Do not mix languages inside each document. The first document must be 100% in English, and the second document must be 100% in ${clinical.counselingLanguage}. Both documents must contain the exact same details, clauses, and signature blocks in their respective languages.`
+    : "";
 
   const roadAccidentSection =
     clinical.consentType === "road_accident_emergency"
@@ -70,7 +79,7 @@ ROAD ACCIDENT EMERGENCY DETAILS (MoRTH Gazette S.O.2489(E) June 2025):
 eDAR Victim ID: ${clinical.edarVictimId || "Pending — police to generate on eDAR application"}
 NHA TMS Patient ID: ${clinical.tmsPatientId || "Pending — hospital to generate on TMS portal"}
 Scheme Coverage: Up to Rs. 1,50,000 per victim for maximum 7 days from accident date
-Legal basis: Motor Vehicles Act 1988 Section 162; IPC Section 92 (emergency implied consent)
+Legal basis: Motor Vehicles Act 1988 Section 162; BNS Section 29 (Bharatiya Nyaya Sanhita) — emergency implied consent
 Note: Include the MoRTH Cashless Treatment of Road Accident Victims Scheme 2025 reference in the form.`
       : "";
 
@@ -96,8 +105,8 @@ Insurance Provider: ${patient.insuranceProvider || "Not provided"}
 Insurance Policy Number: ${patient.insurancePolicyNo || "Not provided"}
 Patient Competency: ${
     patient.patientCompetent
-      ? "COMPETENT — Adult, sound mind, not intoxicated (IPC §87-88)"
-      : "NOT COMPETENT / MINOR — Guardian consent required (IPC §89-90)"
+      ? "COMPETENT — Adult, sound mind, not intoxicated (BNS §24-25)"
+      : "NOT COMPETENT / MINOR — Guardian consent required (BNS §26-27)"
   }
 ${
   !patient.patientCompetent
@@ -131,13 +140,14 @@ Anaesthesia and Blood Transfusion: ${clauses.anaesthesia ? "PATIENT CONSENTS" : 
 Tissue and Specimen Disposal: ${clauses.tissueDisposal ? "PATIENT CONSENTS" : "NOT APPLICABLE"}
 Photography and Academic Use: ${clauses.photographyAcademicUse ? "PATIENT CONSENTS — identity confidentiality required" : "PATIENT DOES NOT CONSENT"}
 Right to Withdraw: ALWAYS INCLUDED — mandatory (Legal Requirement)
-Voluntary Consent: ALWAYS INCLUDED — mandatory (IPC §90)
-Capacity Confirmation: ALWAYS INCLUDED — mandatory (IPC §87-89)
+Voluntary Consent: ALWAYS INCLUDED — mandatory (BNS §27)
+Capacity Confirmation: ALWAYS INCLUDED — mandatory (BNS §24-26)
 
 ════════════════════════════════
 LANGUAGE INSTRUCTION:
 ════════════════════════════════
 ${languageInstruction}
+${bilingualInstruction}
 
 ════════════════════════════════
 REQUIRED SECTIONS — USE ## FOR EACH HEADING:
@@ -145,7 +155,7 @@ REQUIRED SECTIONS — USE ## FOR EACH HEADING:
 ${clauseList}
 
 ${input.includeWitnessBlock ? "INCLUDE: A Witness Signature Block with fields: Full Name, Relationship to Patient, Contact Number, Signature, Date, and exact Time. This is a recommended legal requirement." : ""}
-${input.includeGuardianBlock || !patient.patientCompetent ? "INCLUDE: A Parent or Guardian Consent Block with fields: Guardian Name, Relationship, Signature, Date, and exact Time. Required by IPC §89." : ""}
+${input.includeGuardianBlock || !patient.patientCompetent ? "INCLUDE: A Parent or Guardian Consent Block with fields: Guardian Name, Relationship, Signature, Date, and exact Time. Required by BNS §26 (Bharatiya Nyaya Sanhita)." : ""}
 
 ════════════════════════════════
 PART D — DOCTOR'S DECLARATION:
