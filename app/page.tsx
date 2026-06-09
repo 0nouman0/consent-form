@@ -204,82 +204,215 @@ function ConsentPreview() {
 /* ─── PAGE ─── */
 export default function Home() {
   return (
-    <div className="min-h-screen font-body" style={{ background: "hsl(var(--background))" }}>
+    <>
+      {/* ─── PAGE FRAME ─── */}
+      <div className="min-h-screen w-full p-3 sm:p-4" style={{ backgroundColor: "#ededed", fontFamily: "Inter, sans-serif" }}>
 
+        {/* ─── HERO CONTAINER (clips everything) ─── */}
+        <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl" style={{ height: "calc(100vh - 24px)", backgroundColor: "#d9d9d9" }}>
 
-{/* ─── HERO ─── */}
-      <section id="hero" className="relative h-screen overflow-hidden">
-        {/* Background Video */}
-        <video
-          autoPlay muted loop playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
-        />
-        {/* Gradient overlay — strong at bottom for text legibility */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
+          {/* Background Video */}
+          <video
+            autoPlay loop muted playsInline
+            preload="auto"
+            poster="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1600&q=60"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
+          />
+          {/* Light overlay */}
+          <div className="absolute inset-0 z-0 bg-white/10" />
 
-        {/* Badge — top center */}
-        <div className="absolute top-0 left-0 right-0 z-20 flex justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-black/70 backdrop-blur-md rounded-b-2xl px-6 py-2.5"
-          >
-            <span className="text-xs text-white/80 tracking-wide font-body">
-              India&rsquo;s AI Medico-Legal Consent Platform ✨
-            </span>
-          </motion.div>
-        </div>
+          {/* Foreground */}
+          <div className="relative z-10 flex flex-col h-full">
 
-        {/* Bottom content — 12-col grid */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 grid grid-cols-12 items-end px-4 md:px-8 pb-6 md:pb-10">
+            {/* ─── FLOATING PILL NAVBAR ─── */}
+            <div className="flex justify-center pt-4 sm:pt-6 px-3 sm:px-4">
+              <div className="flex items-center bg-white rounded-full shadow-sm border border-neutral-200 pl-2 pr-2 py-2 w-full max-w-[760px] relative">
 
-          {/* Left 8 cols — giant title */}
-          <div className="col-span-12 lg:col-span-8">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="font-bold leading-[0.85] tracking-[-0.05em] text-[22vw] sm:text-[20vw] md:text-[18vw] lg:text-[17vw]"
-              style={{ color: "#FFFFFF", textShadow: "0 2px 40px rgba(0,0,0,0.4)" }}
-            >
-              Consent
-              <span className="relative inline-block">
-                Gen
-                <sup className="absolute text-[0.3em] top-[0.7em] -right-[0.15em]" style={{ color: "#ffffff" }}>✦</sup>
-              </span>
-            </motion.h1>
-          </div>
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-2 shrink-0 pr-4">
+                  <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-background" />
+                  </div>
+                  <span className="text-sm font-semibold tracking-tight text-foreground hidden sm:block">ConsentGen</span>
+                </Link>
 
-          {/* Right 4 cols — description + CTA */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 pb-3 lg:pl-6 mt-4 lg:mt-0">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-xs sm:text-sm md:text-base font-body leading-[1.4]"
-              style={{ color: "rgba(255,255,255,0.85)", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
-            >
-              ConsentGen helps Indian doctors create medico-legal informed consent forms that comply with IMC&nbsp;2002, BNS&nbsp;§§24-30, and MoRTH&nbsp;2025—so your team can focus on patient care.
-            </motion.p>
+                {/* Nav links — desktop */}
+                <div className="hidden md:flex items-center gap-6 text-[14px] text-neutral-500">
+                  <a href="#" className="flex items-center gap-1 text-foreground font-medium">
+                    Home
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground inline-block ml-1" />
+                  </a>
+                  <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+                  <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+                  <a href="/login" className="hover:text-foreground transition-colors">Sign In</a>
+                </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Link
-                href="/generate"
-                className="group inline-flex items-center gap-2 rounded-full font-medium text-sm sm:text-base font-body transition-all hover:gap-3"
-                style={{ backgroundColor: "#E1E0CC", color: "#000", paddingLeft: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", paddingRight: "0.35rem" }}
+                {/* Right CTA */}
+                <div className="ml-auto flex items-center gap-2">
+                  <Link
+                    href="/generate"
+                    className="inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-white transition-all pr-1.5 pl-4 py-1.5 sm:pl-5"
+                    style={{ backgroundColor: "#0b0f1a" }}
+                  >
+                    <span className="hidden sm:inline">Get Started</span>
+                    <span className="sm:hidden">Start</span>
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                      <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* ─── HERO CONTENT — centered ─── */}
+            <div className="flex flex-col items-center px-4 pt-10 sm:pt-14 pb-6 sm:pb-10 text-center">
+
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm"
+                style={{ fontSize: "13px" }}
               >
-                Get Started
-                <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black transition-transform group-hover:scale-110">
-                  <ArrowRight className="w-4 h-4" style={{ color: "#E1E0CC" }} />
-                </span>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#0b0f1a", flexShrink: 0 }} />
+                <span className="font-medium text-neutral-700">ConsentGen</span>
+              </motion.div>
 
+              {/* Headline */}
+              <motion.h1
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-5 sm:mt-6 max-w-4xl text-foreground"
+                style={{ fontSize: "clamp(36px, 8vw, 72px)", lineHeight: 1.05, fontWeight: 500, letterSpacing: "-0.02em" }}
+              >
+                Generate{" "}
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}>
+                  compliant
+                </span>
+                <br />
+                consent forms
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-4 sm:mt-6 text-neutral-700 px-2 max-w-xl"
+                style={{ fontSize: "clamp(13px, 3.5vw, 16px)", lineHeight: 1.5 }}
+              >
+                The AI-powered platform for Indian doctors—generate medico-legal consent forms compliant with IMC 2002, BNS §§24-30, and MoRTH 2025 in seconds.
+              </motion.p>
+
+              {/* CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-6 sm:mt-8"
+              >
+                <Link
+                  href="/generate"
+                  className="inline-flex items-center gap-3 text-white rounded-full text-[14px] font-medium transition-all pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 hover:opacity-90"
+                  style={{ backgroundColor: "#0b0f1a" }}
+                >
+                  Get Started
+                  <span className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                </Link>
+              </motion.div>
+            </div>
+
+            {/* ─── DASHBOARD PREVIEW — bleeds off bottom ─── */}
+            <div className="px-3 sm:px-4 mt-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-[880px] mx-auto rounded-3xl p-4 sm:p-6"
+                style={{ backgroundColor: "#f5f2ee" }}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+
+                  {/* Card 1 — Consent Stats */}
+                  <div className="bg-white rounded-2xl p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13px] font-semibold" style={{ color: "#0b0f1a" }}>Forms Generated</span>
+                      <span className="text-[11px] text-neutral-400">This Month</span>
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-1">1,284</div>
+                    <div className="inline-flex items-center gap-1 bg-green-50 text-green-600 rounded-full px-2 py-0.5 text-[11px] mb-3">
+                      <CheckCircle className="w-3 h-3" /> +18% vs last month
+                    </div>
+                    <p className="text-[11px] text-neutral-400">Across all consent types</p>
+                    <div className="mt-4 bg-neutral-100 rounded-full p-1 flex text-[11px]">
+                      <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1 font-medium">Surgical</span>
+                      <span className="flex-1 text-center py-1 text-neutral-400">Emergency</span>
+                    </div>
+                  </div>
+
+                  {/* Card 2 — Settings Form */}
+                  <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
+                    <div>
+                      <label className="text-[12px] text-neutral-500 block mb-1">Consent Language</label>
+                      <div className="flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-foreground">
+                        English + Hindi
+                        <CaretRight className="w-3.5 h-3.5 text-neutral-400 rotate-90" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[12px] text-neutral-500 block mb-1">Default Consent Type</label>
+                      <div className="flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-foreground">
+                        Surgical
+                        <CaretRight className="w-3.5 h-3.5 text-neutral-400 rotate-90" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[12px] text-neutral-500 block mb-1">Monthly Form Target</label>
+                      <div className="flex items-center border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-foreground gap-2">
+                        <span className="text-neutral-400">#</span>500
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <button className="rounded-lg px-5 py-2 text-[12px] font-semibold text-white" style={{ backgroundColor: "#0b0f1a" }}>Save</button>
+                      <button className="text-[12px] underline text-neutral-400">Cancel</button>
+                    </div>
+                  </div>
+
+                  {/* Card 3 — Compliance */}
+                  <div className="bg-white rounded-2xl p-5 hidden lg:block">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13px] font-semibold" style={{ color: "#0b0f1a" }}>Compliance Score</span>
+                      <span className="text-[11px] text-neutral-400">Today</span>
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-1">98%</div>
+                    <div className="inline-flex items-center gap-1 bg-green-50 text-green-600 rounded-full px-2 py-0.5 text-[11px] mb-3">
+                      <CheckCircle className="w-3 h-3" /> All clauses verified
+                    </div>
+                    <p className="text-[11px] text-neutral-400 mb-4">BNS §§24-30 · IMC 2002 · MoRTH 2025</p>
+                    {/* Simple gauge bar */}
+                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: "98%", backgroundColor: "#0b0f1a" }} />
+                    </div>
+                    <div className="flex justify-between mt-1 text-[10px] text-neutral-400">
+                      <span>0%</span><span>100%</span>
+                    </div>
+                    <div className="mt-4 bg-neutral-100 rounded-full p-1 flex text-[11px]">
+                      <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1 font-medium">BNS</span>
+                      <span className="flex-1 text-center py-1 text-neutral-400">IMC</span>
+                    </div>
+                  </div>
+
+                </div>
+              </motion.div>
+            </div>
+
+          </div>{/* /foreground */}
+        </div>{/* /hero container */}
+      </div>{/* /page frame */}
+
+
+      {/* ─── REMAINING SECTIONS ─── */}
+      <div className="min-h-screen font-body" style={{ background: "hsl(var(--background))" }}>
 
       {/* ─── BENTO FEATURES ─── */}
       <section id="features" className="py-20 sm:py-28" style={{ background: "hsl(var(--muted))" }}>
@@ -544,6 +677,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>{/* /remaining sections */}
+    </>
   );
 }
