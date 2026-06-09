@@ -215,9 +215,9 @@ export default function Home() {
           <video
             autoPlay loop muted playsInline
             preload="auto"
-            poster="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1600&q=60"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_015952_e1deeb12-8fb7-4071-a42a-60779fc64ab6.mp4"
+            onEnded={(e) => { (e.target as HTMLVideoElement).play(); }}
           />
           {/* Light overlay */}
           <div className="absolute inset-0 z-0 bg-white/10" />
