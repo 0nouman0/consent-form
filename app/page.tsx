@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import {
   ShieldCheck, FileText, Sparkle, CheckCircle, ArrowRight,
   BookOpen, Scales, Stethoscope, CaretRight, Star,
-  Lightning, Lock, DownloadSimple, Play,
+  Lightning, Lock, DownloadSimple,
 } from "@phosphor-icons/react/dist/ssr";
+import LandingNavbar from "@/components/LandingNavbar";
 
 /* ─── DATA ─── */
 const COMPLIANCE_BADGES = [
@@ -205,45 +206,8 @@ function ConsentPreview() {
 export default function Home() {
   return (
     <>
-      {/* ─── FLOATING PILL NAVBAR (fixed, always on top) ─── */}
-      <div className="fixed top-3 sm:top-4 left-0 right-0 z-[100] flex justify-center px-3 sm:px-4">
-              <div className="flex items-center rounded-full pl-2 pr-2 py-2 w-full max-w-[760px] relative" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 2px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.08)" }}>
-
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 shrink-0 pr-4">
-                  <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4 text-background" />
-                  </div>
-                  <span className="text-sm font-semibold tracking-tight text-foreground hidden sm:block">ConsentGen</span>
-                </Link>
-
-                {/* Nav links — desktop */}
-                <div className="hidden md:flex items-center gap-6 text-[14px] text-neutral-500">
-                  <a href="#" className="flex items-center gap-1 text-foreground font-medium">
-                    Home
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground inline-block ml-1" />
-                  </a>
-                  <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                  <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-                  <a href="/login" className="hover:text-foreground transition-colors">Sign In</a>
-                </div>
-
-                {/* Right CTA */}
-                <div className="ml-auto flex items-center gap-2">
-                  <Link
-                    href="/generate"
-                    className="inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-white transition-all pr-1.5 pl-4 py-1.5 sm:pl-5"
-                    style={{ backgroundColor: "#0b0f1a" }}
-                  >
-                    <span className="hidden sm:inline">Get Started</span>
-                    <span className="sm:hidden">Start</span>
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-                      <ArrowRight className="w-3 h-3" />
-                    </span>
-                  </Link>
-                </div>
-              </div>
-      </div>
+      {/* ─── FLOATING PILL NAVBAR ─── */}
+      <LandingNavbar />
 
       {/* ─── PAGE FRAME ─── */}
       <div className="min-h-screen w-full p-3 sm:p-4" style={{ backgroundColor: "#ededed", fontFamily: "Inter, sans-serif" }}>

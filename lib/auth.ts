@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getUserWithRole, requireRole, type UserRole, type AuthenticatedUser } from "@/lib/rbac";
+
+// Re-export RBAC helpers so existing imports from lib/auth still work
+export { getUserWithRole, requireRole, type UserRole, type AuthenticatedUser };
 
 export async function getUser() {
   const supabase = createClient();

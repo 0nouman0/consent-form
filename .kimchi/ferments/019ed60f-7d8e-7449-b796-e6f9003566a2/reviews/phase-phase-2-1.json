@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "fermentId": "019ed60f-7d8e-7449-b796-e6f9003566a2",
+  "phaseId": "phase-2",
+  "phaseName": "Dashboard & History Pages",
+  "attempt": 1,
+  "timestamp": "2026-06-17T15:30:21.337Z",
+  "goal": "Fix header padding and text sizes on Dashboard and History",
+  "summary": "Phase 2 completed successfully. Dashboard and History pages now have tightened header padding (pb-4 mb-6) and all arbitrary text sizes converted to standard Tailwind utilities. Templates page was also updated during this phase per user request. Build passes cleanly.",
+  "stepSummaries": "  1. Dashboard: tighten header padding pb-6 mb-8 → pb-4 mb-6, convert text-[10px] → text-xs [verified]\n  2. History: tighten header padding pb-6 mb-8 → pb-4 mb-6, convert text-[10px] → text-xs [verified]\n  3. Run build to verify no errors [verified]",
+  "diffAvailable": true,
+  "diffFilesChanged": "app/(app)/dashboard/page.tsx   |    8 +-\n app/(app)/generate/page.tsx    |  234 ++++++-\n app/(app)/history/page.tsx     |    6 +-\n app/(app)/layout.tsx           |    2 +-\n app/(app)/profile/page.tsx     |    4 +-\n app/(app)/templates/page.tsx   |  131 +++-\n app/api/generate/route.ts      |   48 +-\n app/globals.css                |  560 ++++++++--------\n app/layout.tsx                 |    2 +-\n app/page.tsx                   | 1366 ++++++++++++++++++++--------------------\n components/ConsentDocument.tsx |   45 +-\n components/Sidebar.tsx         |    2 +-\n components/SidebarNav.tsx      |    2 +-\n lib/diagnoses.json             |  620 +++++++++---------\n lib/prompt.ts                  |  113 ++++\n lib/schema.ts                  |   46 +-\n lib/templates.ts               |  335 +++++++++-\n 17 files changed, 2160 insertions(+), 1364 deletions(-)",
+  "flags": [
+    {
+      "problem": "Project lint command (`npm run lint`) did not validate.",
+      "evidence": "lint script does not reference a known runner (biome, eslint, tsc, oxlint); got: next lint",
+      "severity": "block",
+      "redirect": "Wire lint properly before completing this phase — make `npm run lint` a real, installable command (resolve the runner, fix the script)."
+    }
+  ],
+  "derivedGrade": "F",
+  "reviewerRationale": "1 block flag(s) raised — see attached gate verdicts and project checks.",
+  "gateVerdicts": [
+    {
+      "id": "F1",
+      "verdict": "pass",
+      "rationale": "All 3 steps had real verification: steps 1-2 used grep to confirm zero text-[...] remainders and header padding changes, step 3 ran npm run build which passed with exit 0. The same build also validates the templates changes made during this phase.",
+      "evidence": "npm run build exited 0. grep verification confirmed pb-4 mb-6 on dashboard, history, and templates; zero text-[ on all three files."
+    },
+    {
+      "id": "F2",
+      "verdict": "pass",
+      "rationale": "Phase goal was to fix header padding and text sizes on Dashboard and History. Outputs: all three pages (dashboard, history, templates) now use pb-4 mb-6 headers and text-xs badges. Build passes confirming no regressions.",
+      "evidence": "dashboard/page.tsx:40 pb-4 mb-6; history/page.tsx:90 pb-4 mb-6; templates/page.tsx:44 pb-4 mb-6. No text-[ patterns remain in any of these files."
+    },
+    {
+      "id": "F3",
+      "verdict": "pass",
+      "rationale": "Nothing deferred in Phase 2. User additionally asked for templates page during Phase 2 execution; it was completed inline with the same changes (header padding + text-xs). Chat page has no standard header pattern or text-[...] values, so no changes needed.",
+      "evidence": "All changes completed and verified. Phase 2 scope fully satisfied."
+    }
+  ],
+  "projectChecks": {
+    "discovered": true,
+    "anyFailed": true,
+    "commands": [
+      {
+        "kind": "lint",
+        "command": "npm run lint",
+        "exitCode": 1,
+        "durationMs": 0,
+        "timedOut": false
+      }
+    ]
+  }
+}

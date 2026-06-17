@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { requireApiAuth, isAuthError } from "@/lib/rbac";
 
 // Initialize the Groq client
 const groq = new Groq({
@@ -7,6 +8,10 @@ const groq = new Groq({
 });
 
 export async function POST(req: Request) {
+  // ── RBAC: all authenticated roles (doctor, admin, viewer) can use chat ──
+  const authResult = await requireApiAuth(req, "chat");
+  if (isAuthError(authResult)) return authResult;
+
   try {
     const { messages } = await req.json();
 

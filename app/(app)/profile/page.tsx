@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   User, Envelope, ShieldCheck, SignOut,
-  Gear, FloppyDisk, Check, Stethoscope,
+  Gear, FloppyDisk, Check, Stethoscope, Crown, Eye,
 } from "@phosphor-icons/react/dist/ssr";
+import type { UserRole } from "@/lib/rbac";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<UserRole>("doctor");
   const [profileData, setProfileData] = useState({
     doctorName: "",
     doctorRegistrationNo: "",
@@ -36,6 +38,7 @@ export default function ProfilePage() {
             hospitalAddress: profile.hospital_address || "",
           };
           setProfileData(pd);
+          setUserRole((profile.role as UserRole) ?? "doctor");
           localStorage.setItem("consentgen_doctor_profile", JSON.stringify(pd));
         } else {
           const savedProfile = localStorage.getItem("consentgen_doctor_profile");
@@ -76,110 +79,153 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 min-h-screen flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
-        <div className="w-10 h-10 border-2 border-border border-t-primary rounded-full animate-spin" />
+      <div className="flex-1 flex items-center justify-center bg-[#ededed]">
+        <div className="w-9 h-9 border-2 border-neutral-200 border-t-neutral-800 rounded-full animate-spin" />
       </div>
     );
   }
 
-  const inputCls = "w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground/60 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm";
-  const labelCls = "text-sm font-semibold text-foreground mb-1.5 block";
+  const inputCls = "w-full px-4 py-3 rounded-xl text-sm outline-none transition-all font-body"
+    + " text-neutral-800 placeholder-neutral-400"
+    + " focus:ring-2 focus:ring-neutral-800/10 focus:border-neutral-800"
+    + " border border-neutral-200 bg-white";
+  const labelCls = "text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 block";
 
   return (
-    <div className="min-h-screen font-body" style={{ background: "hsl(var(--muted))" }}>
-      <div className="max-w-screen-md mx-auto px-5 sm:px-8 py-10">
+    <div className="flex-1 overflow-y-auto p-3 sm:p-4 font-body" style={{ backgroundColor: "#ededed" }}>
+      <div className="max-w-screen-md mx-auto space-y-4">
 
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-border mb-8">
-          <div>
-            <h1 className="font-sans font-black text-4xl sm:text-5xl text-foreground tracking-tight">Profile Settings</h1>
-            <p className="text-sm text-muted-foreground mt-2">Manage your account and preferences</p>
+        {/* Page Header Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl px-6 sm:px-8 py-6 sm:py-7"
+          style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+          <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-1">Account</p>
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#0b0f1a", letterSpacing: "-0.02em" }}>
+            Profile <span className="font-serif italic font-normal text-neutral-600 font-instrument" style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>settings</span>
+          </h1>
+          <p className="text-sm text-neutral-500 mt-1">Manage your account and clinical preferences</p>
+        </div>
+
+        {/* Account Info Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="px-6 sm:px-8 py-5 flex items-start gap-5">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "#f5f2ee", border: "1px solid rgba(0,0,0,0.07)" }}>
+              <span className="text-2xl font-bold" style={{ color: "#0b0f1a" }}>
+                {user?.email?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-bold mb-0.5" style={{ color: "#0b0f1a" }}>
+                {userRole === "admin" ? "Administrator" : userRole === "viewer" ? "Viewer Account" : "Doctor Account"}
+              </h2>
+              <div className="flex items-center gap-1.5 text-sm text-neutral-500 mb-3">
+                <Envelope weight="regular" className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{user?.email}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Verified badge */}
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-green-700 bg-green-50 rounded-full"
+                  style={{ border: "1px solid rgba(0,128,0,0.15)" }}>
+                  <ShieldCheck weight="fill" className="w-3.5 h-3.5" /> Verified
+                </span>
+                {/* Role badge */}
+                {userRole === "admin" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-purple-700 bg-purple-50 rounded-full"
+                    style={{ border: "1px solid rgba(147,51,234,0.2)" }}>
+                    <Crown weight="fill" className="w-3.5 h-3.5" /> Admin
+                  </span>
+                )}
+                {userRole === "doctor" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full"
+                    style={{ color: "#0b0f1a", backgroundColor: "rgba(11,15,26,0.06)", border: "1px solid rgba(11,15,26,0.12)" }}>
+                    <Stethoscope weight="fill" className="w-3.5 h-3.5" /> Doctor
+                  </span>
+                )}
+                {userRole === "viewer" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 rounded-full"
+                    style={{ border: "1px solid rgba(59,130,246,0.2)" }}>
+                    <Eye weight="fill" className="w-3.5 h-3.5" /> Viewer
+                  </span>
+                )}
+              </div>
+              {/* Permissions hint */}
+              <p className="text-xs text-neutral-400 mt-2">
+                {userRole === "admin" && "Full access: generate, history, chat & user management"}
+                {userRole === "doctor" && "Access: generate consents, view history & chat"}
+                {userRole === "viewer" && "Read-only access: chat assistant only"}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Account Info */}
-          <div className="bg-background border border-border rounded-2xl p-8 shadow-card">
-            <div className="flex items-start gap-6">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 border-2"
-                style={{ background: "hsl(var(--primary) / 0.08)", borderColor: "hsl(var(--primary) / 0.2)" }}>
-                <span className="font-sans font-black text-4xl text-primary">
-                  {user?.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1">
-                <h2 className="font-sans font-bold text-2xl text-foreground mb-1">Doctor Account</h2>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
-                  <Envelope weight="regular" className="w-4 h-4" /> {user?.email}
-                </div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg">
-                  <ShieldCheck weight="fill" className="w-3.5 h-3.5" /> Verified Doctor
-                </span>
-              </div>
+        {/* Clinical Details Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="px-6 sm:px-8 py-5 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
+              <Stethoscope weight="duotone" className="w-4 h-4 text-neutral-600" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold" style={{ color: "#0b0f1a" }}>Clinical Details</h3>
+              <p className="text-xs text-neutral-500">Auto-fills your consent forms</p>
             </div>
           </div>
-
-          {/* Clinical Details */}
-          <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-card">
-            <div className="p-5 border-b border-border bg-muted/40 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center">
-                <Stethoscope weight="duotone" className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <h3 className="font-sans font-bold text-xl text-foreground">Clinical Details (Auto-fill)</h3>
+          <div className="px-6 sm:px-8 py-6 space-y-5">
+            <div>
+              <label htmlFor="doctorName" className={labelCls}>Doctor / Surgeon Full Name</label>
+              <input id="doctorName" name="doctorName" value={profileData.doctorName}
+                onChange={handleInputChange} type="text" placeholder="Dr. John Doe" className={inputCls} />
             </div>
-            <div className="p-6 space-y-5">
-              <p className="text-sm text-muted-foreground">
-                Save your clinical details here so they automatically populate when you generate a new consent form.
-              </p>
-              <div>
-                <label htmlFor="doctorName" className={labelCls}>Doctor / Surgeon Full Name</label>
-                <input id="doctorName" name="doctorName" value={profileData.doctorName}
-                  onChange={handleInputChange} type="text" placeholder="Dr. John Doe" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="doctorRegistrationNo" className={labelCls}>Medical Council Registration Number</label>
-                <input id="doctorRegistrationNo" name="doctorRegistrationNo" value={profileData.doctorRegistrationNo}
-                  onChange={handleInputChange} type="text" placeholder="e.g. KMC 12345" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="hospitalName" className={labelCls}>Hospital / Clinic Name</label>
-                <input id="hospitalName" name="hospitalName" value={profileData.hospitalName}
-                  onChange={handleInputChange} type="text" placeholder="City General Hospital" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="hospitalAddress" className={labelCls}>Hospital Address</label>
-                <textarea id="hospitalAddress" name="hospitalAddress" value={profileData.hospitalAddress}
-                  onChange={handleInputChange} rows={2} placeholder="123 Hospital Way, City" className={inputCls} />
-              </div>
-              <div className="pt-2">
-                <button onClick={handleSaveProfile}
-                  className={`btn-primary px-6 py-3 text-sm ${isSaved ? "opacity-90" : ""}`}>
-                  {isSaved
-                    ? <><Check weight="bold" className="w-4 h-4" /> Saved Successfully</>
-                    : <><FloppyDisk weight="bold" className="w-4 h-4" /> Save Details</>}
-                </button>
-              </div>
+            <div>
+              <label htmlFor="doctorRegistrationNo" className={labelCls}>Medical Council Registration No.</label>
+              <input id="doctorRegistrationNo" name="doctorRegistrationNo" value={profileData.doctorRegistrationNo}
+                onChange={handleInputChange} type="text" placeholder="e.g. KMC 12345" className={inputCls} />
             </div>
-          </div>
-
-          {/* Account Actions */}
-          <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-card">
-            <div className="p-5 border-b border-border bg-muted/40 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center">
-                <Gear weight="duotone" className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <h3 className="font-sans font-bold text-xl text-foreground">Account Actions</h3>
+            <div>
+              <label htmlFor="hospitalName" className={labelCls}>Hospital / Clinic Name</label>
+              <input id="hospitalName" name="hospitalName" value={profileData.hospitalName}
+                onChange={handleInputChange} type="text" placeholder="City General Hospital" className={inputCls} />
             </div>
-            <div className="p-6">
-              <button onClick={handleSignOut}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-red-50 text-red-600 font-semibold text-sm rounded-xl border border-red-100 hover:bg-red-100 hover:border-red-200 transition-colors">
-                <SignOut weight="bold" className="w-4 h-4" /> Sign Out Securely
+            <div>
+              <label htmlFor="hospitalAddress" className={labelCls}>Hospital Address</label>
+              <textarea id="hospitalAddress" name="hospitalAddress" value={profileData.hospitalAddress}
+                onChange={handleInputChange} rows={2} placeholder="123 Hospital Way, City" className={inputCls} />
+            </div>
+            <div className="pt-1">
+              <button
+                onClick={handleSaveProfile}
+                className="inline-flex items-center gap-2 rounded-full text-sm font-medium text-white transition-all pl-5 pr-3 py-2 hover:opacity-90"
+                style={{ backgroundColor: "#0b0f1a" }}
+              >
+                {isSaved
+                  ? <><Check weight="bold" className="w-4 h-4" /> Saved Successfully</>
+                  : <><FloppyDisk weight="bold" className="w-4 h-4" /> Save Details</>}
               </button>
-              <p className="text-xs text-muted-foreground mt-3">
-                Signing out will end your current session. You will need to log back in to generate or view consent forms.
-              </p>
             </div>
           </div>
         </div>
+
+        {/* Account Actions Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="px-6 sm:px-8 py-5 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
+              <Gear weight="duotone" className="w-4 h-4 text-neutral-600" />
+            </div>
+            <h3 className="text-base font-bold" style={{ color: "#0b0f1a" }}>Account Actions</h3>
+          </div>
+          <div className="px-6 sm:px-8 py-6">
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+              style={{ border: "1px solid rgba(239,68,68,0.2)" }}
+            >
+              <SignOut weight="bold" className="w-4 h-4" /> Sign Out Securely
+            </button>
+            <p className="text-xs text-neutral-400 mt-3 max-w-xs leading-relaxed">
+              Signing out ends your current session. You'll need to log back in to generate or view consent forms.
+            </p>
+          </div>
+        </div>
+
       </div>
     </div>
   );

@@ -63,7 +63,7 @@
   .card {
     background-color: hsl(var(--background));
     border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
+    border-radius: 1rem;
     box-shadow: var(--shadow-card);
     transition: border-color 0.15s ease;
   }

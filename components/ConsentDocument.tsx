@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import { Printer, DownloadSimple, Copy, ArrowCounterClockwise, FloppyDisk, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { nowIST } from "@/lib/utils";
-import { ConsentFormSchema } from "@/lib/schema";
+import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
 import { saveConsentToHistory } from "@/lib/history";
 
 interface ConsentDocumentProps {
@@ -14,7 +14,7 @@ interface ConsentDocumentProps {
   hospitalName: string;
   isComplete: boolean;
   onReset: () => void;
-  formData?: ConsentFormSchema;
+  formData?: ConsentFormSchema | ResearchConsentFormSchema;
 }
 
 export default function ConsentDocument({
@@ -31,6 +31,11 @@ export default function ConsentDocument({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const isResearch = formData && "study" in formData;
+  const counselingLanguage = isResearch
+    ? (formData as ResearchConsentFormSchema).study.counselingLanguage
+    : (formData as ConsentFormSchema)?.clinical.counselingLanguage;
+
   const hasMultipleLanguages = markdown.includes("__LANG_SEPARATOR__");
   const parts = markdown.split("__LANG_SEPARATOR__");
   const englishMarkdown = parts[0] || "";
@@ -45,8 +50,8 @@ export default function ConsentDocument({
     const html2pdf = (await import("html2pdf.js")).default;
     const element = document.getElementById("consent-document-body");
     if (!element) return;
-    const fileSuffix = activeTab === "other" && formData?.clinical.counselingLanguage
-      ? `-${formData.clinical.counselingLanguage.toLowerCase()}`
+    const fileSuffix = activeTab === "other" && counselingLanguage
+      ? `-${counselingLanguage.toLowerCase()}`
       : "-english";
     await html2pdf()
       .set({
@@ -72,15 +77,31 @@ export default function ConsentDocument({
     setSaveError(null);
 
     try {
+      const h_name = isResearch
+        ? (formData as ResearchConsentFormSchema).study.institutionName
+        : (formData as ConsentFormSchema).clinical.hospitalName;
+      const p_name = isResearch
+        ? (formData as ResearchConsentFormSchema).participant.participantName
+        : (formData as ConsentFormSchema).patient.patientName;
+      const proc_name = isResearch
+        ? (formData as ResearchConsentFormSchema).study.studyTitle
+        : (formData as ConsentFormSchema).clinical.procedureName;
+      const c_type = isResearch
+        ? "research"
+        : (formData as ConsentFormSchema).clinical.consentType;
+      const proc_date = isResearch
+        ? new Date().toISOString().split("T")[0]
+        : (formData as ConsentFormSchema).clinical.procedureDate;
+
       await saveConsentToHistory({
         consent_id: consentId,
-        hospital_name: formData.clinical.hospitalName || null,
-        patient_name: formData.patient.patientName || null,
-        procedure_name: formData.clinical.procedureName || null,
-        consent_type: formData.clinical.consentType || null,
-        procedure_date: formData.clinical.procedureDate || null,
+        hospital_name: h_name || null,
+        patient_name: p_name || null,
+        procedure_name: proc_name || null,
+        consent_type: c_type || null,
+        procedure_date: proc_date || null,
         markdown,
-        form_data: formData,
+        form_data: formData as any,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -141,7 +162,7 @@ export default function ConsentDocument({
       )}
 
       {/* Language Tabs */}
-      {formData?.clinical.counselingLanguage && formData.clinical.counselingLanguage !== "English" && (
+      {counselingLanguage && counselingLanguage !== "English" && (
         <div className="flex border-b border-border mb-6">
           <button
             type="button"
@@ -170,7 +191,7 @@ export default function ConsentDocument({
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {formData.clinical.counselingLanguage} Form
+            {counselingLanguage} Form
             {!otherMarkdown.trim() && (
               <span className="w-3.5 h-3.5 border-2 border-t-transparent border-muted-foreground rounded-full animate-spin" />
             )}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "fermentId": "019ed60f-7d8e-7449-b796-e6f9003566a2",
+  "phaseId": "phase-1",
+  "phaseName": "Shared Foundation",
+  "attempt": 1,
+  "timestamp": "2026-06-17T15:19:57.936Z",
+  "goal": "Fix card border-radius globally and tighten shared header padding + text sizes",
+  "summary": "Phase 1 completed successfully. Updated .card border-radius to 1rem (rounded-2xl) in globals.css, tightened mobile header padding in app layout, and converted all arbitrary text sizes in Sidebar and SidebarNav to standard Tailwind utilities. Build passes cleanly.",
+  "stepSummaries": "  1. Update `.card` in globals.css: change `border-radius: var(--radius)` to `border-radius: 1rem` [verified]\n  2. Fix mobile header padding in app/(app)/layout.tsx: px-4 py-3 → px-3 py-2, adjust top positioning if needed [verified]\n  3. Convert text-[16px] → text-base in components/Sidebar.tsx logo [verified]\n  4. Convert text-[10px] → text-xs in components/SidebarNav.tsx mobile labels [verified]\n  5. Run build to verify no errors [verified]",
+  "diffAvailable": false,
+  "diffFilesChanged": "(git unavailable)",
+  "flags": [
+    {
+      "problem": "Project lint command (`npm run lint`) did not validate.",
+      "evidence": "lint script does not reference a known runner (biome, eslint, tsc, oxlint); got: next lint",
+      "severity": "block",
+      "redirect": "Wire lint properly before completing this phase — make `npm run lint` a real, installable command (resolve the runner, fix the script)."
+    }
+  ],
+  "derivedGrade": "F",
+  "reviewerRationale": "1 block flag(s) raised — see attached gate verdicts and project checks.",
+  "gateVerdicts": [
+    {
+      "id": "F1",
+      "verdict": "pass",
+      "rationale": "All 5 steps had real verification: step 1 had grep for border-radius: 1rem, step 2 had grep for px-3 py-2, step 3/4 had grep counting zero text-[...] remainders, step 5 had npm run build passing end-to-end.",
+      "evidence": "All verify commands executed successfully. npm run build exited 0 with all routes compiling cleanly."
+    },
+    {
+      "id": "F2",
+      "verdict": "pass",
+      "rationale": "Phase goal was to fix card border-radius globally and tighten shared header padding + text sizes. Outputs: globals.css now has rounded-2xl cards everywhere, mobile header uses tighter padding, Sidebar/SidebarNav use standard text-base and text-xs. The combined output fully delivers the phase goal.",
+      "evidence": "app/globals.css:66 border-radius: 1rem; app/(app)/layout.tsx:16 px-3 py-2; components/Sidebar.tsx text-base; components/SidebarNav.tsx text-xs."
+    },
+    {
+      "id": "F3",
+      "verdict": "pass",
+      "rationale": "Nothing deferred in Phase 1. All planned shared foundation changes were completed. User additionally requested templates and chat pages be included — this will be handled in Phase 2 and 3.",
+      "evidence": "All 5 steps completed and verified. No remaining items from Phase 1 scope."
+    }
+  ],
+  "projectChecks": {
+    "discovered": true,
+    "anyFailed": true,
+    "commands": [
+      {
+        "kind": "lint",
+        "command": "npm run lint",
+        "exitCode": 1,
+        "durationMs": 0,
+        "timedOut": false
+      }
+    ]
+  }
+}

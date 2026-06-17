@@ -175,3 +175,116 @@ DOCUMENT FOOTER (include at the end):
 - "This consent applies to the named procedure only. Blanket consent is void in India."
 - Generation timestamp: ${nowIST()} IST`;
 }
+
+export function buildResearchSystemPrompt(): string {
+  return `You are a senior medico-legal and bioethics documentation specialist in India.
+You draft research informed consent forms that comply with:
+- ICMR National Ethical Guidelines for Biomedical and Health Research Involving Human Participants (2018)
+- Standard Research Ethics (Informed Consent elements: voluntariness, disclosure, understanding, capacity)
+- Bharatiya Nyaya Sanhita (BNS) 2023 §§24-27 (consent capacity and validity)
+
+RULES YOU MUST NEVER BREAK:
+1. The study title and principal investigator details must appear exactly as provided.
+2. Every signature block must have Date AND Time fields — not just date.
+3. The counseling language used must be stated on the face of the form.
+4. Right to withdraw consent at any time without any academic, professional, or health consequences must appear clearly and prominently.
+5. Emphasize that participation is 100% voluntary.
+6. Outline confidentiality measures (e.g. data anonymization).
+7. Output ONLY the consent form in Markdown. No preamble. No explanation.
+   Start directly with the document title on the first line.`;
+}
+
+export function buildResearchUserPrompt(
+  input: any, // ResearchConsentFormSchema
+  consentId: string
+): string {
+  const { study, participant } = input;
+
+  const bilingualInstruction = study.counselingLanguage !== "English"
+    ? `\nCRITICAL MULTI-LANGUAGE DOCUMENT REQUIREMENT:\n` +
+      `Since the counseling language is ${study.counselingLanguage}, you MUST generate TWO SEPARATE complete consent forms.\n` +
+      `First, generate the entire form in English, complying fully with all study details, ethical disclosures, and signature blocks.\n` +
+      `Once the English form is fully complete, output the exact separator token on a single line: __LANG_SEPARATOR__\n` +
+      `Immediately after the separator, generate the complete consent form fully translated into ${study.counselingLanguage} (e.g. Hindi, Kannada, Tamil, etc.).\n` +
+      `Do not mix languages inside each document. The first document must be 100% in English, and the second document must be 100% in ${study.counselingLanguage}. Both documents must contain the exact same details and signature blocks in their respective languages.`
+    : "";
+
+  return `Generate a complete legally and ethically valid Indian research consent form.
+
+════════════════════════════════
+DOCUMENT HEADER INFORMATION:
+════════════════════════════════
+Consent ID: ${consentId}
+Institution: ${study.institutionName}
+Address: ${study.institutionAddress}
+Date and Time Generated: ${nowIST()} IST
+Form Type: INFORMED WRITTEN CONSENT FOR VOLUNTARY PARTICIPATION IN RESEARCH
+
+════════════════════════════════
+STUDY INFORMATION:
+════════════════════════════════
+Title of Study: ${study.studyTitle}
+Principal Investigator: ${study.principalInvestigator}
+Department: ${study.department}
+Contact Number: ${study.contactMobile}
+Purpose of Study: ${study.studyPurpose}
+Data/Tasks/Procedure to be Collected: ${study.dataToCollect}
+Time Required: ${study.timeRequired}
+Risks: ${study.risks}
+Benefits: ${study.benefits}
+Monetary Benefits: ${study.monetaryBenefits}
+Counseling Language: ${study.counselingLanguage}
+
+════════════════════════════════
+PARTICIPANT INFORMATION:
+════════════════════════════════
+Participant Full Name: ${participant.participantName}
+Participant ID / Roll Number: ${participant.participantId}
+Age / Sex: ${participant.age} years / ${participant.sex}
+Participant Competency: ${
+    participant.isCompetent
+      ? "COMPETENT — Adult, sound mind, not intoxicated (BNS §24-25)"
+      : "NOT COMPETENT / MINOR — Guardian consent required (BNS §26-27)"
+  }
+${
+  !participant.isCompetent
+    ? `Guardian Name: ${participant.guardianName}
+Guardian Relationship: ${participant.guardianRelationship}`
+    : ""
+}
+
+════════════════════════════════
+REQUIRED SECTIONS — USE ## FOR EACH HEADING:
+════════════════════════════════
+## 1. PURPOSE OF DATA COLLECTION / STUDY
+## 2. DATA TO BE COLLECTED / PROCEDURES
+## 3. CONFIDENTIALITY & USE OF DATA
+## 4. VOLUNTARY PARTICIPATION & RIGHT TO WITHDRAW
+## 5. RISKS AND BENEFITS
+## 6. INFORMED CONSENT & DECLARATION
+
+${input.includeWitnessBlock ? "INCLUDE: A Witness Signature Block with fields: Full Name, Relationship to Participant, Contact Number, Signature, Date, and exact Time." : ""}
+${!participant.isCompetent ? "INCLUDE: A Parent or Guardian Consent Block with fields: Guardian Name, Relationship, Signature, Date, and exact Time." : ""}
+
+════════════════════════════════
+PARTICIPANT / RESEARCHER DECLARATION:
+════════════════════════════════
+Include a Researcher's Declaration section stating:
+- ${study.principalInvestigator} (or their representative) explained the study, procedures, risks, and benefits
+- Explanation was given in ${study.counselingLanguage}
+- All questions were answered to the best of their ability
+- Fields: Participant Signature, Researcher Signature, Date, exact Time
+
+════════════════════════════════
+LANGUAGE INSTRUCTION:
+════════════════════════════════
+Write in clear, standard research language. Explain terms clearly.
+${bilingualInstruction}
+
+════════════════════════════════
+DOCUMENT FOOTER (include at the end):
+════════════════════════════════
+- Consent ID: ${consentId}
+- "This research consent form is drafted in compliance with ICMR National Ethical Guidelines (2018)."
+- Generation timestamp: ${nowIST()} IST`;
+}

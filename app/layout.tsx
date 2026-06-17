@@ -8,7 +8,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+export const metadata: Metadata = { 
   title: "ConsentGen — Medical Consent Form Generator",
   description:
     "AI-powered medico-legal consent form generator for Indian doctors. IMC 2002 compliant.",
