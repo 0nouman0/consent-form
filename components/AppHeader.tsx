@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
+import Link from "next/link";
+import { Coins } from "@phosphor-icons/react/dist/ssr";
 
 interface ProfileSnap {
   doctorName: string;
@@ -11,18 +13,36 @@ interface ProfileSnap {
 
 export default function AppHeader() {
   const [profile, setProfile] = useState<ProfileSnap | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
+    const fetchCreditsOnly = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("credits")
+        .eq("id", user.id)
+        .single();
+      if (p) setCredits(p.credits);
+    };
+
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
       const { data: p } = await supabase
         .from("profiles")
-        .select("doctor_name, hospital_name")
+        .select("doctor_name, hospital_name, credits")
         .eq("id", user.id)
         .single();
-      if (p) setProfile({ doctorName: p.doctor_name || "", hospitalName: p.hospital_name || "" });
+      if (p) {
+        setProfile({ doctorName: p.doctor_name || "", hospitalName: p.hospital_name || "" });
+        setCredits(p.credits);
+      }
     });
+
+    window.addEventListener("credits-updated", fetchCreditsOnly);
+    return () => window.removeEventListener("credits-updated", fetchCreditsOnly);
   }, []);
 
   return (
@@ -52,8 +72,17 @@ export default function AppHeader() {
         )}
       </div>
 
-      {/* Right — UserMenu */}
-      <UserMenu />
+      {/* Right — Credits + UserMenu */}
+      <div className="flex items-center gap-3">
+        <Link 
+          href="/credits" 
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-50 border border-black/[0.06] text-neutral-700 hover:bg-neutral-100 hover:border-black/[0.12] transition-all"
+        >
+          <Coins className="w-3.5 h-3.5 text-neutral-500" weight="fill" />
+          <span>{credits !== null ? `${credits} Credits` : "—"}</span>
+        </Link>
+        <UserMenu />
+      </div>
     </header>
   );
 }

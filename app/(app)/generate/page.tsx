@@ -15,7 +15,8 @@ import ResearchConsentForm from "@/components/ResearchConsentForm";
 import ConsentDocument from "@/components/ConsentDocument";
 import ClauseChecklist from "@/components/ClauseChecklist";
 import LoadingState from "@/components/LoadingState";
-import { BookOpen, FileText, ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import { BookOpen, FileText, ArrowLeft, Coins } from "@phosphor-icons/react/dist/ssr";
+import { createClient } from "@/lib/supabase/client";
 
 function GenerateContent() {
   const searchParams = useSearchParams();
@@ -35,6 +36,30 @@ function GenerateContent() {
   const [detectedClauses, setDetectedClauses] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [consentType, setConsentType] = useState("surgical");
+  const [credits, setCredits] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(true);
+
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("credits")
+            .eq("id", user.id)
+            .single();
+          if (data) setCredits(data.credits);
+        }
+      } catch (err) {
+        console.error("Failed to fetch credits:", err);
+      } finally {
+        setLoadingCredits(false);
+      }
+    };
+    fetchCredits();
+  }, []);
 
   // Surgical/Clinical Form
   const form = useForm<ConsentFormSchema>({
@@ -202,6 +227,8 @@ function GenerateContent() {
       }
 
       setStatus("complete");
+      setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : null));
+      window.dispatchEvent(new Event("credits-updated"));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
       setError(message);
@@ -255,6 +282,8 @@ function GenerateContent() {
       }
 
       setStatus("complete");
+      setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : null));
+      window.dispatchEvent(new Event("credits-updated"));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
       setError(message);
@@ -313,7 +342,42 @@ function GenerateContent() {
       </div>
 
       <AnimatePresence mode="wait">
-        {status === "idle" && formType === "select" ? (
+        {loadingCredits ? (
+          <motion.div
+            key="loading-credits"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-center p-12 bg-white rounded-2xl max-w-md mx-auto"
+            style={{ border: "1px solid rgba(0,0,0,0.07)" }}
+          >
+            <div className="w-6 h-6 border-2 border-neutral-200 border-t-neutral-800 rounded-full animate-spin" />
+          </motion.div>
+        ) : credits === 0 ? (
+          <motion.div
+            key="no-credits"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="flex flex-col items-center justify-center p-10 rounded-2xl bg-white text-center max-w-md mx-auto"
+            style={{ border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-5">
+              <Coins className="w-7 h-7 text-amber-600" weight="duotone" />
+            </div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: "#0b0f1a" }}>No Credits Available</h3>
+            <p className="text-sm text-neutral-500 leading-relaxed mb-6">
+              You need credits to generate a consent form (1 credit = 1 form). Your current balance is 0.
+            </p>
+            <Link
+              href="/credits"
+              className="inline-flex items-center gap-2 rounded-xl text-xs font-bold text-white transition-all px-5 py-3 hover:opacity-90"
+              style={{ backgroundColor: "#0b0f1a" }}
+            >
+              Purchase Credits
+            </Link>
+          </motion.div>
+        ) : status === "idle" && formType === "select" ? (
           <motion.div
             key="select"
             initial={{ opacity: 0, y: 12 }}

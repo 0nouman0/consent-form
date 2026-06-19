@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   User, Envelope, ShieldCheck, SignOut,
   Gear, FloppyDisk, Check, Stethoscope, Crown, Eye,
+  Coins, CreditCard, ClockCounterClockwise, ArrowUpRight, ArrowDownLeft, Receipt, CalendarBlank
 } from "@phosphor-icons/react/dist/ssr";
 import type { UserRole } from "@/lib/rbac";
 
@@ -18,8 +19,13 @@ export default function ProfilePage() {
     doctorRegistrationNo: "",
     hospitalName: "",
     hospitalAddress: "",
+    billingAddress: "",
   });
   const [isSaved, setIsSaved] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [txs, setTxs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [invoiceTx, setInvoiceTx] = useState<any>(null);
 
   const router = useRouter();
   const supabase = createClient();
@@ -36,14 +42,34 @@ export default function ProfilePage() {
             doctorRegistrationNo: profile.doctor_registration_no || "",
             hospitalName: profile.hospital_name || "",
             hospitalAddress: profile.hospital_address || "",
+            billingAddress: profile.billing_address || "",
           };
           setProfileData(pd);
           setUserRole((profile.role as UserRole) ?? "doctor");
+          setCredits(profile.credits);
           localStorage.setItem("consentgen_doctor_profile", JSON.stringify(pd));
         } else {
           const savedProfile = localStorage.getItem("consentgen_doctor_profile");
           if (savedProfile) { try { setProfileData(JSON.parse(savedProfile)); } catch (e) {} }
         }
+
+        // Fetch recent transactions
+        const { data: txData } = await supabase
+          .from("transactions")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(3);
+        if (txData) setTxs(txData);
+
+        // Fetch recent credit usage logs
+        const { data: logData } = await supabase
+          .from("credit_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(3);
+        if (logData) setLogs(logData);
       } else {
         router.push("/login?redirect=/profile");
       }
@@ -65,6 +91,7 @@ export default function ProfilePage() {
         doctor_registration_no: profileData.doctorRegistrationNo,
         hospital_name: profileData.hospitalName,
         hospital_address: profileData.hospitalAddress,
+        billing_address: profileData.billingAddress,
         updated_at: new Date().toISOString(),
       });
     }
@@ -190,6 +217,11 @@ export default function ProfilePage() {
               <textarea id="hospitalAddress" name="hospitalAddress" value={profileData.hospitalAddress}
                 onChange={handleInputChange} rows={2} placeholder="123 Hospital Way, City" className={inputCls} />
             </div>
+            <div>
+              <label htmlFor="billingAddress" className={labelCls}>Billing Address (for Invoices)</label>
+              <textarea id="billingAddress" name="billingAddress" value={profileData.billingAddress}
+                onChange={handleInputChange} rows={2} placeholder="e.g. 123 Clinic Road, Suite A, Bangalore" className={inputCls} />
+            </div>
             <div className="pt-1">
               <button
                 onClick={handleSaveProfile}
@@ -200,6 +232,90 @@ export default function ProfilePage() {
                   ? <><Check weight="bold" className="w-4 h-4" /> Saved Successfully</>
                   : <><FloppyDisk weight="bold" className="w-4 h-4" /> Save Details</>}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment & Billing History Card */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="px-6 sm:px-8 py-5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
+                <Coins weight="duotone" className="w-4 h-4 text-neutral-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold" style={{ color: "#0b0f1a" }}>Payment & Billing</h3>
+                <p className="text-xs text-neutral-500">Manage your packages and transactions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-neutral-50 border border-neutral-200">
+              <span>{credits !== null ? credits : 0} Credits Available</span>
+            </div>
+          </div>
+          <div className="px-6 sm:px-8 py-6 space-y-6">
+            <div>
+              <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">Recent Transactions</h4>
+              {txs.length === 0 ? (
+                <p className="text-xs text-neutral-400">No payment transaction records found.</p>
+              ) : (
+                <div className="divide-y divide-neutral-100">
+                  {txs.map((tx) => (
+                    <div key={tx.id} className="py-2.5 flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-mono font-bold text-neutral-800">{tx.order_id}</p>
+                        <p className="text-[10px] text-neutral-400 mt-0.5">
+                          {tx.payment_id ? `ID: ${tx.payment_id}` : 'Pending'} • {new Date(tx.created_at).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold">₹{(tx.amount / 100).toFixed(0)}</p>
+                          <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${
+                            tx.status === "paid" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+                          }`}>{tx.status}</span>
+                        </div>
+                        {tx.status === "paid" && (
+                          <button
+                            onClick={() => setInvoiceTx(tx)}
+                            className="p-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border border-neutral-200 transition-all cursor-pointer"
+                            title="View Invoice"
+                          >
+                            <Receipt weight="bold" className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-neutral-100">
+              <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">Credit History</h4>
+              {logs.length === 0 ? (
+                <p className="text-xs text-neutral-400">No credit usage logs found.</p>
+              ) : (
+                <div className="divide-y divide-neutral-100">
+                  {logs.map((log) => (
+                    <div key={log.id} className="py-2.5 flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-bold text-neutral-800 capitalize">{log.action.replace(/_/g, " ")}</p>
+                        <p className="text-[10px] text-neutral-400 mt-0.5">
+                          {new Date(log.created_at).toLocaleDateString("en-IN", {
+                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold ${log.amount < 0 ? "text-red-600" : "text-green-600"}`}>
+                          {log.amount > 0 ? `+${log.amount}` : log.amount}
+                        </p>
+                        <p className="text-[9px] text-neutral-400 mt-0.5">Bal: {log.balance_after}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -227,6 +343,112 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {/* Invoice Modal */}
+      {invoiceTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:p-0 print:bg-white">
+          <style dangerouslySetInnerHTML={{__html: `
+            @media print {
+              body * {
+                visibility: hidden;
+              }
+              #printable-invoice-modal, #printable-invoice-modal * {
+                visibility: visible;
+              }
+              #printable-invoice-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                box-shadow: none !important;
+                background: white !important;
+                color: black !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+          `}} />
+          <div id="printable-invoice-modal" className="w-full max-w-[500px] bg-white rounded-3xl p-6 sm:p-8 text-neutral-800 border border-neutral-100 shadow-2xl relative">
+            {/* Header */}
+            <div className="text-center border-b border-neutral-100 pb-5 mb-5">
+              <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Payment Invoice</h2>
+              <p className="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-semibold">Consent Form Generator</p>
+            </div>
+
+            {/* Info details */}
+            <div className="space-y-4 text-xs mb-6">
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Payer</span>
+                <span className="font-bold text-neutral-800 text-right">
+                  {invoiceTx.metadata?.billing_doctor_name || profileData.doctorName || "Dr. User"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Registration No.</span>
+                <span className="font-bold text-neutral-800 text-right font-mono">
+                  {invoiceTx.metadata?.billing_doctor_registration_no || profileData.doctorRegistrationNo || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Hospital</span>
+                <span className="font-bold text-neutral-800 text-right">
+                  {invoiceTx.metadata?.billing_hospital_name || profileData.hospitalName || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Billing Address</span>
+                <span className="font-bold text-neutral-800 text-right" style={{ whiteSpace: "pre-line" }}>
+                  {invoiceTx.metadata?.billing_address || profileData.billingAddress || profileData.hospitalAddress || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Order ID</span>
+                <span className="font-mono text-neutral-800 text-right">{invoiceTx.order_id}</span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Payment ID</span>
+                <span className="font-mono text-neutral-800 text-right">{invoiceTx.payment_id}</span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Payment Date</span>
+                <span className="font-bold text-neutral-800 text-right">
+                  {new Date(invoiceTx.created_at).toLocaleDateString("en-IN")} {new Date(invoiceTx.created_at).toLocaleTimeString("en-IN")}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Payment Method</span>
+                <span className="font-bold text-neutral-800 capitalize text-right">{invoiceTx.metadata?.method || "Razorpay"}</span>
+              </div>
+              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
+                <span className="text-neutral-400">Credits Credited</span>
+                <span className="font-bold text-neutral-800 text-right text-green-600">+{invoiceTx.credits} Credits</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t-2 border-neutral-900">
+                <span className="font-bold text-neutral-900 text-sm">Total Paid Amount</span>
+                <span className="font-extrabold text-neutral-900 text-base">₹{(invoiceTx.amount / 100).toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Actions (Not printed) */}
+            <div className="flex gap-3 mt-6 no-print">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                Print Invoice
+              </button>
+              <button
+                onClick={() => setInvoiceTx(null)}
+                className="px-4 py-2.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 font-bold rounded-xl text-xs border border-neutral-200 transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

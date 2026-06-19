@@ -13,6 +13,7 @@ import {
   User,
   CaretLeft,
   CaretRight,
+  Coins,
 } from "@phosphor-icons/react/dist/ssr";
 
 const NAV_LINKS = [
@@ -21,6 +22,7 @@ const NAV_LINKS = [
   { href: "/templates",  label: "Templates",         icon: Columns             },
   { href: "/history",    label: "History",           icon: ClockCounterClockwise },
   { href: "/chat",       label: "Chat",              icon: ChatCircleText      },
+  { href: "/credits",    label: "Buy Credits",       icon: Coins               },
 ];
 
 export default function Sidebar() {
