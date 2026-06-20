@@ -12,7 +12,7 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         serif: ["var(--font-inter)", "system-ui", "sans-serif"],
         inter: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["'Instrument Serif'", "Georgia", "serif"],
         body: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       colors: {
