@@ -74,9 +74,9 @@ export default function AppHeader() {
 
       {/* Right — Credits + UserMenu */}
       <div className="flex items-center gap-3">
-        <Link 
-          href="/credits" 
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-50 border border-black/[0.06] text-neutral-700 hover:bg-neutral-100 hover:border-black/[0.12] transition-all"
+        <Link
+          href="/credits"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-100 border border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-neutral-400 transition-all"
         >
           <Coins className="w-3.5 h-3.5 text-neutral-500" weight="fill" />
           <span>{credits !== null ? `${credits} Credits` : "—"}</span>

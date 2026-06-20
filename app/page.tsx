@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -15,6 +16,18 @@ import {
   MagnifyingGlass,
   Sparkle,
   CheckCircle,
+  Brain,
+  Eye,
+  Drop,
+  Syringe,
+  Scissors,
+  Flask,
+  Heart,
+  DeviceMobile,
+  Baby,
+  FirstAidKit,
+  Tooth,
+  Bone,
 } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
@@ -24,16 +37,13 @@ gsap.registerPlugin(ScrollTrigger);
 /* ─── PALETTE ─── */
 const WHITE    = "#FFFFFF";
 const PAGE_BG  = "#F5F5F5";
-const MINT     = "#C4D5CF";
+const DARK_PANEL = "#FFFFFF";
 const INK      = "#0A0A0B";
 const BODY_TXT = "#6B6B78";
 const MUTED    = "#9B9BA8";
 const BORDER   = "#E8E8EA";
 const PILL_BG  = "#F0F0F2";
 const DARK_BTN = "#111118";
-const BLOB_LAV = "#C0AEE8";
-const BLOB_PINK= "#EAA8C0";
-const BLOB_ORA = "#E89860";
 
 /* ─── DATA ─── */
 const COMPLIANCE_LAWS = [
@@ -43,6 +53,15 @@ const COMPLIANCE_LAWS = [
   { code: "CPA 2019",    name: "Consumer Protection Act" },
   { code: "Aadhaar Act", name: "Aadhaar Act 2016" },
   { code: "DPDP 2023",   name: "Digital Personal Data Protection" },
+];
+
+const ORG_LOGOS = [
+  { code: "IMC",   name: "Indian Medical Council",      color: "#22C55E", bg: "#F0FDF4" },
+  { code: "BNS",   name: "Bharatiya Nyaya Sanhita",     color: "#8B5CF6", bg: "#F5F3FF" },
+  { code: "MoRTH", name: "Min. of Road Transport",      color: "#F59E0B", bg: "#FFFBEB" },
+  { code: "CPA",   name: "Consumer Protection Act",     color: "#EF4444", bg: "#FEF2F2" },
+  { code: "UIDAI", name: "Aadhaar / UIDAI",             color: "#3B82F6", bg: "#EFF6FF" },
+  { code: "MeitY", name: "DPDP Act 2023",               color: "#06B6D4", bg: "#ECFEFF" },
 ];
 
 const STATS = [
@@ -73,19 +92,21 @@ const FEATURES = [
   },
 ];
 
-const CONSENT_TYPES = [
-  { icon: "🏥", name: "Surgical",          sub: "Pre-operative" },
-  { icon: "💉", name: "Anaesthesia",       sub: "General & Regional" },
-  { icon: "🔬", name: "Diagnostic",        sub: "Invasive procedures" },
-  { icon: "🩸", name: "Blood Transfusion", sub: "Donor / recipient" },
-  { icon: "📱", name: "Telemedicine",      sub: "Remote consultation" },
-  { icon: "🤰", name: "Obstetric",         sub: "Labour & delivery" },
-  { icon: "🧠", name: "Psychiatric",       sub: "ECT & admission" },
-  { icon: "🚨", name: "Emergency",         sub: "Life-threatening" },
-  { icon: "🧪", name: "Research",          sub: "Clinical trials" },
-  { icon: "🦷", name: "Dental",            sub: "Surgical extractions" },
-  { icon: "👁️", name: "Ophthalmic",       sub: "LASIK & cataract" },
-  { icon: "🫀", name: "Cardiac",           sub: "Catheterisation" },
+const MARQUEE_ITEMS = [
+  { icon: <Scissors   className="w-3.5 h-3.5" />, name: "Surgical" },
+  { icon: <Syringe    className="w-3.5 h-3.5" />, name: "Anaesthesia" },
+  { icon: <FirstAidKit className="w-3.5 h-3.5" />, name: "Emergency" },
+  { icon: <Brain      className="w-3.5 h-3.5" />, name: "Psychiatric" },
+  { icon: <Flask      className="w-3.5 h-3.5" />, name: "Research" },
+  { icon: <Eye        className="w-3.5 h-3.5" />, name: "Ophthalmic" },
+  { icon: <Heart      className="w-3.5 h-3.5" />, name: "Cardiac" },
+  { icon: <DeviceMobile className="w-3.5 h-3.5" />, name: "Telemedicine" },
+  { icon: <Baby       className="w-3.5 h-3.5" />, name: "Obstetric" },
+  { icon: <MagnifyingGlass className="w-3.5 h-3.5" />, name: "Diagnostic" },
+  { icon: <Drop       className="w-3.5 h-3.5" />, name: "Blood Transfusion" },
+  { icon: <Tooth      className="w-3.5 h-3.5" />, name: "Dental" },
+  { icon: <Bone       className="w-3.5 h-3.5" />, name: "Orthopaedic" },
+  { icon: <Stethoscope className="w-3.5 h-3.5" />, name: "Paediatric" },
 ];
 
 const TESTIMONIALS = [
@@ -100,104 +121,119 @@ const STEPS = [
   { n: "03", title: "Generate & export",     body: "AI drafts a compliant form. Review, verify clauses, then download as PDF or print for hospital records." },
 ];
 
-const WORKFLOW_DOTS = [
-  { label: "Patient Identity",      angle: 0   },
-  { label: "Procedure Briefing",    angle: 60  },
-  { label: "Risk Disclosure",       angle: 120 },
-  { label: "Alternatives Listed",   angle: 180 },
-  { label: "Witness Block",         angle: 240 },
-  { label: "Doctor Sign-off",       angle: 300 },
-];
-
 /* ═══════════════════════════════════════════
-   PRISMATIC LIGHT SVG
+   DNA HELIX CANVAS (Three.js)
 ═══════════════════════════════════════════ */
-function PrismaticLight() {
-  const lines = Array.from({ length: 70 }, (_, i) => {
-    const x = i * 1.4;
-    const wave = Math.sin(i * 0.15) * 14;
-    const hue = 255 + i * 3;
-    const sat = 55 + Math.sin(i * 0.4) * 15;
-    const lit = 52 + Math.sin(i * 0.7) * 12;
-    const opacity = 0.65 + Math.sin(i * 0.5) * 0.35;
-    return { x1: x, x2: x + wave, hue, sat, lit, opacity };
-  });
+function DNAHelixCanvas() {
+  const mountRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <svg width="100" height="280" viewBox="0 0 100 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {lines.map((l, i) => (
-        <line
-          key={i}
-          x1={l.x1} y1={0}
-          x2={l.x2} y2={280}
-          stroke={`hsl(${l.hue}, ${l.sat}%, ${l.lit}%)`}
-          strokeWidth={1.2}
-          strokeOpacity={l.opacity}
-        />
-      ))}
-    </svg>
-  );
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+
+    const w = el.clientWidth || 500;
+    const h = el.clientHeight || 700;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    el.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 100);
+    camera.position.z = 5.5;
+
+    const group = new THREE.Group();
+    const N = 120;
+    const R = 1.1;
+    const HEIGHT = 9;
+    const TURNS = 4;
+
+    const sphGeo = new THREE.SphereGeometry(0.05, 8, 8);
+    const mat1 = new THREE.MeshBasicMaterial({ color: 0x7C3AED }); // deep violet
+    const mat2 = new THREE.MeshBasicMaterial({ color: 0x0EA5E9 }); // ocean blue
+
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const angle = t * TURNS * Math.PI * 2;
+      const y = (t - 0.5) * HEIGHT;
+
+      // Strand 1
+      const m1 = new THREE.Mesh(sphGeo, mat1);
+      m1.position.set(Math.cos(angle) * R, y, Math.sin(angle) * R);
+      group.add(m1);
+
+      // Strand 2 (opposite side)
+      const m2 = new THREE.Mesh(sphGeo, mat2);
+      m2.position.set(Math.cos(angle + Math.PI) * R, y, Math.sin(angle + Math.PI) * R);
+      group.add(m2);
+
+      // Base pair rungs
+      if (i % 5 === 0) {
+        const p1 = new THREE.Vector3(Math.cos(angle) * R, y, Math.sin(angle) * R);
+        const p2 = new THREE.Vector3(Math.cos(angle + Math.PI) * R, y, Math.sin(angle + Math.PI) * R);
+        const len = p1.distanceTo(p2);
+        const rungGeo = new THREE.CylinderGeometry(0.012, 0.012, len, 4);
+        const rungMat = new THREE.MeshBasicMaterial({ color: 0xaaaacc, transparent: true, opacity: 0.45 });
+        const rung = new THREE.Mesh(rungGeo, rungMat);
+        rung.position.copy(p1).lerp(p2, 0.5);
+        const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
+        rung.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        group.add(rung);
+      }
+    }
+
+    scene.add(group);
+
+    // Ambient glow particles
+    const particleGeo = new THREE.BufferGeometry();
+    const positions: number[] = [];
+    for (let i = 0; i < 80; i++) {
+      positions.push(
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 12,
+        (Math.random() - 0.5) * 4
+      );
+    }
+    particleGeo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0x7C3AED, size: 0.05, transparent: true, opacity: 0.25 });
+    scene.add(new THREE.Points(particleGeo, particleMat));
+
+    let animId: number;
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      group.rotation.y += 0.004;
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    const onResize = () => {
+      const w2 = el.clientWidth;
+      const h2 = el.clientHeight;
+      if (!w2 || !h2) return;
+      camera.aspect = w2 / h2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w2, h2);
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", onResize);
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+    };
+  }, []);
+
+  return <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />;
 }
 
 /* ═══════════════════════════════════════════
-   ABSTRACT ART (blobs + prismatic)
+   CONSENT FLOW ANIMATION (3-phase illustration)
 ═══════════════════════════════════════════ */
-function AbstractArt() {
-  return (
-    <div className="relative w-full h-full">
-      {/* Lavender blob — top left area */}
-      <div
-        className="blob-drift absolute"
-        style={{
-          top: "5%", left: "5%",
-          width: 300, height: 260,
-          background: `radial-gradient(ellipse, ${BLOB_LAV} 0%, rgba(192,174,232,0.6) 50%, transparent 75%)`,
-          borderRadius: "60% 40% 55% 45% / 50% 60% 40% 55%",
-          filter: "blur(2px)",
-        }}
-      />
-      {/* Pink blob — top right */}
-      <div
-        className="blob-drift-2 absolute"
-        style={{
-          top: "0%", right: "0%",
-          width: 240, height: 220,
-          background: `radial-gradient(ellipse, ${BLOB_PINK} 0%, rgba(234,168,192,0.5) 50%, transparent 75%)`,
-          borderRadius: "45% 55% 40% 60% / 60% 40% 55% 45%",
-          filter: "blur(1px)",
-        }}
-      />
-      {/* Orange blob — bottom right */}
-      <div
-        className="blob-drift-3 absolute"
-        style={{
-          bottom: "5%", right: "5%",
-          width: 220, height: 200,
-          background: `radial-gradient(ellipse, ${BLOB_ORA} 0%, rgba(232,152,96,0.5) 50%, transparent 75%)`,
-          borderRadius: "55% 45% 60% 40% / 45% 55% 45% 55%",
-          filter: "blur(1px)",
-        }}
-      />
-      {/* Prismatic vertical strip — center */}
-      <div
-        className="absolute"
-        style={{
-          top: "15%", left: "42%",
-          transform: "translateX(-50%)",
-        }}
-      >
-        <PrismaticLight />
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   FLOATING CARD
-═══════════════════════════════════════════ */
-/* Animated 3-phase consent flow illustration */
 function ConsentFlowAnimation() {
-  const [phase, setPhase] = useState(0); // 0=fill, 1=generate, 2=ready
+  const [phase, setPhase] = useState(0);
   const [typedName, setTypedName] = useState("");
   const [progress, setProgress] = useState(0);
   const [checks, setChecks] = useState([false, false, false, false]);
@@ -208,13 +244,11 @@ function ConsentFlowAnimation() {
     let progInterval: ReturnType<typeof setInterval> | null = null;
 
     const runCycle = () => {
-      // Reset all state
       setPhase(0);
       setTypedName("");
       setProgress(0);
       setChecks([false, false, false, false]);
 
-      // Phase 0: typewriter on name field
       const fullName = "Rajesh Kumar";
       let i = 0;
       typerInterval = setInterval(() => {
@@ -223,7 +257,6 @@ function ConsentFlowAnimation() {
         if (i >= fullName.length && typerInterval) clearInterval(typerInterval);
       }, 90);
 
-      // Phase 1: generating
       timers.push(setTimeout(() => {
         setPhase(1);
         let p = 0;
@@ -234,7 +267,6 @@ function ConsentFlowAnimation() {
         }, 40);
       }, 2200));
 
-      // Phase 2: document ready — checks appear one by one
       timers.push(setTimeout(() => {
         setPhase(2);
         [600, 1100, 1600, 2100].forEach((d, idx) => {
@@ -259,7 +291,7 @@ function ConsentFlowAnimation() {
 
   return (
     <div className="float-card absolute inset-0 flex flex-col items-center justify-center"
-      style={{ padding: "72px 28px 100px" }}>
+      style={{ padding: "60px 40px 60px" }}>
 
       {/* Phase indicator pills */}
       <div className="flex items-center gap-2 mb-4">
@@ -267,56 +299,56 @@ function ConsentFlowAnimation() {
           <div key={label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-dm transition-all duration-500"
             style={{
               fontSize: 9,
-              background: i === phase ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
-              color: i === phase ? INK : "rgba(255,255,255,0.7)",
+              background: i === phase ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.15)",
+              color: i === phase ? INK : "rgba(255,255,255,0.6)",
               fontWeight: i === phase ? 600 : 400,
             }}>
             <div className="w-1.5 h-1.5 rounded-full transition-all duration-500"
-              style={{ background: i === phase ? "#166534" : "rgba(255,255,255,0.4)" }} />
+              style={{ background: i === phase ? "#166534" : "rgba(255,255,255,0.3)" }} />
             {label}
           </div>
         ))}
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-[260px] rounded-2xl overflow-hidden"
+      <div className="w-full max-w-[320px] rounded-2xl overflow-hidden"
         style={{
-          background: "rgba(255,255,255,0.95)",
+          background: "rgba(255,255,255,0.98)",
           backdropFilter: "blur(20px)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)",
         }}>
 
-        {/* Mac window chrome */}
-        <div className="flex items-center gap-1.5 px-4 py-3"
+        {/* Mac chrome */}
+        <div className="flex items-center gap-2 px-5 py-3.5"
           style={{ borderBottom: `1px solid ${BORDER}`, background: "rgba(248,248,250,0.8)" }}>
           {["#FF5F57", "#FEBC2E", "#28C840"].map(c => (
-            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+            <div key={c} className="w-3 h-3 rounded-full" style={{ background: c }} />
           ))}
-          <span className="ml-auto font-dm text-[9px] font-medium" style={{ color: MUTED }}>ConsentGen</span>
+          <span className="ml-auto font-dm text-[10px] font-medium" style={{ color: MUTED }}>ConsentGen</span>
         </div>
 
         {/* Phase 0 — Fill Details */}
         {phase === 0 && (
-          <div className="p-4">
+          <div className="p-5">
             <p className="font-bricolage font-bold text-xs mb-3" style={{ color: INK }}>Patient Details</p>
             <div className="space-y-2.5">
               {[
-                { label: "Patient Name", value: typedName, placeholder: "", typing: true },
-                { label: "Procedure", value: "Surgical", placeholder: "", typing: false },
-                { label: "Consent Type", value: "Pre-operative", placeholder: "", typing: false },
+                { label: "Patient Name", value: typedName, typing: true },
+                { label: "Procedure", value: "Surgical", typing: false },
+                { label: "Consent Type", value: "Pre-operative", typing: false },
               ].map(field => (
                 <div key={field.label}>
                   <div className="font-dm mb-1" style={{ fontSize: 9, color: MUTED }}>{field.label}</div>
-                  <div className="flex items-center h-7 px-2.5 rounded-lg"
-                    style={{ border: `1px solid ${field.typing ? "#166534" : BORDER}`, fontSize: 11, color: field.value ? INK : MUTED, fontFamily: "var(--font-dm)" }}>
+                  <div className="flex items-center h-8 px-3 rounded-lg"
+                    style={{ border: `1px solid ${field.typing ? "#166534" : BORDER}`, fontSize: 12, color: field.value ? INK : MUTED, fontFamily: "var(--font-dm)" }}>
                     {field.value}
                     {field.typing && <span className="animate-pulse ml-px text-[#166534]">|</span>}
                   </div>
                 </div>
               ))}
             </div>
-            <button className="mt-4 w-full h-8 rounded-lg flex items-center justify-center gap-1.5 text-white font-dm font-medium"
-              style={{ background: DARK_BTN, fontSize: 11 }}>
+            <button className="mt-4 w-full h-9 rounded-lg flex items-center justify-center gap-1.5 text-white font-dm font-medium"
+              style={{ background: DARK_BTN, fontSize: 12 }}>
               <Sparkle className="w-3 h-3" /> Generate Consent
             </button>
           </div>
@@ -324,13 +356,12 @@ function ConsentFlowAnimation() {
 
         {/* Phase 1 — AI Generating */}
         {phase === 1 && (
-          <div className="p-4">
+          <div className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#4CAF50" }} />
               <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>AI Generating…</p>
               <span className="ml-auto font-dm font-semibold" style={{ fontSize: 10, color: "#166534" }}>{progress}%</span>
             </div>
-            {/* Steps */}
             <div className="space-y-2 mb-4">
               {[
                 "Applying IMC 2002 guidelines",
@@ -351,7 +382,6 @@ function ConsentFlowAnimation() {
                 );
               })}
             </div>
-            {/* Progress bar */}
             <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
               <div className="h-full rounded-full transition-all duration-100"
                 style={{ width: `${progress}%`, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
@@ -361,13 +391,12 @@ function ConsentFlowAnimation() {
 
         {/* Phase 2 — Form Ready */}
         {phase === 2 && (
-          <div className="p-4">
+          <div className="p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>Consent Form Ready</p>
               <span className="font-dm font-semibold px-2 py-0.5 rounded-full"
                 style={{ fontSize: 9, background: "#DCFCE7", color: "#166534" }}>IMC ✓</span>
             </div>
-            {/* Mock document lines */}
             <div className="space-y-1.5 mb-3">
               {[95, 100, 78, 100, 82].map((w, i) => (
                 <div key={i} className="h-1 rounded-full" style={{ width: `${w}%`, background: "#EBEBEB" }} />
@@ -389,10 +418,10 @@ function ConsentFlowAnimation() {
               </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <div className="flex-1 h-7 rounded-lg flex items-center justify-center font-dm font-medium"
-                style={{ border: `1px solid ${BORDER}`, fontSize: 10, color: INK }}>PDF</div>
-              <div className="flex-1 h-7 rounded-lg flex items-center justify-center font-dm font-medium text-white"
-                style={{ background: DARK_BTN, fontSize: 10 }}>Print</div>
+              <div className="flex-1 h-8 rounded-lg flex items-center justify-center font-dm font-medium"
+                style={{ border: `1px solid ${BORDER}`, fontSize: 12, color: INK }}>PDF</div>
+              <div className="flex-1 h-8 rounded-lg flex items-center justify-center font-dm font-medium text-white"
+                style={{ background: DARK_BTN, fontSize: 12 }}>Print</div>
             </div>
           </div>
         )}
@@ -416,14 +445,13 @@ function HeroSection() {
 
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.from(".hero-nav",     { opacity: 0, y: -20, duration: 0.5 })
-      .from(".hero-eyebrow", { opacity: 0, y: 20,  duration: 0.5 }, "-=0.2")
-      .from(".split-word",   { opacity: 0, y: 50,  stagger: 0.06, duration: 0.65 }, "-=0.2")
-      .from(".hero-sub",     { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
-      .from(".hero-cta",     { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
-      .from(".hero-info",    { opacity: 0, y: 30,  duration: 0.5 }, "-=0.1")
-      .from(".right-panel",  { opacity: 0, x: 30,  duration: 0.7, ease: "power2.out" }, "-=0.5")
-      .from(".float-card",   { opacity: 0, y: -20, duration: 0.5 }, "-=0.3");
+    tl.from(".hero-nav",    { opacity: 0, y: -20, duration: 0.5 })
+      .from(".split-word",  { opacity: 0, y: 50,  stagger: 0.06, duration: 0.65 }, "-=0.2")
+      .from(".hero-sub",    { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
+      .from(".hero-cta",    { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
+      .from(".hero-marquee",{ opacity: 0, y: 20,  duration: 0.4 }, "-=0.1")
+      .from(".right-panel", { opacity: 0, x: 30,  duration: 0.7, ease: "power2.out" }, "-=0.4")
+      .from(".float-card",  { opacity: 0, y: -20, duration: 0.5 }, "-=0.3");
   }, []);
 
   return (
@@ -436,7 +464,6 @@ function HeroSection() {
       >
         {/* NAV */}
         <nav className="hero-nav flex items-center justify-between px-8 py-5 flex-shrink-0">
-          {/* Logo pill */}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-full"
             style={{ border: `1px solid ${BORDER}`, background: PILL_BG }}
@@ -445,7 +472,6 @@ function HeroSection() {
             <span className="font-bricolage font-semibold text-sm" style={{ color: INK }}>ConsentGen</span>
           </div>
 
-          {/* Center nav pills */}
           <div className="hidden md:flex items-center gap-2">
             <a
               href="#"
@@ -475,7 +501,6 @@ function HeroSection() {
             )}
           </div>
 
-          {/* Right side */}
           <div className="flex items-center gap-2">
             {isLoggedIn === null && (
               <div className="w-8 h-8 rounded-full animate-pulse" style={{ background: PILL_BG }} />
@@ -505,15 +530,7 @@ function HeroSection() {
         </nav>
 
         {/* HERO CONTENT */}
-        <div className="flex-1 flex flex-col justify-center px-10 sm:px-14 pb-8">
-          {/* Eyebrow */}
-          <div className="hero-eyebrow flex items-center gap-3 mb-6">
-            <div className="w-8 h-0.5" style={{ background: INK }} />
-            <span className="text-sm font-dm" style={{ color: BODY_TXT }}>
-              Generate Compliant Consent Forms With AI
-            </span>
-          </div>
-
+        <div className="flex-1 flex flex-col justify-center px-10 sm:px-14 pb-6">
           {/* Headline */}
           <h1
             className="font-bricolage font-extrabold leading-[0.9] tracking-[-0.03em] mb-6"
@@ -522,98 +539,54 @@ function HeroSection() {
             {["Generate", "Compliant", "Consent"].map((word, i) => (
               <span key={i} className="split-word block">{word}</span>
             ))}
-            {/* Last line with inline avatar + arrow */}
-            <span className="flex items-end gap-3 flex-wrap">
-              <span className="split-word">Forms.</span>
-              <span className="inline-flex items-center gap-2 mb-2">
-                <span
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                  style={{ background: "linear-gradient(135deg, #6B7FD4, #8B6FC4)" }}
-                >
-                  DR
-                </span>
-                <span
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: PILL_BG, border: `1px solid ${BORDER}` }}
-                >
-                  <ArrowUpRight className="w-4 h-4" style={{ color: INK }} />
-                </span>
-              </span>
-            </span>
+            <span className="split-word block">Forms.</span>
           </h1>
 
           {/* Subtext */}
           <p className="hero-sub font-dm text-base leading-relaxed max-w-xs mb-8" style={{ color: BODY_TXT }}>
-            Learn how Indian doctors generate IMC 2002 compliant consent forms in under 30 seconds using AI.
+            Indian doctors generate IMC 2002 compliant consent forms in under 30 seconds using AI.
           </p>
 
           {/* CTA */}
-          <div className="hero-cta flex items-center gap-4">
+          <div className="hero-cta flex items-center gap-4 mb-10">
             <Link
               href="/generate"
               className="px-8 py-3.5 rounded-full font-dm font-medium text-sm tracking-[0.08em] uppercase text-white"
               style={{ background: DARK_BTN }}
             >
-              Explore More
+              Generate Now
             </Link>
-          </div>
-
-          {/* Scroll badge */}
-          <div
-            className="mt-10 inline-flex items-center gap-2 px-4 py-2 rounded-full self-start"
-            style={{ border: `1px solid ${BORDER}`, background: PILL_BG }}
-          >
-            <span className="text-xs font-dm" style={{ color: MUTED }}>Scroll</span>
-            <ArrowRight className="w-3 h-3 rotate-90" style={{ color: MUTED }} />
+            <Link
+              href="#how-it-works"
+              className="px-6 py-3.5 rounded-full font-dm font-medium text-sm"
+              style={{ border: `1px solid ${BORDER}`, color: BODY_TXT }}
+            >
+              How it works
+            </Link>
           </div>
         </div>
 
-        {/* BOTTOM INFO ROW */}
-        <div className="hero-info px-10 sm:px-14 pb-8 flex gap-6 items-start flex-wrap">
-          {/* Top consent types */}
-          <div className="flex-1 min-w-0">
-            <p className="font-bricolage font-bold text-lg mb-3" style={{ color: INK }}>
-              Top consent types
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {["Surgical", "Anaesthesia", "Emergency", "Psychiatric"].map(tag => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full text-xs font-dm"
-                  style={{ border: `1px solid ${BORDER}`, color: BODY_TXT }}
+        {/* CONSENT TYPE MARQUEE */}
+        <div className="hero-marquee overflow-hidden pb-8 px-10 sm:px-14">
+          <p className="font-dm text-xs uppercase tracking-[0.12em] mb-3" style={{ color: MUTED }}>
+            Consent Types Available
+          </p>
+          <div className="overflow-hidden relative">
+            <div
+              className="marquee-track flex gap-3"
+              style={{ width: "max-content" }}
+            >
+              {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
+                  style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: BODY_TXT }}
                 >
-                  {tag}
-                </span>
+                  <span style={{ color: INK }}>{item.icon}</span>
+                  <span className="font-dm text-xs whitespace-nowrap">{item.name}</span>
+                </div>
               ))}
-              <span
-                className="w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ border: `1px solid ${BORDER}` }}
-              >
-                <ArrowUpRight className="w-3.5 h-3.5" style={{ color: INK }} />
-              </span>
             </div>
-          </div>
-
-          {/* Feature mini-card */}
-          <div className="w-56 rounded-2xl p-4 flex-shrink-0" style={{ background: PILL_BG }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bricolage font-semibold" style={{ color: INK }}>
-                AI Consent Progress
-              </span>
-              <div className="flex gap-1">
-                <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs"
-                  style={{ border: `1px solid ${BORDER}`, color: MUTED }}
-                >←</span>
-                <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs"
-                  style={{ border: `1px solid ${BORDER}`, color: MUTED }}
-                >→</span>
-              </div>
-            </div>
-            <p className="font-dm leading-relaxed" style={{ fontSize: 11, color: MUTED }}>
-              AI provides doctors support &amp; legally validated consent documentation in seconds.
-            </p>
           </div>
         </div>
       </div>
@@ -621,49 +594,21 @@ function HeroSection() {
       {/* ── RIGHT PANEL ── */}
       <div
         className="right-panel relative flex-1 overflow-hidden"
-        style={{ background: MINT, borderRadius: "0 0 0 24px" }}
+        style={{ background: DARK_PANEL, borderRadius: "0 0 0 24px" }}
       >
-        {/* Abstract blob art — fills the panel */}
-        <div className="absolute inset-0">
-          <AbstractArt />
-        </div>
+        {/* DNA Helix fills the panel */}
+        <DNAHelixCanvas />
+
+        {/* Subtle vignette for depth */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, transparent 50%, rgba(240,240,245,0.6) 100%)",
+          }}
+        />
 
         {/* Animated consent flow illustration */}
         <ConsentFlowAnimation />
-
-        {/* Bottom stats strip */}
-        <div className="absolute bottom-0 left-0 right-0 flex">
-          {[
-            { label: "2.1k", sub: "Forms Generated" },
-            { label: "98%",  sub: "Compliance Rate" },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="flex-1 p-6"
-              style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.2)" : "none" }}
-            >
-              <p className="font-dm mb-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>
-                {s.sub}
-              </p>
-              <div className="flex items-end gap-2">
-                <span className="font-bricolage font-bold text-3xl text-white">{s.label}</span>
-                <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center mb-0.5"
-                  style={{ background: "rgba(255,255,255,0.15)" }}
-                >
-                  <ArrowUpRight className="w-2.5 h-2.5 text-white" />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Caption */}
-        <div className="absolute bottom-20 right-6 max-w-[180px]">
-          <p className="font-dm leading-relaxed" style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>
-            Patients who benefit from compliant documentation and enjoying compliance with peace of mind
-          </p>
-        </div>
       </div>
     </section>
   );
@@ -719,7 +664,7 @@ function InfoStrip() {
 }
 
 /* ═══════════════════════════════════════════
-   STATS SECTION — compliance bars + time chart
+   STATS SECTION
 ═══════════════════════════════════════════ */
 function StatsSection() {
   useGSAP(() => {
@@ -727,19 +672,9 @@ function StatsSection() {
       opacity: 0, y: 40, stagger: 0.1, duration: 0.7, ease: "power3.out",
       scrollTrigger: { trigger: ".stats-section", start: "top 75%" },
     });
-    // Animate compliance bars from 0 → 100%
-    gsap.to(".comp-bar", {
-      width: "100%", stagger: 0.1, duration: 0.9, ease: "power2.out",
-      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
-    });
-    // Time comparison bar — 30s is ~1.67% of 30min
-    gsap.to(".time-bar-ai", {
-      width: "1.67%", duration: 1, ease: "power3.out",
-      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
-    });
-    gsap.to(".time-bar-manual", {
-      width: "100%", duration: 0.8, ease: "power2.out",
-      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
+    gsap.from(".org-card", {
+      opacity: 0, scale: 0.85, stagger: 0.07, duration: 0.5, ease: "back.out(1.5)",
+      scrollTrigger: { trigger: ".org-grid", start: "top 80%" },
     });
   }, []);
 
@@ -747,7 +682,7 @@ function StatsSection() {
     <section className="stats-section" style={{ background: WHITE, padding: "80px 40px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
 
-        {/* MYDNA-style mission text */}
+        {/* Mission text */}
         <div className="mb-16">
           <h2 className="font-bricolage font-bold leading-tight tracking-tight"
             style={{ fontSize: "clamp(28px, 4vw, 52px)", maxWidth: 760 }}>
@@ -758,7 +693,7 @@ function StatsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
 
-          {/* Left: 2×2 large stat grid */}
+          {/* Left: 2×2 stat grid */}
           <div className="grid grid-cols-2 gap-0">
             {STATS.map((stat, i) => (
               <div key={stat.label} className="stat-cell"
@@ -778,56 +713,36 @@ function StatsSection() {
             ))}
           </div>
 
-          {/* Right: Compliance coverage + time comparison */}
-          <div className="compliance-bars">
-            {/* Compliance coverage */}
+          {/* Right: Legal framework org logos */}
+          <div>
             <p className="font-bricolage font-bold text-lg mb-1" style={{ color: INK }}>
-              Legal Framework Coverage
+              Legal Frameworks Covered
             </p>
-            <p className="font-dm text-sm mb-6" style={{ color: BODY_TXT }}>
-              Full coverage across every Indian medico-legal framework
+            <p className="font-dm text-sm mb-8" style={{ color: BODY_TXT }}>
+              Every form is validated against these Indian medico-legal authorities.
             </p>
-            <div className="space-y-3.5 mb-10">
-              {COMPLIANCE_LAWS.map(law => (
-                <div key={law.code}>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <div>
-                      <span className="font-dm font-semibold text-xs" style={{ color: INK }}>{law.code}</span>
-                      <span className="font-dm text-xs ml-2" style={{ color: MUTED }}>{law.name}</span>
-                    </div>
-                    <span className="font-bricolage font-bold text-xs" style={{ color: "#166534" }}>100%</span>
+            <div className="org-grid grid grid-cols-3 gap-4">
+              {ORG_LOGOS.map(org => (
+                <div
+                  key={org.code}
+                  className="org-card flex flex-col items-center gap-3 p-4 rounded-2xl"
+                  style={{ border: `1px solid ${BORDER}`, background: PAGE_BG }}
+                >
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center font-bricolage font-extrabold text-sm"
+                    style={{
+                      background: org.bg,
+                      color: org.color,
+                      border: `2px solid ${org.color}30`,
+                    }}
+                  >
+                    {org.code}
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
-                    <div className="comp-bar h-full rounded-full" style={{ width: 0, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
-                  </div>
+                  <span className="font-dm text-center leading-tight" style={{ fontSize: 10, color: BODY_TXT }}>
+                    {org.name}
+                  </span>
                 </div>
               ))}
-            </div>
-
-            {/* Time comparison */}
-            <p className="font-bricolage font-bold text-sm mb-4" style={{ color: INK }}>
-              Generation Time — AI vs Manual
-            </p>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between mb-1.5">
-                  <span className="font-dm text-xs" style={{ color: BODY_TXT }}>Manual drafting</span>
-                  <span className="font-dm text-xs font-semibold" style={{ color: BODY_TXT }}>~30 min</span>
-                </div>
-                <div className="h-2.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
-                  <div className="time-bar-manual h-full rounded-full" style={{ width: 0, background: "#D0D0D8" }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1.5">
-                  <span className="font-dm text-xs font-semibold" style={{ color: INK }}>With ConsentGen AI</span>
-                  <span className="font-bricolage font-bold text-xs" style={{ color: "#166534" }}>30 sec ⚡</span>
-                </div>
-                <div className="h-2.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
-                  <div className="time-bar-ai h-full rounded-full" style={{ width: 0, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
-                </div>
-                <p className="font-dm mt-1.5" style={{ fontSize: 10, color: MUTED }}>60× faster than manual documentation</p>
-              </div>
             </div>
           </div>
         </div>
@@ -837,7 +752,7 @@ function StatsSection() {
 }
 
 /* ═══════════════════════════════════════════
-   FEATURES SECTION (light theme)
+   FEATURES SECTION
 ═══════════════════════════════════════════ */
 function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -889,7 +804,6 @@ function FeaturesSection() {
               className="feature-row grid grid-cols-1 md:grid-cols-2"
               style={{ borderTop: `1px solid ${BORDER}` }}
             >
-              {/* Text side */}
               <div
                 className="feature-text"
                 style={{
@@ -928,17 +842,13 @@ function FeaturesSection() {
                   {feat.body}
                 </p>
                 <div className="flex items-baseline gap-2">
-                  <span
-                    className="font-bricolage font-extrabold"
-                    style={{ fontSize: 40, color: INK }}
-                  >
+                  <span className="font-bricolage font-extrabold" style={{ fontSize: 40, color: INK }}>
                     {feat.metric.value}
                   </span>
                   <span className="font-dm text-sm" style={{ color: MUTED }}>{feat.metric.label}</span>
                 </div>
               </div>
 
-              {/* Visual side */}
               <div
                 className="feature-visual"
                 style={{
@@ -948,7 +858,6 @@ function FeaturesSection() {
                   background: PILL_BG,
                 }}
               >
-                {/* Abstract visual */}
                 <div
                   className="rounded-2xl w-full"
                   style={{
@@ -959,10 +868,7 @@ function FeaturesSection() {
                   }}
                 >
                   <div className="flex items-center gap-2 mb-6">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ background: featureColors[i] }}
-                    />
+                    <div className="w-2 h-2 rounded-full" style={{ background: featureColors[i] }} />
                     <span className="font-dm text-xs font-semibold" style={{ color: INK }}>{feat.tag} Active</span>
                   </div>
                   <div className="flex flex-col gap-2.5">
@@ -970,8 +876,7 @@ function FeaturesSection() {
                       <div key={j} style={{ height: 7, borderRadius: 4, background: BORDER, overflow: "hidden" }}>
                         <div
                           style={{
-                            height: "100%", borderRadius: 4,
-                            width: `${w}%`,
+                            height: "100%", borderRadius: 4, width: `${w}%`,
                             background: `linear-gradient(90deg, ${featureColors[i]}, ${featureColors[i]}80)`,
                           }}
                         />
@@ -987,75 +892,6 @@ function FeaturesSection() {
             </div>
           );
         })}
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   CONSENT TYPES SECTION
-═══════════════════════════════════════════ */
-function ConsentTypesSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    gsap.from(".type-card", {
-      opacity: 0, x: 30, stagger: 0.04, duration: 0.6, ease: "power2.out",
-      scrollTrigger: { trigger: ".types-track", start: "top 80%" },
-    });
-  }, { scope: sectionRef });
-
-  return (
-    <section ref={sectionRef} style={{ background: WHITE, padding: "80px 0" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-        <div className="mb-10">
-          <div className="flex items-center gap-2 mb-4">
-            <Stethoscope className="w-3.5 h-3.5" style={{ color: INK }} />
-            <span className="font-dm text-xs font-semibold tracking-[0.1em] uppercase" style={{ color: INK }}>
-              Consent Types
-            </span>
-          </div>
-          <h2
-            className="font-bricolage font-extrabold"
-            style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", color: INK }}
-          >
-            10+ procedure-specific{" "}
-            <span style={{ color: MUTED }}>consent templates.</span>
-          </h2>
-        </div>
-
-        <div style={{ position: "relative" }}>
-          <div style={{
-            position: "absolute", left: 0, top: 0, bottom: 0, width: 60, zIndex: 1, pointerEvents: "none",
-            background: `linear-gradient(to right, ${WHITE}, transparent)`,
-          }} />
-          <div style={{
-            position: "absolute", right: 0, top: 0, bottom: 0, width: 60, zIndex: 1, pointerEvents: "none",
-            background: `linear-gradient(to left, ${WHITE}, transparent)`,
-          }} />
-          <div
-            className="types-track no-scrollbar"
-            style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}
-          >
-            {CONSENT_TYPES.map((ct) => (
-              <div
-                key={ct.name}
-                className="type-card"
-                style={{
-                  width: 160, flexShrink: 0, borderRadius: 16, padding: 20,
-                  cursor: "default",
-                  background: PILL_BG,
-                  border: `1px solid ${BORDER}`,
-                  transition: "box-shadow 0.2s",
-                }}
-              >
-                <div style={{ fontSize: 24, marginBottom: 10 }}>{ct.icon}</div>
-                <div className="font-bricolage font-semibold text-sm mb-1" style={{ color: INK }}>{ct.name}</div>
-                <div className="font-dm text-xs" style={{ color: MUTED }}>{ct.sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
@@ -1101,7 +937,7 @@ function HowItWorksSection() {
             >
               <div
                 className="font-bricolage font-extrabold"
-                style={{ fontSize: 80, color: `${INK}08`, lineHeight: 1, letterSpacing: "-0.04em", marginBottom: 20 }}
+                style={{ fontSize: 80, color: "#C0C0CC", lineHeight: 1, letterSpacing: "-0.04em", marginBottom: 20 }}
               >
                 {step.n}
               </div>
@@ -1148,7 +984,6 @@ function TestimonialsSection() {
 
   return (
     <section style={{ background: WHITE, padding: "100px 40px", position: "relative", overflow: "hidden" }}>
-      {/* Decorative quote */}
       <div
         className="font-bricolage"
         style={{
@@ -1161,10 +996,7 @@ function TestimonialsSection() {
       </div>
 
       <div style={{ maxWidth: 800, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div
-          className="font-dm text-xs font-semibold tracking-[0.1em] uppercase mb-10"
-          style={{ color: MUTED }}
-        >
+        <div className="font-dm text-xs font-semibold tracking-[0.1em] uppercase mb-10" style={{ color: MUTED }}>
           Testimonials
         </div>
 
@@ -1201,7 +1033,6 @@ function TestimonialsSection() {
           </div>
         </div>
 
-        {/* Dots */}
         <div className="flex gap-2 mt-9">
           {TESTIMONIALS.map((_, i) => (
             <button
@@ -1241,13 +1072,8 @@ function CTASection() {
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <div
           className="cta-block relative overflow-hidden rounded-3xl"
-          style={{
-            padding: "80px 64px",
-            textAlign: "center",
-            background: INK,
-          }}
+          style={{ padding: "80px 64px", textAlign: "center", background: INK }}
         >
-          {/* Background watermark */}
           <div
             className="font-bricolage"
             style={{
@@ -1278,7 +1104,7 @@ function CTASection() {
               }}
             >
               Generate your first{" "}
-              <span style={{ color: `${MINT}` }}>consent form for free.</span>
+              <span style={{ color: "#C4D5CF" }}>consent form for free.</span>
             </h2>
             <p className="font-dm text-base" style={{ color: MUTED, maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.6 }}>
               Join hundreds of Indian doctors who trust ConsentGen for their medico-legal documentation.
@@ -1305,7 +1131,6 @@ function CTASection() {
               </Link>
             </div>
 
-            {/* Mini stats */}
             <div className="flex gap-12 justify-center mt-14 flex-wrap">
               {[
                 { value: "10+", label: "Consent Types" },
@@ -1326,89 +1151,68 @@ function CTASection() {
 }
 
 /* ═══════════════════════════════════════════
-   PAGE FOOTER
+   PAGE FOOTER (compact)
 ═══════════════════════════════════════════ */
 function PageFooter() {
   return (
-    <footer style={{ background: WHITE, borderTop: `1px solid ${BORDER}`, padding: "60px 40px 32px" }}>
+    <footer style={{ background: WHITE, borderTop: `1px solid ${BORDER}`, padding: "32px 40px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+
           {/* Brand */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: INK }}
-              >
-                <ShieldCheck className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bricolage font-bold text-base" style={{ color: INK }}>ConsentGen</span>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: INK }}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-white" />
             </div>
-            <p className="font-dm text-sm leading-relaxed mb-4" style={{ color: BODY_TXT, maxWidth: 280 }}>
-              AI-powered medico-legal consent form generator for Indian doctors. Generate, verify, and export in seconds.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {["IMC 2002", "BNS §§24-30", "MoRTH 2025"].map(b => (
-                <div
-                  key={b}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-dm font-medium"
-                  style={{ border: `1px solid ${BORDER}`, color: BODY_TXT, background: PILL_BG }}
-                >
-                  <ShieldCheck className="w-3 h-3" style={{ color: INK }} />
-                  {b}
-                </div>
-              ))}
+            <div>
+              <span className="font-bricolage font-bold text-sm" style={{ color: INK }}>ConsentGen</span>
+              <span className="font-dm text-xs ml-2" style={{ color: MUTED }}>AI-powered medico-legal consent forms for Indian doctors</span>
             </div>
           </div>
 
-          {/* Application links */}
-          <div>
-            <div className="font-dm text-xs font-semibold tracking-[0.1em] uppercase mb-4" style={{ color: MUTED }}>
-              Application
-            </div>
+          {/* Nav links */}
+          <div className="flex flex-wrap items-center gap-6">
             {[
-              { label: "Generate Form", href: "/generate" },
-              { label: "Dashboard",     href: "/dashboard" },
-              { label: "History",       href: "/history" },
-              { label: "Sign In",       href: "/login" },
+              { label: "Generate", href: "/generate" },
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "History", href: "/history" },
+              { label: "Sign In", href: "/login" },
             ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="block font-dm text-sm mb-3 transition-colors"
-                style={{ color: BODY_TXT }}
-              >
+              <Link key={label} href={href} className="font-dm text-sm transition-colors" style={{ color: BODY_TXT }}>
                 {label}
               </Link>
             ))}
           </div>
 
-          {/* Compliance */}
-          <div>
-            <div className="font-dm text-xs font-semibold tracking-[0.1em] uppercase mb-4" style={{ color: MUTED }}>
-              Compliance
-            </div>
-            {COMPLIANCE_LAWS.map(law => (
-              <div key={law.code} className="mb-3">
-                <span className="font-dm text-sm font-semibold" style={{ color: INK }}>{law.code}</span>
-                <span className="block font-dm text-xs mt-0.5" style={{ color: MUTED }}>{law.name}</span>
-              </div>
+          {/* Compliance badges */}
+          <div className="flex flex-wrap gap-2">
+            {["IMC 2002", "BNS", "DPDP"].map(b => (
+              <span
+                key={b}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-dm"
+                style={{ border: `1px solid ${BORDER}`, color: MUTED, background: PILL_BG }}
+              >
+                <ShieldCheck className="w-3 h-3" style={{ color: INK }} />
+                {b}
+              </span>
             ))}
           </div>
         </div>
 
         {/* Bottom bar */}
         <div
-          className="flex items-center justify-between flex-wrap gap-3"
-          style={{ paddingTop: 24, borderTop: `1px solid ${BORDER}` }}
+          className="flex items-center justify-between flex-wrap gap-2 mt-6 pt-5"
+          style={{ borderTop: `1px solid ${BORDER}` }}
         >
           <p className="font-dm text-xs" style={{ color: MUTED }}>
             © 2025 ConsentGen. Built for Indian Medical Practice.
           </p>
-          <div className="flex items-center gap-1.5 font-dm text-xs" style={{ color: MUTED }}>
-            <ShieldCheck className="w-3.5 h-3.5" style={{ color: INK }} />
-            IMC 2002 Compliant Platform
-          </div>
+          <p className="font-dm text-xs" style={{ color: MUTED }}>
+            IMC 2002 · BNS §§24-30 · MoRTH 2025 · CPA 2019 · Aadhaar Act · DPDP 2023
+          </p>
         </div>
       </div>
     </footer>
@@ -1425,7 +1229,6 @@ export default function Home() {
       <InfoStrip />
       <StatsSection />
       <FeaturesSection />
-      <ConsentTypesSection />
       <HowItWorksSection />
       <TestimonialsSection />
       <CTASection />

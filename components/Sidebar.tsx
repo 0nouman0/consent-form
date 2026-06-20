@@ -31,7 +31,21 @@ export default function Sidebar() {
 
   useEffect(() => {
     const stored = localStorage.getItem("sidebar_collapsed");
-    if (stored !== null) setCollapsed(stored === "true");
+    if (stored !== null) {
+      setCollapsed(stored === "true");
+    } else {
+      // Auto-collapse on tablet (md → lg range)
+      setCollapsed(window.innerWidth < 1024);
+    }
+  }, []);
+
+  // Auto-collapse when viewport shrinks to tablet
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth < 1024) setCollapsed(true);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const toggle = () => {
@@ -48,9 +62,7 @@ export default function Sidebar() {
         width: collapsed ? "68px" : "240px",
         minWidth: collapsed ? "68px" : "240px",
         transition: "width 0.25s cubic-bezier(0.4,0,0.2,1), min-width 0.25s cubic-bezier(0.4,0,0.2,1)",
-        background: "rgba(255,255,255,0.85)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        background: "#ffffff",
         borderRight: "1px solid rgba(0,0,0,0.08)",
       }}
     >

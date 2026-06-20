@@ -91,9 +91,8 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
         className="flex items-center gap-2 rounded-full transition-all hover:opacity-90 focus:outline-none"
         style={{
           padding: compact ? "3px" : "3px 10px 3px 3px",
-          border: "1px solid rgba(0,0,0,0.10)",
-          background: "rgba(255,255,255,0.85)",
-          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(0,0,0,0.14)",
+          background: "#f4f4f5",
         }}
         aria-label="Open user menu"
       >
@@ -127,12 +126,12 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-64 rounded-2xl overflow-hidden z-[200]"
+          className="absolute right-0 top-full mt-2 w-64 rounded-2xl z-[9999]"
           style={{
-            background: "rgba(255,255,255,0.95)",
-            backdropFilter: "blur(20px)",
+            background: "#ffffff",
             border: "1px solid rgba(0,0,0,0.09)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+            boxShadow: "0 16px 48px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08)",
+            overflow: "hidden",
           }}
         >
           {/* Header */}
