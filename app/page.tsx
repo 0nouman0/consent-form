@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import {
   ShieldCheck,
   Sparkle,
@@ -13,27 +15,31 @@ import {
   Lightning,
   Star,
 } from "@phosphor-icons/react/dist/ssr";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import LandingNavbar from "@/components/LandingNavbar";
 
+gsap.registerPlugin(ScrollTrigger);
+
 /* ─── PALETTE ─── */
-const INK     = "#100F0D";
-const MIST    = "#7A736C";
-const RULE    = "#E2D9CE";
-const BG      = "#F9F7F4";
-const BG_ALT  = "#F2EDE5";
-const BG_DARK = "#0C0A09";
-const GREEN   = "#15562F";
-const WHITE   = "#FFFFFF";
+const BG       = "#060810";
+const BG2      = "#0A0C16";
+const SURFACE  = "#0F1220";
+const BORDER   = "rgba(255,255,255,0.07)";
+const BORDER_B = "rgba(82,130,255,0.2)";
+const TEXT     = "#E4E8FF";
+const MUTED    = "#525878";
+const ACCENT   = "#5282FF";
+const TEAL     = "#00D4C8";
+const GREEN    = "#10D990";
+const WHITE    = "#FFFFFF";
 
 /* ─── DATA ─── */
 const COMPLIANCE_LAWS = [
-  { code: "IMC 2002",     name: "Indian Medical Council Regulations" },
-  { code: "BNS §§24-30",  name: "Bharatiya Nyaya Sanhita" },
-  { code: "MoRTH 2025",   name: "Ministry of Road Transport" },
-  { code: "CPA 2019",     name: "Consumer Protection Act" },
-  { code: "Aadhaar Act",  name: "Aadhaar Act 2016" },
-  { code: "DPDP 2023",    name: "Digital Personal Data Protection" },
+  { code: "IMC 2002",    name: "Indian Medical Council Regulations" },
+  { code: "BNS §§24-30", name: "Bharatiya Nyaya Sanhita" },
+  { code: "MoRTH 2025",  name: "Ministry of Road Transport" },
+  { code: "CPA 2019",    name: "Consumer Protection Act" },
+  { code: "Aadhaar Act", name: "Aadhaar Act 2016" },
+  { code: "DPDP 2023",   name: "Digital Personal Data Protection" },
 ];
 
 const STATS = [
@@ -80,34 +86,16 @@ const CONSENT_TYPES = [
 ];
 
 const TESTIMONIALS = [
-  {
-    quote: "ConsentGen completely changed how I manage patient documentation. The AI-generated forms are accurate, compliant, and save me at least 30 minutes every day.",
-    name: "Dr. Rajesh Kumar", role: "Senior Surgeon, AIIMS Delhi", initials: "RK",
-  },
-  {
-    quote: "The medico-legal alignment gave our hospital legal confidence we've never had before. We've standardised all consent forms with ConsentGen.",
-    name: "Dr. Priya Mehta", role: "Medical Superintendent", initials: "PM",
-  },
-  {
-    quote: "Real-time clause verification is a game changer. I never worry about missing a critical medico-legal requirement before a procedure.",
-    name: "Dr. Arjun Nair", role: "Anaesthesiologist", initials: "AN",
-  },
+  { quote: "ConsentGen completely changed how I manage patient documentation. The AI-generated forms are accurate, compliant, and save me at least 30 minutes every day.", name: "Dr. Rajesh Kumar",  role: "Senior Surgeon, AIIMS Delhi", initials: "RK" },
+  { quote: "The medico-legal alignment gave our hospital legal confidence we've never had before. We've standardised all consent forms with ConsentGen.",                    name: "Dr. Priya Mehta",  role: "Medical Superintendent",      initials: "PM" },
+  { quote: "Real-time clause verification is a game changer. I never worry about missing a critical medico-legal requirement before a procedure.",                          name: "Dr. Arjun Nair",   role: "Anaesthesiologist",            initials: "AN" },
 ];
 
 const STEPS = [
-  { n: "01", title: "Enter patient details",  body: "Patient name, age, diagnosis, procedure type, and attending doctor — in a clean guided form." },
-  { n: "02", title: "Select consent type",    body: "Choose from 10+ procedure-specific templates. Each type loads the relevant clause set automatically." },
-  { n: "03", title: "Generate & export",      body: "AI drafts a compliant form. Review, verify clauses, then download as PDF or print for hospital records." },
+  { n: "01", title: "Enter patient details", body: "Patient name, age, diagnosis, procedure type, and attending doctor — in a clean guided form." },
+  { n: "02", title: "Select consent type",   body: "Choose from 10+ procedure-specific templates. Each type loads the relevant clause set automatically." },
+  { n: "03", title: "Generate & export",     body: "AI drafts a compliant form. Review, verify clauses, then download as PDF or print for hospital records." },
 ];
-
-/* ─── ANIMATION VARIANTS ─── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: (i: number = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
-  }),
-};
 
 /* ═══════════════════════════════════════════
    DOCUMENT PREVIEW
@@ -116,7 +104,7 @@ function DocumentPreview() {
   const [checked, setChecked] = useState<boolean[]>([false, false, false, false]);
 
   useEffect(() => {
-    const delays = [800, 1400, 2000, 2600];
+    const delays = [700, 1200, 1700, 2200];
     const timers = delays.map((d, i) =>
       setTimeout(() => setChecked(prev => { const n = [...prev]; n[i] = true; return n; }), d)
     );
@@ -131,39 +119,36 @@ function DocumentPreview() {
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.8, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-[780px] mx-auto select-none pointer-events-none"
+    <div
+      className="hero-preview w-full max-w-[780px] mx-auto select-none pointer-events-none"
       style={{
         borderRadius: 20,
-        background: WHITE,
-        border: `1px solid ${RULE}`,
-        boxShadow: "0 24px 64px rgba(16,15,13,0.1), 0 4px 16px rgba(16,15,13,0.06)",
+        background: SURFACE,
+        border: `1px solid ${BORDER_B}`,
+        boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(82,130,255,0.1)",
         overflow: "hidden",
       }}
     >
       {/* Chrome bar */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "10px 16px", borderBottom: `1px solid ${RULE}`,
-        background: BG,
+        padding: "10px 16px", borderBottom: `1px solid ${BORDER}`,
+        background: BG2,
       }}>
         <div style={{ display: "flex", gap: 6 }}>
-          {["#FF5F57","#FFBD2E","#28CA41"].map(c => (
+          {["#FF5F57", "#FFBD2E", "#28CA41"].map(c => (
             <div key={c} style={{ width: 11, height: 11, borderRadius: "50%", background: c }} />
           ))}
         </div>
         <div style={{
           display: "flex", alignItems: "center", gap: 5,
-          background: `${GREEN}18`, borderRadius: 20, padding: "3px 10px",
-          fontSize: 11, fontWeight: 600, color: GREEN,
+          background: `rgba(82,130,255,0.12)`, borderRadius: 20, padding: "3px 10px",
+          fontSize: 11, fontWeight: 600, color: ACCENT,
         }}>
           <ShieldCheck size={11} weight="bold" />
           IMC Compliant
         </div>
-        <span style={{ fontSize: 11, fontWeight: 600, color: MIST, letterSpacing: "0.03em" }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: MUTED, letterSpacing: "0.03em" }}>
           ConsentGen
         </span>
       </div>
@@ -171,21 +156,23 @@ function DocumentPreview() {
       {/* Body */}
       <div style={{ display: "flex", minHeight: 240 }}>
         {/* Left panel */}
-        <div style={{ width: 200, borderRight: `1px solid ${RULE}`, padding: 16, flexShrink: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: MIST, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+        <div style={{ width: 200, borderRight: `1px solid ${BORDER}`, padding: 16, flexShrink: 0, background: BG }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
             Patient Details
           </div>
           {["Patient Name", "Procedure", "Surgeon"].map((label) => (
             <div key={label} style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 9, color: MIST, marginBottom: 3 }}>{label}</div>
-              <div style={{ height: 28, border: `1px solid ${RULE}`, borderRadius: 6, display: "flex", alignItems: "center", padding: "0 8px" }}>
-                <div style={{ height: 6, borderRadius: 3, background: RULE, width: "70%" }} />
+              <div style={{ fontSize: 9, color: MUTED, marginBottom: 3 }}>{label}</div>
+              <div style={{ height: 28, border: `1px solid ${BORDER}`, borderRadius: 6, display: "flex", alignItems: "center", padding: "0 8px", background: SURFACE }}>
+                <div style={{ height: 6, borderRadius: 3, background: BORDER, width: "70%" }} />
               </div>
             </div>
           ))}
           <div style={{
-            marginTop: 12, height: 32, borderRadius: 8, background: INK,
+            marginTop: 12, height: 32, borderRadius: 8,
+            background: ACCENT,
             display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            boxShadow: "0 0 16px rgba(82,130,255,0.3)",
           }}>
             <Sparkle size={11} color={WHITE} weight="fill" />
             <span style={{ color: WHITE, fontSize: 10, fontWeight: 600 }}>Generate</span>
@@ -193,50 +180,45 @@ function DocumentPreview() {
         </div>
 
         {/* Right panel */}
-        <div style={{ flex: 1, padding: 16 }}>
+        <div style={{ flex: 1, padding: 16, background: SURFACE }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: INK }}>Surgical Consent Form</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: TEXT }}>Surgical Consent Form</span>
             <div style={{ display: "flex", gap: 6 }}>
               {["PDF", "Print"].map(label => (
                 <div key={label} style={{
-                  fontSize: 9, fontWeight: 600, color: MIST,
-                  border: `1px solid ${RULE}`, borderRadius: 5, padding: "3px 8px",
+                  fontSize: 9, fontWeight: 600, color: MUTED,
+                  border: `1px solid ${BORDER}`, borderRadius: 5, padding: "3px 8px",
                 }}>{label}</div>
               ))}
             </div>
           </div>
           {[95, 80, 100, 72, 88, 60].map((w, i) => (
-            <div key={i} style={{ height: 6, borderRadius: 3, background: `${RULE}`, marginBottom: 6, width: `${w}%` }} />
+            <div key={i} style={{ height: 6, borderRadius: 3, background: BORDER, marginBottom: 6, width: `${w}%` }} />
           ))}
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${RULE}` }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: MIST, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BORDER}` }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
               Clause Verification
             </div>
             {clauses.map((clause, i) => (
               <div key={clause} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                <motion.div
-                  animate={checked[i] ? { backgroundColor: GREEN, scale: 1 } : { backgroundColor: RULE, scale: 1 }}
-                  initial={{ backgroundColor: RULE, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  style={{ width: 14, height: 14, borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                <div
+                  style={{
+                    width: 14, height: 14, borderRadius: 3,
+                    background: checked[i] ? GREEN : BORDER,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    transition: "background 0.3s ease",
+                  }}
                 >
-                  {checked[i] && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.4 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                    >
-                      <CheckCircle size={10} color={WHITE} weight="bold" />
-                    </motion.div>
-                  )}
-                </motion.div>
-                <span style={{ fontSize: 9, color: checked[i] ? INK : MIST }}>{clause}</span>
+                  {checked[i] && <CheckCircle size={10} color={BG} weight="bold" />}
+                </div>
+                <span style={{ fontSize: 9, color: checked[i] ? TEXT : MUTED, transition: "color 0.3s ease" }}>{clause}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -246,171 +228,143 @@ function DocumentPreview() {
 function HeroSection() {
   const compliancePills = ["IMC 2002", "BNS §§24-30", "MoRTH 2025", "CPA 2019"];
 
+  useGSAP(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.from(".hero-badge",   { opacity: 0, y: 20, duration: 0.6 })
+      .from(".split-word",   { opacity: 0, y: 60, stagger: 0.05, duration: 0.7 }, "-=0.3")
+      .from(".hero-sub",     { opacity: 0, y: 20, duration: 0.5 }, "-=0.3")
+      .from(".hero-ctas",    { opacity: 0, y: 20, duration: 0.5 }, "-=0.3")
+      .from(".hero-pills",   { opacity: 0, y: 10, duration: 0.4 }, "-=0.2")
+      .from(".hero-preview", { opacity: 0, y: 50, duration: 0.9, ease: "power2.out" }, "-=0.3");
+  }, []);
+
   return (
     <section
       style={{ minHeight: "100vh", background: BG, position: "relative", overflow: "hidden" }}
       className="flex flex-col items-center justify-center pt-24 pb-16 px-5"
     >
-      {/* Mesh blobs */}
+      {/* Dot grid overlay */}
+      <div className="dot-grid" style={{ position: "absolute", inset: 0, opacity: 0.4, pointerEvents: "none" }} />
+
+      {/* Glow orbs */}
       <div style={{
-        position: "absolute", top: "-15%", left: "-10%",
-        width: 700, height: 700, borderRadius: "50%", pointerEvents: "none",
-        background: "radial-gradient(ellipse at center, rgba(21,86,47,0.06) 0%, transparent 65%)",
+        position: "absolute", top: "-10%", left: "50%", transform: "translateX(-50%)",
+        width: 600, height: 600, borderRadius: "50%", pointerEvents: "none",
+        background: "rgba(82,130,255,0.15)", filter: "blur(120px)",
       }} />
       <div style={{
-        position: "absolute", bottom: "-20%", right: "-10%",
-        width: 800, height: 800, borderRadius: "50%", pointerEvents: "none",
-        background: "radial-gradient(ellipse at center, rgba(180,130,80,0.07) 0%, transparent 65%)",
+        position: "absolute", bottom: "-15%", right: "-10%",
+        width: 500, height: 500, borderRadius: "50%", pointerEvents: "none",
+        background: "rgba(0,212,200,0.08)", filter: "blur(120px)",
       }} />
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto">
-        {/* Eyebrow */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28 }}
+        {/* Pill badge */}
+        <div
+          className="hero-badge"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 28,
+            padding: "6px 16px", borderRadius: 999,
+            border: `1px solid ${BORDER_B}`,
+            background: "rgba(82,130,255,0.07)",
+          }}
         >
-          <motion.div
-            animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            style={{ width: 7, height: 7, borderRadius: "50%", background: GREEN, flexShrink: 0 }}
-          />
-          <span style={{ fontSize: 11, color: MIST, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            India&rsquo;s AI-Powered Consent Platform
+          <span style={{
+            width: 7, height: 7, borderRadius: "50%", background: ACCENT,
+            flexShrink: 0, boxShadow: `0 0 8px ${ACCENT}`,
+            animation: "glow-pulse 2s ease-in-out infinite",
+          }} />
+          <span style={{ fontSize: 11, color: "#A0B4FF", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            AI-POWERED · IMC 2002 COMPLIANT
           </span>
-        </motion.div>
+        </div>
 
         {/* Headline */}
-        <h1 style={{ margin: 0, padding: 0, lineHeight: 0.92, letterSpacing: "-0.035em" }}>
-          {[
-            { text: "Generate", serif: false },
-            { text: "compliant", serif: true },
-            { text: "consent forms.", serif: false },
-          ].map((line, i) => (
-            <motion.div
-              key={line.text}
-              variants={fadeUp}
-              initial="hidden"
-              animate="show"
-              custom={i}
-              style={{
-                display: "block",
-                fontSize: "clamp(52px, 10.5vw, 120px)",
-                fontWeight: line.serif ? 400 : 700,
-                fontStyle: line.serif ? "italic" : "normal",
-                fontFamily: line.serif ? "'Instrument Serif', Georgia, serif" : "Inter, system-ui, sans-serif",
-                color: INK,
-                lineHeight: 0.92,
-              }}
-            >
-              {line.text}
-            </motion.div>
-          ))}
+        <h1 style={{ margin: 0, padding: 0, lineHeight: 0.88, letterSpacing: "-0.04em" }}>
+          <div style={{ display: "block", fontSize: "clamp(56px, 11vw, 128px)", fontWeight: 800, color: TEXT, lineHeight: 0.88 }}>
+            <span className="split-word inline-block font-syne">Generate</span>
+          </div>
+          <div style={{ display: "block", fontSize: "clamp(56px, 11vw, 128px)", fontWeight: 800, lineHeight: 0.88 }}>
+            <span className="split-word inline-block font-syne gradient-text">compliant</span>
+          </div>
+          <div style={{ display: "block", fontSize: "clamp(56px, 11vw, 128px)", fontWeight: 800, color: TEXT, lineHeight: 0.88 }}>
+            <span className="split-word inline-block font-syne">consent</span>{" "}
+            <span className="split-word inline-block font-syne">forms.</span>
+          </div>
         </h1>
 
         {/* Subtext */}
-        <motion.p
-          variants={fadeUp} initial="hidden" animate="show" custom={3}
-          style={{
-            marginTop: 28, fontSize: 18, color: MIST, maxWidth: 380,
-            lineHeight: 1.55, textAlign: "center",
-          }}
+        <p
+          className="hero-sub"
+          style={{ marginTop: 28, fontSize: 18, color: MUTED, maxWidth: 380, lineHeight: 1.55, textAlign: "center" }}
         >
           For Indian doctors. IMC 2002 compliant.
           <br />
           Draft in 30 seconds, not 30 minutes.
-        </motion.p>
+        </p>
 
         {/* CTAs */}
-        <motion.div
-          variants={fadeUp} initial="hidden" animate="show" custom={4}
-          style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 36, flexWrap: "wrap", justifyContent: "center" }}
+        <div
+          className="hero-ctas"
+          style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 36, flexWrap: "wrap", justifyContent: "center" }}
         >
           <Link
             href="/generate"
             style={{
-              display: "inline-flex", alignItems: "center", gap: 0,
-              background: INK, color: WHITE, borderRadius: 999,
-              paddingLeft: 22, paddingRight: 6, paddingTop: 8, paddingBottom: 8,
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: ACCENT, color: WHITE, borderRadius: 999,
+              padding: "12px 24px",
               fontSize: 14, fontWeight: 600, textDecoration: "none",
-              transition: "opacity 0.15s",
+              border: `1px solid rgba(82,130,255,0.4)`,
+              boxShadow: "0 0 24px rgba(82,130,255,0.3)",
+              transition: "box-shadow 0.2s, opacity 0.2s",
             }}
-            className="hover:opacity-85"
+            className="hover:opacity-90"
           >
             Generate Now
-            <span style={{
-              marginLeft: 10, width: 30, height: 30, borderRadius: "50%",
-              background: "rgba(255,255,255,0.14)", display: "inline-flex",
-              alignItems: "center", justifyContent: "center",
-            }}>
-              <ArrowRight size={14} color={WHITE} weight="bold" />
-            </span>
+            <ArrowRight size={15} weight="bold" />
           </Link>
           <a
             href="#features"
             style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              color: INK, fontSize: 14, fontWeight: 500, textDecoration: "none",
-              opacity: 0.7,
+              display: "inline-flex", alignItems: "center", gap: 6,
+              color: TEXT, fontSize: 14, fontWeight: 500, textDecoration: "none",
+              border: `1px solid rgba(255,255,255,0.1)`,
+              borderRadius: 999, padding: "12px 20px",
+              transition: "border-color 0.2s",
             }}
-            className="hover:opacity-100 transition-opacity"
+            className="hover:border-white/30"
           >
             See how it works
             <ArrowUpRight size={14} />
           </a>
-        </motion.div>
+        </div>
 
         {/* Compliance pills */}
-        <motion.div
-          variants={fadeUp} initial="hidden" animate="show" custom={5}
+        <div
+          className="hero-pills"
           style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 28 }}
         >
-          <Tooltip.Provider delayDuration={200}>
-            {compliancePills.map((pill) => {
-              const law = COMPLIANCE_LAWS.find(l => l.code === pill);
-              return (
-                <Tooltip.Root key={pill}>
-                  <Tooltip.Trigger asChild>
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: 5,
-                      border: `1px solid ${RULE}`, borderRadius: 999,
-                      padding: "4px 11px", fontSize: 11, fontWeight: 600,
-                      color: INK, background: WHITE, cursor: "default",
-                    }}>
-                      <ShieldCheck size={11} color={GREEN} weight="bold" />
-                      {pill}
-                    </div>
-                  </Tooltip.Trigger>
-                  {law && (
-                    <Tooltip.Portal>
-                      <Tooltip.Content
-                        side="bottom"
-                        sideOffset={6}
-                        style={{
-                          background: INK, color: WHITE, borderRadius: 8,
-                          padding: "6px 12px", fontSize: 11, fontWeight: 500,
-                          boxShadow: "0 8px 24px rgba(16,15,13,0.18)",
-                          zIndex: 9999,
-                        }}
-                      >
-                        {law.name}
-                        <Tooltip.Arrow style={{ fill: INK }} />
-                      </Tooltip.Content>
-                    </Tooltip.Portal>
-                  )}
-                </Tooltip.Root>
-              );
-            })}
-          </Tooltip.Provider>
-        </motion.div>
+          {compliancePills.map((pill) => (
+            <div
+              key={pill}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                border: `1px solid ${BORDER_B}`, borderRadius: 999,
+                padding: "4px 12px", fontSize: 11, fontWeight: 600,
+                color: "#A0B4FF", background: "rgba(82,130,255,0.07)",
+              }}
+            >
+              <ShieldCheck size={11} color={TEAL} weight="bold" />
+              {pill}
+            </div>
+          ))}
+        </div>
 
         {/* Document preview */}
-        <motion.div
-          variants={fadeUp} initial="hidden" animate="show" custom={6}
-          className="w-full mt-14"
-        >
+        <div className="w-full mt-14">
           <DocumentPreview />
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -424,33 +378,34 @@ function ComplianceTicker() {
 
   return (
     <div style={{
-      background: BG_DARK, position: "relative", overflow: "hidden",
+      background: BG2, position: "relative", overflow: "hidden",
       paddingTop: 18, paddingBottom: 18,
+      borderTop: `1px solid rgba(82,130,255,0.15)`,
+      borderBottom: `1px solid rgba(82,130,255,0.15)`,
     }}>
-      {/* Fade edges */}
       <div style={{
         position: "absolute", left: 0, top: 0, bottom: 0, width: 120, zIndex: 2, pointerEvents: "none",
-        background: `linear-gradient(to right, ${BG_DARK}, transparent)`,
+        background: `linear-gradient(to right, ${BG2}, transparent)`,
       }} />
       <div style={{
         position: "absolute", right: 0, top: 0, bottom: 0, width: 120, zIndex: 2, pointerEvents: "none",
-        background: `linear-gradient(to left, ${BG_DARK}, transparent)`,
+        background: `linear-gradient(to left, ${BG2}, transparent)`,
       }} />
 
       <div className="marquee-track" style={{ display: "flex", whiteSpace: "nowrap", width: "max-content" }}>
         {doubled.map((law, i) => (
           <div
             key={i}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, marginRight: 0, paddingLeft: 32, paddingRight: 32 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 32 }}
           >
-            <ShieldCheck size={13} color={GREEN} weight="bold" />
+            <ShieldCheck size={13} color={TEAL} weight="bold" />
             <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.8)", letterSpacing: "0.04em" }}>
               {law.code}
             </span>
             <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: "0.01em" }}>
               {law.name}
             </span>
-            <span style={{ width: 1, height: 14, background: "rgba(255,255,255,0.1)", marginLeft: 8 }} />
+            <span style={{ width: 1, height: 14, background: BORDER, marginLeft: 8, display: "inline-block" }} />
           </div>
         ))}
       </div>
@@ -462,49 +417,50 @@ function ComplianceTicker() {
    STATS SECTION
 ═══════════════════════════════════════════ */
 function StatsSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  useGSAP(() => {
+    gsap.from(".stat-cell", {
+      opacity: 0, y: 40, stagger: 0.1, duration: 0.7, ease: "power3.out",
+      scrollTrigger: { trigger: ".stats-section", start: "top 75%" },
+    });
+  }, []);
 
   return (
-    <section ref={ref} style={{ background: BG_DARK }}>
+    <section className="stats-section" style={{ background: BG }}>
       <div style={{
         display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
         maxWidth: 1280, margin: "0 auto",
-      }} className="grid-cols-2 sm:grid-cols-4">
-        {STATS.map((stat, i) => {
-          const isSerifValue = i === 1 || i === 3;
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      }}>
+        {STATS.map((stat, i) => (
+          <div
+            key={stat.label}
+            className="stat-cell"
+            style={{
+              padding: "44px 40px",
+              borderTop: `1px solid rgba(82,130,255,0.15)`,
+              borderRight: i < 3 ? `1px solid ${BORDER}` : "none",
+              borderBottom: `1px solid ${BORDER}`,
+            }}
+          >
+            <div
+              className={`font-syne ${i % 2 === 0 ? "gradient-text" : ""}`}
               style={{
-                padding: "44px 40px",
-                borderRight: i < 3 ? "1px solid rgba(255,255,255,0.07)" : "none",
-                borderBottom: "1px solid rgba(255,255,255,0.07)",
-              }}
-            >
-              <div style={{
-                fontSize: "clamp(40px, 6vw, 72px)",
-                fontWeight: isSerifValue ? 400 : 700,
-                fontStyle: isSerifValue ? "italic" : "normal",
-                fontFamily: isSerifValue ? "'Instrument Serif', Georgia, serif" : "Inter, system-ui, sans-serif",
-                color: WHITE,
+                fontSize: "clamp(44px, 6vw, 72px)",
+                fontWeight: 700,
                 lineHeight: 1,
                 marginBottom: 8,
-              }}>
-                {stat.value}
-              </div>
-              <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500, marginBottom: 4 }}>
-                {stat.label}
-              </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                {stat.sub}
-              </div>
-            </motion.div>
-          );
-        })}
+                color: i % 2 !== 0 ? TEXT : undefined,
+              }}
+            >
+              {stat.value}
+            </div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500, marginBottom: 4 }}>
+              {stat.label}
+            </div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>
+              {stat.sub}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -515,34 +471,41 @@ function StatsSection() {
 ═══════════════════════════════════════════ */
 function FeatureVisual01() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
+  const linesRef = useRef<HTMLDivElement[]>([]);
   const lines = [92, 75, 100, 63, 84];
+
+  useGSAP(() => {
+    gsap.from(linesRef.current, {
+      width: 0, duration: 0.7,
+      stagger: 0.12, ease: "power2.out",
+      scrollTrigger: { trigger: ref.current, start: "top 80%" },
+    });
+  }, { scope: ref });
 
   return (
     <div
       ref={ref}
       style={{
-        background: BG, border: `1px solid ${RULE}`, borderRadius: 16,
+        background: SURFACE, border: `1px solid ${BORDER_B}`, borderRadius: 16,
         padding: 28, minHeight: 200,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          style={{ width: 8, height: 8, borderRadius: "50%", background: GREEN }}
-        />
-        <span style={{ fontSize: 11, fontWeight: 600, color: GREEN }}>Generating…</span>
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%", background: ACCENT,
+          animation: "glow-pulse 1.5s ease-in-out infinite",
+          boxShadow: `0 0 8px ${ACCENT}`,
+        }} />
+        <span style={{ fontSize: 11, fontWeight: 600, color: ACCENT }}>Generating…</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {lines.map((w, i) => (
-          <motion.div
-            key={i}
-            initial={{ width: 0 }}
-            animate={inView ? { width: `${w}%` } : { width: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-            style={{ height: 8, borderRadius: 4, background: `${INK}18` }}
-          />
+          <div key={i} style={{ height: 8, borderRadius: 4, background: BORDER, overflow: "hidden" }}>
+            <div
+              ref={(el) => { if (el) linesRef.current[i] = el; }}
+              style={{ height: "100%", borderRadius: 4, background: `linear-gradient(90deg, ${ACCENT}, ${TEAL})`, width: `${w}%` }}
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -551,7 +514,7 @@ function FeatureVisual01() {
 
 function FeatureVisual02() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
+  const barRefs = useRef<HTMLDivElement[]>([]);
   const frameworks = [
     { name: "IMC 2002",    pct: 100 },
     { name: "BNS §§24-30", pct: 100 },
@@ -559,12 +522,18 @@ function FeatureVisual02() {
     { name: "CPA 2019",    pct: 98  },
   ];
 
+  useGSAP(() => {
+    gsap.from(barRefs.current, {
+      width: 0, duration: 0.8,
+      stagger: 0.15, ease: "power2.out",
+      scrollTrigger: { trigger: ref.current, start: "top 80%" },
+    });
+  }, { scope: ref });
+
   return (
     <div
       ref={ref}
-      style={{
-        background: INK, borderRadius: 16, padding: 28, minHeight: 200,
-      }}
+      style={{ background: BG2, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 28, minHeight: 200 }}
     >
       <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", marginBottom: 18, letterSpacing: "0.08em", textTransform: "uppercase" }}>
         Frameworks
@@ -574,21 +543,19 @@ function FeatureVisual02() {
           <div key={f.name}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
               <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{f.name}</span>
-              <span style={{ fontSize: 11, color: GREEN, fontWeight: 700 }}>{f.pct}%</span>
+              <span style={{ fontSize: 11, color: TEAL, fontWeight: 700 }}>{f.pct}%</span>
             </div>
-            <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={inView ? { width: `${f.pct}%` } : { width: 0 }}
-                transition={{ duration: 0.8, delay: 0.15 * i, ease: [0.16, 1, 0.3, 1] }}
-                style={{ height: "100%", background: GREEN, borderRadius: 2 }}
+            <div style={{ height: 4, background: BORDER, borderRadius: 2, overflow: "hidden" }}>
+              <div
+                ref={(el) => { if (el) barRefs.current[i] = el; }}
+                style={{ height: "100%", background: `linear-gradient(90deg, ${ACCENT}, ${TEAL})`, borderRadius: 2, width: `${f.pct}%` }}
               />
             </div>
           </div>
         ))}
       </div>
-      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <span style={{ fontSize: 32, fontWeight: 700, color: WHITE, fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>100%</span>
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
+        <span className="font-syne gradient-text" style={{ fontSize: 32, fontWeight: 700 }}>100%</span>
         <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginLeft: 8 }}>coverage</span>
       </div>
     </div>
@@ -597,7 +564,6 @@ function FeatureVisual02() {
 
 function FeatureVisual03() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
   const clauses = [
     "Patient identification verified",
     "Procedure explained in detail",
@@ -608,34 +574,39 @@ function FeatureVisual03() {
     "Doctor's countersignature",
   ];
 
+  useGSAP(() => {
+    gsap.from(".clause-item", {
+      opacity: 0, x: -20, stagger: 0.07, duration: 0.5, ease: "power2.out",
+      scrollTrigger: { trigger: ref.current, start: "top 80%" },
+    });
+  }, { scope: ref });
+
   return (
     <div
       ref={ref}
       style={{
-        background: BG_ALT, border: `1px solid ${RULE}`, borderRadius: 16,
+        background: SURFACE, border: `1px solid ${BORDER_B}`, borderRadius: 16,
         padding: 28, minHeight: 200,
       }}
     >
-      <div style={{ fontSize: 11, fontWeight: 600, color: MIST, marginBottom: 16, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: MUTED, marginBottom: 16, letterSpacing: "0.08em", textTransform: "uppercase" }}>
         Clauses
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {clauses.map((c, i) => (
-          <motion.div
+        {clauses.map((c) => (
+          <div
             key={c}
-            initial={{ opacity: 0, x: -16 }}
-            animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 }}
-            transition={{ duration: 0.4, delay: 0.06 * i, ease: [0.16, 1, 0.3, 1] }}
+            className="clause-item"
             style={{ display: "flex", alignItems: "center", gap: 8 }}
           >
             <div style={{
               width: 14, height: 14, borderRadius: 3, background: GREEN,
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <CheckCircle size={9} color={WHITE} weight="bold" />
+              <CheckCircle size={9} color={BG} weight="bold" />
             </div>
-            <span style={{ fontSize: 11, color: INK, fontWeight: 500 }}>{c}</span>
-          </motion.div>
+            <span style={{ fontSize: 11, color: TEXT, fontWeight: 500 }}>{c}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -648,25 +619,46 @@ const featureVisuals = [FeatureVisual01, FeatureVisual02, FeatureVisual03];
    FEATURES SECTION
 ═══════════════════════════════════════════ */
 function FeaturesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    // Section header
+    gsap.from(".features-header", {
+      opacity: 0, y: 30, duration: 0.7, ease: "power3.out",
+      scrollTrigger: { trigger: ".features-header", start: "top 80%" },
+    });
+
+    // Feature rows
+    gsap.utils.toArray<HTMLElement>(".feature-row").forEach((row, i) => {
+      const text = row.querySelector(".feature-text");
+      const visual = row.querySelector(".feature-visual");
+      gsap.from([text, visual], {
+        opacity: 0,
+        x: (j: number) => (i % 2 === 0 ? (j === 0 ? -40 : 40) : (j === 0 ? 40 : -40)),
+        duration: 0.8, stagger: 0.1, ease: "power3.out",
+        scrollTrigger: { trigger: row, start: "top 75%" },
+      });
+    });
+  }, { scope: sectionRef });
+
   return (
-    <section id="features" style={{ background: BG }}>
+    <section id="features" ref={sectionRef} style={{ background: BG }}>
       {/* Section header */}
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 40px 0" }}>
+      <div className="features-header" style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 40px 0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 18 }}>
-          <Lightning size={14} color={GREEN} weight="bold" />
-          <span style={{ fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <Lightning size={14} color={ACCENT} weight="bold" />
+          <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, letterSpacing: "0.1em", textTransform: "uppercase" }}>
             Features
           </span>
         </div>
-        <div style={{ paddingBottom: 48, borderBottom: `1px solid ${RULE}` }}>
-          <h2 style={{ margin: 0, padding: 0, fontSize: "clamp(32px, 4.5vw, 54px)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-            <span style={{ fontWeight: 700, color: INK, fontFamily: "Inter, system-ui, sans-serif" }}>
-              Everything a doctor needs
-            </span>
+        <div style={{ paddingBottom: 48, borderBottom: `1px solid ${BORDER}` }}>
+          <h2
+            className="font-syne"
+            style={{ margin: 0, padding: 0, fontSize: "clamp(32px, 4.5vw, 54px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: TEXT, fontWeight: 700 }}
+          >
+            Everything a doctor needs
             <br />
-            <span style={{ fontWeight: 400, fontStyle: "italic", fontFamily: "'Instrument Serif', Georgia, serif", color: INK }}>
-              before the procedure.
-            </span>
+            <span className="gradient-text">before the procedure.</span>
           </h2>
         </div>
       </div>
@@ -679,66 +671,64 @@ function FeaturesSection() {
           return (
             <div
               key={feat.num}
+              className="feature-row"
               style={{
                 display: "grid", gridTemplateColumns: "1fr 1fr",
-                borderBottom: `1px solid ${RULE}`,
-                flexDirection: isEven ? "row" : "row-reverse",
+                borderBottom: `1px solid ${BORDER}`,
               }}
-              className="flex-col sm:grid"
             >
               {/* Text side */}
-              <motion.div
-                variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
+              <div
+                className="feature-text"
                 style={{
                   padding: "56px 48px",
-                  borderRight: isEven ? `1px solid ${RULE}` : "none",
-                  borderLeft: isEven ? "none" : `1px solid ${RULE}`,
+                  borderRight: isEven ? `1px solid ${BORDER}` : "none",
+                  borderLeft: isEven ? "none" : `1px solid ${BORDER}`,
                   order: isEven ? 0 : 1,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginBottom: 20 }}>
-                  <span style={{ fontSize: 80, fontWeight: 700, color: RULE, lineHeight: 1, fontFamily: "Inter, system-ui, sans-serif", letterSpacing: "-0.04em" }}>
+                  <span className="font-syne" style={{ fontSize: 80, fontWeight: 700, color: "rgba(255,255,255,0.06)", lineHeight: 1, letterSpacing: "-0.04em" }}>
                     {feat.num}
                   </span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     {feat.tag}
                   </span>
                 </div>
-                <h3 style={{
-                  margin: "0 0 16px",
-                  fontSize: "clamp(28px, 3.5vw, 40px)",
-                  fontWeight: 700, color: INK,
-                  lineHeight: 1.15, letterSpacing: "-0.02em",
-                  whiteSpace: "pre-line",
-                  fontFamily: "Inter, system-ui, sans-serif",
-                }}>
+                <h3
+                  className="font-syne"
+                  style={{
+                    margin: "0 0 16px",
+                    fontSize: "clamp(28px, 3.5vw, 42px)",
+                    fontWeight: 700, color: TEXT,
+                    lineHeight: 1.15, letterSpacing: "-0.02em",
+                    whiteSpace: "pre-line",
+                  }}
+                >
                   {feat.title}
                 </h3>
-                <p style={{ fontSize: 15, color: MIST, lineHeight: 1.65, marginBottom: 28, maxWidth: 420 }}>
+                <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.65, marginBottom: 28, maxWidth: 420 }}>
                   {feat.body}
                 </p>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <span style={{
-                    fontSize: 40, fontWeight: 700, color: INK,
-                    fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic",
-                  }}>
+                  <span className="font-syne gradient-text" style={{ fontSize: 40, fontWeight: 700 }}>
                     {feat.metric.value}
                   </span>
-                  <span style={{ fontSize: 13, color: MIST }}>
+                  <span style={{ fontSize: 13, color: MUTED }}>
                     {feat.metric.label}
                   </span>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Visual side */}
-              <motion.div
-                variants={fadeUp} initial="hidden" whileInView="show" custom={1} viewport={{ once: true }}
+              <div
+                className="feature-visual"
                 style={{ padding: "56px 48px", display: "flex", alignItems: "center", order: isEven ? 1 : 0 }}
               >
                 <div style={{ width: "100%" }}>
                   <Visual />
                 </div>
-              </motion.div>
+              </div>
             </div>
           );
         })}
@@ -751,25 +741,32 @@ function FeaturesSection() {
    CONSENT TYPES SECTION
 ═══════════════════════════════════════════ */
 function ConsentTypesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    gsap.from(".type-card", {
+      opacity: 0, x: 30, stagger: 0.04, duration: 0.6, ease: "power2.out",
+      scrollTrigger: { trigger: ".types-track", start: "top 80%" },
+    });
+  }, { scope: sectionRef });
+
   return (
-    <section style={{ background: BG_ALT, padding: "80px 0" }}>
+    <section ref={sectionRef} style={{ background: BG2, padding: "80px 0" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16 }}>
-            <Stethoscope size={14} color={GREEN} weight="bold" />
-            <span style={{ fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <Stethoscope size={14} color={ACCENT} weight="bold" />
+            <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT, letterSpacing: "0.1em", textTransform: "uppercase" }}>
               Consent Types
             </span>
           </div>
-          <h2 style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
-            <span style={{ fontWeight: 700, color: INK, fontFamily: "Inter, system-ui, sans-serif" }}>
-              10+ procedure-specific
-            </span>
-            <br />
-            <span style={{ fontWeight: 400, fontStyle: "italic", fontFamily: "'Instrument Serif', Georgia, serif", color: INK }}>
-              consent templates.
-            </span>
+          <h2
+            className="font-syne"
+            style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", fontWeight: 700, color: TEXT }}
+          >
+            10+ procedure-specific{" "}
+            <span className="gradient-text">consent templates.</span>
           </h2>
         </div>
 
@@ -777,34 +774,29 @@ function ConsentTypesSection() {
         <div style={{ position: "relative" }}>
           <div style={{
             position: "absolute", left: 0, top: 0, bottom: 0, width: 60, zIndex: 1, pointerEvents: "none",
-            background: `linear-gradient(to right, ${BG_ALT}, transparent)`,
+            background: `linear-gradient(to right, ${BG2}, transparent)`,
           }} />
           <div style={{
             position: "absolute", right: 0, top: 0, bottom: 0, width: 60, zIndex: 1, pointerEvents: "none",
-            background: `linear-gradient(to left, ${BG_ALT}, transparent)`,
+            background: `linear-gradient(to left, ${BG2}, transparent)`,
           }} />
           <div
-            className="no-scrollbar"
+            className="types-track no-scrollbar"
             style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4 }}
           >
-            {CONSENT_TYPES.map((ct, i) => (
-              <motion.div
+            {CONSENT_TYPES.map((ct) => (
+              <div
                 key={ct.name}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.04 }}
-                whileHover={{ y: -4 }}
+                className="type-card glow-card"
                 style={{
                   width: 160, flexShrink: 0, borderRadius: 16, padding: 20,
-                  background: WHITE, border: `1px solid ${RULE}`,
-                  cursor: "default", transition: "box-shadow 0.2s",
+                  cursor: "default",
                 }}
               >
                 <div style={{ fontSize: 24, marginBottom: 10 }}>{ct.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: INK, marginBottom: 3 }}>{ct.name}</div>
-                <div style={{ fontSize: 11, color: MIST }}>{ct.sub}</div>
-              </motion.div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 3 }}>{ct.name}</div>
+                <div style={{ fontSize: 11, color: MUTED }}>{ct.sub}</div>
+              </div>
             ))}
           </div>
         </div>
@@ -817,48 +809,57 @@ function ConsentTypesSection() {
    HOW IT WORKS SECTION
 ═══════════════════════════════════════════ */
 function HowItWorksSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    gsap.from(".step-cell", {
+      opacity: 0, y: 30, stagger: 0.15, duration: 0.7, ease: "power3.out",
+      scrollTrigger: { trigger: ".steps-grid", start: "top 75%" },
+    });
+  }, { scope: sectionRef });
+
   return (
-    <section id="how-it-works" style={{ background: BG, padding: "80px 0" }}>
+    <section id="how-it-works" ref={sectionRef} style={{ background: BG, padding: "80px 0" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
         {/* Header */}
         <div style={{ marginBottom: 56 }}>
-          <h2 style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
-            <span style={{ fontWeight: 700, color: INK, fontFamily: "Inter, system-ui, sans-serif" }}>
-              Three steps to a
-            </span>
-            <br />
-            <span style={{ fontWeight: 400, fontStyle: "italic", fontFamily: "'Instrument Serif', Georgia, serif", color: INK }}>
-              compliant consent form.
-            </span>
+          <h2
+            className="font-syne"
+            style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", fontWeight: 700, color: TEXT }}
+          >
+            Three steps to a{" "}
+            <span className="gradient-text">compliant consent form.</span>
           </h2>
         </div>
 
         {/* Steps grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }} className="grid-cols-1 sm:grid-cols-3">
+        <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
           {STEPS.map((step, i) => (
-            <motion.div
+            <div
               key={step.n}
-              variants={fadeUp} initial="hidden" whileInView="show" custom={i} viewport={{ once: true }}
+              className="step-cell"
               style={{
-                borderTop: `1px solid ${RULE}`,
-                borderRight: i < 2 ? `1px solid ${RULE}` : "none",
+                borderTop: `1px solid rgba(82,130,255,0.15)`,
+                borderRight: i < 2 ? `1px solid ${BORDER}` : "none",
                 padding: "36px 36px 40px",
               }}
             >
-              <div style={{
-                fontSize: 80, fontWeight: 700, color: RULE, lineHeight: 1,
-                fontFamily: "Inter, system-ui, sans-serif", letterSpacing: "-0.04em",
-                marginBottom: 20,
-              }}>
+              <div
+                className="font-syne"
+                style={{
+                  fontSize: 80, fontWeight: 700, color: "rgba(255,255,255,0.05)", lineHeight: 1,
+                  letterSpacing: "-0.04em", marginBottom: 20,
+                }}
+              >
                 {step.n}
               </div>
-              <h3 style={{ fontSize: 20, fontWeight: 600, color: INK, marginBottom: 10, lineHeight: 1.3 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 600, color: TEXT, marginBottom: 10, lineHeight: 1.3 }}>
                 {step.title}
               </h3>
-              <p style={{ fontSize: 14, color: MIST, lineHeight: 1.65 }}>
+              <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.65 }}>
                 {step.body}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -871,20 +872,31 @@ function HowItWorksSection() {
 ═══════════════════════════════════════════ */
 function TestimonialsSection() {
   const [active, setActive] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setInterval(() => setActive(a => (a + 1) % TESTIMONIALS.length), 5000);
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    if (containerRef.current) {
+      gsap.fromTo(
+        containerRef.current,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      );
+    }
+  }, [active]);
+
   const t = TESTIMONIALS[active];
 
   return (
-    <section style={{ background: BG_DARK, padding: "100px 40px", position: "relative", overflow: "hidden" }}>
+    <section style={{ background: BG2, padding: "100px 40px", position: "relative", overflow: "hidden" }}>
       {/* Decorative quote */}
-      <div style={{
+      <div className="font-syne" style={{
         position: "absolute", top: 20, left: 48, fontSize: 200,
-        fontFamily: "Georgia, serif", color: "rgba(255,255,255,0.04)",
+        color: "rgba(82,130,255,0.08)",
         lineHeight: 1, userSelect: "none", pointerEvents: "none",
       }}>
         &ldquo;
@@ -895,39 +907,34 @@ function TestimonialsSection() {
           Testimonials
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <blockquote style={{
+        <div ref={containerRef}>
+          <blockquote
+            className="font-syne"
+            style={{
               margin: 0, marginBottom: 40,
-              fontSize: "clamp(22px, 3.5vw, 36px)",
-              fontWeight: 500, color: WHITE,
+              fontSize: "clamp(20px, 3vw, 34px)",
+              fontWeight: 500, color: TEXT,
               lineHeight: 1.35, letterSpacing: "-0.01em",
               maxWidth: 720,
+            }}
+          >
+            &ldquo;{t.quote}&rdquo;
+          </blockquote>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: "50%",
+              background: `linear-gradient(135deg, ${ACCENT}, ${TEAL})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13, fontWeight: 700, color: WHITE, flexShrink: 0,
             }}>
-              &ldquo;{t.quote}&rdquo;
-            </blockquote>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: `${GREEN}40`, border: `1px solid ${GREEN}60`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 13, fontWeight: 700, color: GREEN, flexShrink: 0,
-              }}>
-                {t.initials}
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: WHITE }}>{t.name}</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{t.role}</div>
-              </div>
+              {t.initials}
             </div>
-          </motion.div>
-        </AnimatePresence>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: WHITE }}>{t.name}</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{t.role}</div>
+            </div>
+          </div>
+        </div>
 
         {/* Dots */}
         <div style={{ display: "flex", gap: 8, marginTop: 36 }}>
@@ -938,7 +945,7 @@ function TestimonialsSection() {
               style={{
                 height: 6, borderRadius: 999,
                 width: i === active ? 24 : 6,
-                background: i === active ? WHITE : "rgba(255,255,255,0.2)",
+                background: i === active ? ACCENT : "rgba(255,255,255,0.15)",
                 border: "none", cursor: "pointer",
                 transition: "all 0.3s ease",
                 padding: 0,
@@ -955,41 +962,50 @@ function TestimonialsSection() {
    CTA SECTION
 ═══════════════════════════════════════════ */
 function CTASection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    gsap.from(".cta-block", {
+      opacity: 0, scale: 0.95, duration: 0.8, ease: "power3.out",
+      scrollTrigger: { trigger: ".cta-block", start: "top 80%" },
+    });
+  }, { scope: sectionRef });
+
   return (
-    <section style={{ background: BG, padding: "80px 40px" }}>
+    <section ref={sectionRef} style={{ background: BG, padding: "80px 40px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div style={{
-          background: INK, borderRadius: 28, padding: "80px 64px",
-          position: "relative", overflow: "hidden", textAlign: "center",
-        }}>
-          {/* Huge bg text */}
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "clamp(80px, 14vw, 200px)", fontWeight: 400, fontStyle: "italic",
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            color: "rgba(255,255,255,0.02)", lineHeight: 1, pointerEvents: "none",
-            userSelect: "none", whiteSpace: "nowrap", overflow: "hidden",
-          }}>
+        <div
+          className="cta-block dark-card"
+          style={{ padding: "80px 64px", textAlign: "center" }}
+        >
+          {/* Background watermark */}
+          <div
+            className="font-syne"
+            style={{
+              position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "clamp(80px, 14vw, 200px)", fontWeight: 800,
+              color: "rgba(82,130,255,0.03)", lineHeight: 1, pointerEvents: "none",
+              userSelect: "none", whiteSpace: "nowrap", overflow: "hidden",
+            }}
+          >
             ConsentGen
           </div>
 
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 24 }}>
-              <Sparkle size={14} color="rgba(255,255,255,0.5)" />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              <Sparkle size={14} color={ACCENT} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: MUTED, letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Ready to streamline
               </span>
             </div>
-            <h2 style={{ margin: "0 0 16px", fontSize: "clamp(32px, 5vw, 60px)", lineHeight: 1.1, letterSpacing: "-0.025em" }}>
-              <span style={{ fontWeight: 700, color: WHITE, fontFamily: "Inter, system-ui, sans-serif" }}>
-                Generate your first
-              </span>
-              <br />
-              <span style={{ fontWeight: 400, fontStyle: "italic", fontFamily: "'Instrument Serif', Georgia, serif", color: WHITE }}>
-                consent form for free.
-              </span>
+            <h2
+              className="font-syne"
+              style={{ margin: "0 0 16px", fontSize: "clamp(32px, 5vw, 60px)", lineHeight: 1.1, letterSpacing: "-0.025em", color: TEXT, fontWeight: 800 }}
+            >
+              Generate your first{" "}
+              <span className="gradient-text">consent form for free.</span>
             </h2>
-            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 16, color: MUTED, maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.6 }}>
               Join hundreds of Indian doctors who trust ConsentGen for their medico-legal documentation.
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -997,25 +1013,25 @@ function CTASection() {
                 href="/generate"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
-                  background: WHITE, color: INK, borderRadius: 999,
-                  padding: "12px 28px", fontSize: 14, fontWeight: 700,
+                  background: WHITE, color: BG, borderRadius: 999,
+                  padding: "14px 32px", fontSize: 15, fontWeight: 700,
                   textDecoration: "none", transition: "opacity 0.15s",
                 }}
                 className="hover:opacity-90"
               >
                 Start Generating
-                <ArrowRight size={14} weight="bold" />
+                <ArrowRight size={15} weight="bold" />
               </Link>
               <Link
                 href="/dashboard"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
-                  background: "transparent", color: WHITE,
-                  border: `1px solid rgba(255,255,255,0.25)`,
-                  borderRadius: 999, padding: "12px 28px", fontSize: 14, fontWeight: 600,
+                  background: "transparent", color: TEXT,
+                  border: `1px solid rgba(255,255,255,0.15)`,
+                  borderRadius: 999, padding: "14px 28px", fontSize: 15, fontWeight: 600,
                   textDecoration: "none", transition: "border-color 0.15s",
                 }}
-                className="hover:border-white/50"
+                className="hover:border-white/40"
               >
                 View Dashboard
               </Link>
@@ -1029,8 +1045,8 @@ function CTASection() {
                 { value: "100%", label: "IMC Compliant" },
               ].map(({ value, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: WHITE, lineHeight: 1, marginBottom: 4 }}>{value}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{label}</div>
+                  <div className="font-syne gradient-text" style={{ fontSize: 28, fontWeight: 700, lineHeight: 1, marginBottom: 4 }}>{value}</div>
+                  <div style={{ fontSize: 12, color: MUTED }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -1046,31 +1062,33 @@ function CTASection() {
 ═══════════════════════════════════════════ */
 function PageFooter() {
   return (
-    <footer style={{ background: BG, borderTop: `1px solid ${RULE}`, padding: "60px 40px 32px" }}>
+    <footer style={{ background: BG, borderTop: `1px solid ${BORDER_B}`, padding: "60px 40px 32px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.5fr", gap: 48, marginBottom: 48 }} className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.5fr", gap: 48, marginBottom: 48 }}>
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <div style={{
-                width: 32, height: 32, borderRadius: 8, background: INK,
+                width: 32, height: 32, borderRadius: 8,
+                background: `linear-gradient(135deg, ${ACCENT}, ${TEAL})`,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 <ShieldCheck size={16} color={WHITE} weight="bold" />
               </div>
-              <span style={{ fontSize: 15, fontWeight: 700, color: INK }}>ConsentGen</span>
+              <span className="font-syne" style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>ConsentGen</span>
             </div>
-            <p style={{ fontSize: 13, color: MIST, lineHeight: 1.65, maxWidth: 240, marginBottom: 18 }}>
+            <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, maxWidth: 240, marginBottom: 18 }}>
               AI-powered medico-legal consent form generator for Indian doctors. Generate, verify, and export in seconds.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {["IMC 2002", "BNS §§24-30", "MoRTH 2025"].map(b => (
                 <div key={b} style={{
                   display: "inline-flex", alignItems: "center", gap: 4,
-                  border: `1px solid ${RULE}`, borderRadius: 999,
-                  padding: "3px 9px", fontSize: 10, fontWeight: 600, color: MIST,
+                  border: `1px solid ${BORDER_B}`, borderRadius: 999,
+                  padding: "3px 9px", fontSize: 10, fontWeight: 600, color: "#A0B4FF",
+                  background: "rgba(82,130,255,0.07)",
                 }}>
-                  <ShieldCheck size={9} color={GREEN} />
+                  <ShieldCheck size={9} color={TEAL} />
                   {b}
                 </div>
               ))}
@@ -1079,7 +1097,7 @@ function PageFooter() {
 
           {/* Application */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: MIST, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
               Application
             </div>
             {[
@@ -1088,7 +1106,12 @@ function PageFooter() {
               { label: "History", href: "/history" },
               { label: "Sign In", href: "/login" },
             ].map(({ label, href }) => (
-              <Link key={label} href={href} style={{ display: "block", fontSize: 14, color: MIST, textDecoration: "none", marginBottom: 10, transition: "color 0.15s" }} className="hover:text-ink">
+              <Link
+                key={label}
+                href={href}
+                style={{ display: "block", fontSize: 14, color: MUTED, textDecoration: "none", marginBottom: 10, transition: "color 0.15s" }}
+                className="hover:text-white"
+              >
                 {label}
               </Link>
             ))}
@@ -1096,23 +1119,23 @@ function PageFooter() {
 
           {/* Compliance */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: MIST, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
               Compliance
             </div>
             {COMPLIANCE_LAWS.map(law => (
-              <div key={law.code} style={{ fontSize: 13, color: MIST, marginBottom: 8 }}>
-                <span style={{ fontWeight: 600, color: INK }}>{law.code}</span>
-                <span style={{ display: "block", fontSize: 11, color: MIST, marginTop: 1 }}>{law.name}</span>
+              <div key={law.code} style={{ fontSize: 13, color: MUTED, marginBottom: 8 }}>
+                <span style={{ fontWeight: 600, color: TEXT }}>{law.code}</span>
+                <span style={{ display: "block", fontSize: 11, color: MUTED, marginTop: 1 }}>{law.name}</span>
               </div>
             ))}
           </div>
 
           {/* Stay Updated */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: MIST, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
               Stay Updated
             </div>
-            <p style={{ fontSize: 13, color: MIST, lineHeight: 1.6, marginBottom: 14 }}>
+            <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 14 }}>
               Get updates on new consent templates and compliance changes.
             </p>
             <div style={{ display: "flex", gap: 8 }}>
@@ -1121,16 +1144,16 @@ function PageFooter() {
                 placeholder="Enter your email"
                 style={{
                   flex: 1, fontSize: 13, padding: "9px 12px",
-                  border: `1px solid ${RULE}`, borderRadius: 8,
-                  background: WHITE, color: INK, outline: "none",
+                  border: `1px solid ${BORDER}`, borderRadius: 8,
+                  background: SURFACE, color: TEXT, outline: "none",
                 }}
               />
               <button
                 type="button"
                 style={{
-                  padding: "9px 16px", background: INK, color: WHITE,
+                  padding: "9px 16px", background: ACCENT, color: WHITE,
                   border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600,
-                  cursor: "pointer",
+                  cursor: "pointer", boxShadow: `0 0 12px rgba(82,130,255,0.3)`,
                 }}
               >
                 →
@@ -1140,10 +1163,10 @@ function PageFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div style={{ paddingTop: 24, borderTop: `1px solid ${RULE}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ fontSize: 12, color: MIST }}>© 2025 ConsentGen. Built for Indian Medical Practice.</p>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: MIST }}>
-            <ShieldCheck size={12} color={GREEN} />
+        <div style={{ paddingTop: 24, borderTop: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <p style={{ fontSize: 12, color: MUTED }}>© 2025 ConsentGen. Built for Indian Medical Practice.</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: MUTED }}>
+            <ShieldCheck size={12} color={TEAL} />
             IMC 2002 Compliant Platform
           </div>
         </div>

@@ -9,11 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        serif: ["var(--font-inter)", "system-ui", "sans-serif"],
-        inter: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["'Instrument Serif'", "Georgia", "serif"],
-        body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans:    ["var(--font-dm)", "system-ui", "sans-serif"],
+        dm:      ["var(--font-dm)", "system-ui", "sans-serif"],
+        syne:    ["var(--font-syne)", "system-ui", "sans-serif"],
+        display: ["var(--font-syne)", "system-ui", "sans-serif"],
+        body:    ["var(--font-dm)", "system-ui", "sans-serif"],
+        inter:   ["var(--font-dm)", "system-ui", "sans-serif"],
+        serif:   ["var(--font-syne)", "serif"],
       },
       colors: {
         // ─── Semantic design tokens ───
@@ -94,11 +96,20 @@ const config: Config = {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "0.5" },
+          "50%": { opacity: "1" },
+        },
+        "border-spin": {
+          "0%": { "--angle": "0deg" },
+          "100%": { "--angle": "360deg" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         float: "float 4s ease-in-out infinite",
         "spin-slow": "spin-slow 8s linear infinite",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
       },
     },
   },
