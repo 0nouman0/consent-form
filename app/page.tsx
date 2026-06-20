@@ -13,6 +13,8 @@ import {
   Lightning,
   Star,
   MagnifyingGlass,
+  Sparkle,
+  CheckCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
@@ -193,53 +195,207 @@ function AbstractArt() {
 /* ═══════════════════════════════════════════
    FLOATING CARD
 ═══════════════════════════════════════════ */
-function FloatingCard() {
+/* Animated 3-phase consent flow illustration */
+function ConsentFlowAnimation() {
+  const [phase, setPhase] = useState(0); // 0=fill, 1=generate, 2=ready
+  const [typedName, setTypedName] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [checks, setChecks] = useState([false, false, false, false]);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let typerInterval: ReturnType<typeof setInterval> | null = null;
+    let progInterval: ReturnType<typeof setInterval> | null = null;
+
+    const runCycle = () => {
+      // Reset all state
+      setPhase(0);
+      setTypedName("");
+      setProgress(0);
+      setChecks([false, false, false, false]);
+
+      // Phase 0: typewriter on name field
+      const fullName = "Rajesh Kumar";
+      let i = 0;
+      typerInterval = setInterval(() => {
+        i++;
+        setTypedName(fullName.slice(0, i));
+        if (i >= fullName.length && typerInterval) clearInterval(typerInterval);
+      }, 90);
+
+      // Phase 1: generating
+      timers.push(setTimeout(() => {
+        setPhase(1);
+        let p = 0;
+        progInterval = setInterval(() => {
+          p += 3;
+          setProgress(Math.min(p, 100));
+          if (p >= 100 && progInterval) clearInterval(progInterval);
+        }, 40);
+      }, 2200));
+
+      // Phase 2: document ready — checks appear one by one
+      timers.push(setTimeout(() => {
+        setPhase(2);
+        [600, 1100, 1600, 2100].forEach((d, idx) => {
+          timers.push(setTimeout(() => {
+            setChecks(prev => { const n = [...prev]; n[idx] = true; return n; });
+          }, d));
+        });
+      }, 5400));
+    };
+
+    runCycle();
+    const cycle = setInterval(runCycle, 10500);
+    return () => {
+      clearInterval(cycle);
+      if (typerInterval) clearInterval(typerInterval);
+      if (progInterval) clearInterval(progInterval);
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  const PHASES = ["Fill Details", "AI Generating", "Form Ready"];
+
   return (
-    <div
-      className="float-card absolute top-6 right-6 w-56 rounded-2xl p-4"
-      style={{
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(12px)",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-        zIndex: 10,
-      }}
-    >
-      {/* Three dots */}
-      <div className="flex gap-1.5 mb-3">
-        {[0, 1, 2].map(i => (
-          <div
-            key={i}
-            className="w-2 h-2 rounded-full"
-            style={{ background: i === 0 ? "#D1D1D6" : "transparent", border: `1px solid ${BORDER}` }}
-          />
+    <div className="float-card absolute inset-0 flex flex-col items-center justify-center"
+      style={{ padding: "72px 28px 100px" }}>
+
+      {/* Phase indicator pills */}
+      <div className="flex items-center gap-2 mb-4">
+        {PHASES.map((label, i) => (
+          <div key={label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-dm transition-all duration-500"
+            style={{
+              fontSize: 9,
+              background: i === phase ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
+              color: i === phase ? INK : "rgba(255,255,255,0.7)",
+              fontWeight: i === phase ? 600 : 400,
+            }}>
+            <div className="w-1.5 h-1.5 rounded-full transition-all duration-500"
+              style={{ background: i === phase ? "#166534" : "rgba(255,255,255,0.4)" }} />
+            {label}
+          </div>
         ))}
       </div>
-      {/* Text */}
-      <p className="text-xs font-dm leading-relaxed mb-3" style={{ color: INK }}>
-        Generate consent in 30 seconds with full legal compliance
-      </p>
-      {/* Avatar row */}
-      <div className="flex items-center gap-2 mb-3">
-        <div
-          className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-          style={{ background: "linear-gradient(135deg, #6B7FD4, #8B6FC4)", fontSize: 9 }}
-        >
-          DR
+
+      {/* Card */}
+      <div className="w-full max-w-[260px] rounded-2xl overflow-hidden"
+        style={{
+          background: "rgba(255,255,255,0.95)",
+          backdropFilter: "blur(20px)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
+        }}>
+
+        {/* Mac window chrome */}
+        <div className="flex items-center gap-1.5 px-4 py-3"
+          style={{ borderBottom: `1px solid ${BORDER}`, background: "rgba(248,248,250,0.8)" }}>
+          {["#FF5F57", "#FEBC2E", "#28C840"].map(c => (
+            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+          ))}
+          <span className="ml-auto font-dm text-[9px] font-medium" style={{ color: MUTED }}>ConsentGen</span>
         </div>
-        <div>
-          <div className="font-dm font-medium" style={{ fontSize: 10, color: INK }}>@consentgen</div>
-          <div style={{ fontSize: 9, color: MUTED }}>AI Verified</div>
-        </div>
-      </div>
-      {/* Bottom row */}
-      <div className="flex items-center justify-between">
-        <span className="font-dm" style={{ fontSize: 10, color: MUTED }}>Consultant</span>
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: DARK_BTN }}
-        >
-          <ArrowUpRight className="w-3 h-3 text-white" />
-        </div>
+
+        {/* Phase 0 — Fill Details */}
+        {phase === 0 && (
+          <div className="p-4">
+            <p className="font-bricolage font-bold text-xs mb-3" style={{ color: INK }}>Patient Details</p>
+            <div className="space-y-2.5">
+              {[
+                { label: "Patient Name", value: typedName, placeholder: "", typing: true },
+                { label: "Procedure", value: "Surgical", placeholder: "", typing: false },
+                { label: "Consent Type", value: "Pre-operative", placeholder: "", typing: false },
+              ].map(field => (
+                <div key={field.label}>
+                  <div className="font-dm mb-1" style={{ fontSize: 9, color: MUTED }}>{field.label}</div>
+                  <div className="flex items-center h-7 px-2.5 rounded-lg"
+                    style={{ border: `1px solid ${field.typing ? "#166534" : BORDER}`, fontSize: 11, color: field.value ? INK : MUTED, fontFamily: "var(--font-dm)" }}>
+                    {field.value}
+                    {field.typing && <span className="animate-pulse ml-px text-[#166534]">|</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="mt-4 w-full h-8 rounded-lg flex items-center justify-center gap-1.5 text-white font-dm font-medium"
+              style={{ background: DARK_BTN, fontSize: 11 }}>
+              <Sparkle className="w-3 h-3" /> Generate Consent
+            </button>
+          </div>
+        )}
+
+        {/* Phase 1 — AI Generating */}
+        {phase === 1 && (
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#4CAF50" }} />
+              <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>AI Generating…</p>
+              <span className="ml-auto font-dm font-semibold" style={{ fontSize: 10, color: "#166534" }}>{progress}%</span>
+            </div>
+            {/* Steps */}
+            <div className="space-y-2 mb-4">
+              {[
+                "Applying IMC 2002 guidelines",
+                "Verifying BNS §§24-30",
+                "Checking MoRTH 2025",
+                "Finalizing all clauses",
+              ].map((msg, i) => {
+                const done = progress > (i + 1) * 25;
+                return (
+                  <div key={msg} className="flex items-center gap-2 transition-all duration-300">
+                    <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                      style={{ background: done ? "#166534" : BORDER }}>
+                      {done && <span className="text-white" style={{ fontSize: 8 }}>✓</span>}
+                    </div>
+                    <span className="font-dm transition-colors duration-300"
+                      style={{ fontSize: 10, color: done ? INK : MUTED }}>{msg}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Progress bar */}
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+              <div className="h-full rounded-full transition-all duration-100"
+                style={{ width: `${progress}%`, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
+            </div>
+          </div>
+        )}
+
+        {/* Phase 2 — Form Ready */}
+        {phase === 2 && (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>Consent Form Ready</p>
+              <span className="font-dm font-semibold px-2 py-0.5 rounded-full"
+                style={{ fontSize: 9, background: "#DCFCE7", color: "#166534" }}>IMC ✓</span>
+            </div>
+            {/* Mock document lines */}
+            <div className="space-y-1.5 mb-3">
+              {[95, 100, 78, 100, 82].map((w, i) => (
+                <div key={i} className="h-1 rounded-full" style={{ width: `${w}%`, background: "#EBEBEB" }} />
+              ))}
+            </div>
+            <div className="pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <p className="font-dm uppercase tracking-wider mb-2" style={{ fontSize: 8, color: MUTED }}>Clause Verification</p>
+              <div className="space-y-1.5">
+                {["Risks & benefits disclosed", "Alternatives listed", "Signature block present", "Witness section ready"].map((clause, i) => (
+                  <div key={clause} className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-md shrink-0 flex items-center justify-center transition-all duration-300"
+                      style={{ background: checks[i] ? "#166534" : BORDER }}>
+                      {checks[i] && <CheckCircle className="w-2.5 h-2.5 text-white" weight="fill" />}
+                    </div>
+                    <span className="font-dm transition-colors duration-300"
+                      style={{ fontSize: 10, color: checks[i] ? INK : MUTED }}>{clause}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <div className="flex-1 h-7 rounded-lg flex items-center justify-center font-dm font-medium"
+                style={{ border: `1px solid ${BORDER}`, fontSize: 10, color: INK }}>PDF</div>
+              <div className="flex-1 h-7 rounded-lg flex items-center justify-center font-dm font-medium text-white"
+                style={{ background: DARK_BTN, fontSize: 10 }}>Print</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -286,7 +442,7 @@ function HeroSection() {
             style={{ border: `1px solid ${BORDER}`, background: PILL_BG }}
           >
             <ShieldCheck className="w-4 h-4" style={{ color: INK }} />
-            <span className="font-syne font-semibold text-sm" style={{ color: INK }}>ConsentGen</span>
+            <span className="font-bricolage font-semibold text-sm" style={{ color: INK }}>ConsentGen</span>
           </div>
 
           {/* Center nav pills */}
@@ -360,7 +516,7 @@ function HeroSection() {
 
           {/* Headline */}
           <h1
-            className="font-syne font-extrabold leading-[0.9] tracking-[-0.03em] mb-6"
+            className="font-bricolage font-extrabold leading-[0.9] tracking-[-0.03em] mb-6"
             style={{ fontSize: "clamp(52px, 7vw, 96px)", color: INK }}
           >
             {["Generate", "Compliant", "Consent"].map((word, i) => (
@@ -416,7 +572,7 @@ function HeroSection() {
         <div className="hero-info px-10 sm:px-14 pb-8 flex gap-6 items-start flex-wrap">
           {/* Top consent types */}
           <div className="flex-1 min-w-0">
-            <p className="font-syne font-bold text-lg mb-3" style={{ color: INK }}>
+            <p className="font-bricolage font-bold text-lg mb-3" style={{ color: INK }}>
               Top consent types
             </p>
             <div className="flex flex-wrap gap-2">
@@ -441,7 +597,7 @@ function HeroSection() {
           {/* Feature mini-card */}
           <div className="w-56 rounded-2xl p-4 flex-shrink-0" style={{ background: PILL_BG }}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-syne font-semibold" style={{ color: INK }}>
+              <span className="text-xs font-bricolage font-semibold" style={{ color: INK }}>
                 AI Consent Progress
               </span>
               <div className="flex gap-1">
@@ -472,8 +628,8 @@ function HeroSection() {
           <AbstractArt />
         </div>
 
-        {/* Floating card */}
-        <FloatingCard />
+        {/* Animated consent flow illustration */}
+        <ConsentFlowAnimation />
 
         {/* Bottom stats strip */}
         <div className="absolute bottom-0 left-0 right-0 flex">
@@ -490,7 +646,7 @@ function HeroSection() {
                 {s.sub}
               </p>
               <div className="flex items-end gap-2">
-                <span className="font-syne font-bold text-3xl text-white">{s.label}</span>
+                <span className="font-bricolage font-bold text-3xl text-white">{s.label}</span>
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center mb-0.5"
                   style={{ background: "rgba(255,255,255,0.15)" }}
@@ -554,7 +710,7 @@ function InfoStrip() {
           >
             {card.icon}
           </div>
-          <p className="font-syne font-semibold text-sm mb-2" style={{ color: INK }}>{card.title}</p>
+          <p className="font-bricolage font-semibold text-sm mb-2" style={{ color: INK }}>{card.title}</p>
           <p className="font-dm text-sm leading-relaxed" style={{ color: BODY_TXT }}>{card.body}</p>
         </div>
       ))}
@@ -563,7 +719,7 @@ function InfoStrip() {
 }
 
 /* ═══════════════════════════════════════════
-   STATS SECTION (MYDNA-inspired)
+   STATS SECTION — compliance bars + time chart
 ═══════════════════════════════════════════ */
 function StatsSection() {
   useGSAP(() => {
@@ -571,33 +727,48 @@ function StatsSection() {
       opacity: 0, y: 40, stagger: 0.1, duration: 0.7, ease: "power3.out",
       scrollTrigger: { trigger: ".stats-section", start: "top 75%" },
     });
+    // Animate compliance bars from 0 → 100%
+    gsap.to(".comp-bar", {
+      width: "100%", stagger: 0.1, duration: 0.9, ease: "power2.out",
+      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
+    });
+    // Time comparison bar — 30s is ~1.67% of 30min
+    gsap.to(".time-bar-ai", {
+      width: "1.67%", duration: 1, ease: "power3.out",
+      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
+    });
+    gsap.to(".time-bar-manual", {
+      width: "100%", duration: 0.8, ease: "power2.out",
+      scrollTrigger: { trigger: ".compliance-bars", start: "top 80%" },
+    });
   }, []);
-
-  // Concentric circles SVG
-  const cx = 200, cy = 200;
-  const radii = [60, 100, 140, 175];
 
   return (
     <section className="stats-section" style={{ background: WHITE, padding: "80px 40px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+
+        {/* MYDNA-style mission text */}
+        <div className="mb-16">
+          <h2 className="font-bricolage font-bold leading-tight tracking-tight"
+            style={{ fontSize: "clamp(28px, 4vw, 52px)", maxWidth: 760 }}>
+            <span style={{ color: INK }}>Our mission is to simplify medico-legal documentation</span>
+            <span style={{ color: "#D0D0D8" }}>{" "}for every Indian doctor, every time.</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
 
           {/* Left: 2×2 large stat grid */}
           <div className="grid grid-cols-2 gap-0">
             {STATS.map((stat, i) => (
-              <div
-                key={stat.label}
-                className="stat-cell"
+              <div key={stat.label} className="stat-cell"
                 style={{
                   padding: "36px 32px",
                   borderBottom: i < 2 ? `1px solid ${BORDER}` : "none",
                   borderRight: i % 2 === 0 ? `1px solid ${BORDER}` : "none",
-                }}
-              >
-                <div
-                  className="font-syne font-bold"
-                  style={{ fontSize: "clamp(44px, 5vw, 64px)", color: INK, lineHeight: 1, marginBottom: 6 }}
-                >
+                }}>
+                <div className="font-bricolage font-bold"
+                  style={{ fontSize: "clamp(44px, 5vw, 64px)", color: INK, lineHeight: 1, marginBottom: 6 }}>
                   {stat.value}
                 </div>
                 <div className="w-8 h-0.5 mb-3" style={{ background: BORDER }} />
@@ -607,50 +778,57 @@ function StatsSection() {
             ))}
           </div>
 
-          {/* Right: Concentric circles diagram */}
-          <div className="flex flex-col items-center">
-            <p className="font-syne font-bold text-xl mb-2" style={{ color: INK }}>
-              Consent Workflow
+          {/* Right: Compliance coverage + time comparison */}
+          <div className="compliance-bars">
+            {/* Compliance coverage */}
+            <p className="font-bricolage font-bold text-lg mb-1" style={{ color: INK }}>
+              Legal Framework Coverage
             </p>
-            <p className="font-dm text-sm mb-8" style={{ color: BODY_TXT }}>
-              Six-stage compliance verification process
+            <p className="font-dm text-sm mb-6" style={{ color: BODY_TXT }}>
+              Full coverage across every Indian medico-legal framework
             </p>
-            <svg width="400" height="400" viewBox="0 0 400 400" fill="none">
-              {radii.map(r => (
-                <circle key={r} cx={cx} cy={cy} r={r} stroke={BORDER} strokeWidth={1.5} fill="none" />
+            <div className="space-y-3.5 mb-10">
+              {COMPLIANCE_LAWS.map(law => (
+                <div key={law.code}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <div>
+                      <span className="font-dm font-semibold text-xs" style={{ color: INK }}>{law.code}</span>
+                      <span className="font-dm text-xs ml-2" style={{ color: MUTED }}>{law.name}</span>
+                    </div>
+                    <span className="font-bricolage font-bold text-xs" style={{ color: "#166534" }}>100%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                    <div className="comp-bar h-full rounded-full" style={{ width: 0, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
+                  </div>
+                </div>
               ))}
-              {/* Center dot */}
-              <circle cx={cx} cy={cy} r={6} fill="#9B84D8" />
-              <text x={cx} y={cy + 20} textAnchor="middle" fontSize={9} fill={MUTED} fontFamily="DM Sans">
-                AI Core
-              </text>
+            </div>
 
-              {/* Workflow dots */}
-              {WORKFLOW_DOTS.map((dot, i) => {
-                const r = i < 3 ? 140 : 175;
-                const rad = (dot.angle - 90) * (Math.PI / 180);
-                const dx = cx + r * Math.cos(rad);
-                const dy = cy + r * Math.sin(rad);
-                const labelDx = cx + (r + 22) * Math.cos(rad);
-                const labelDy = cy + (r + 22) * Math.sin(rad);
-                return (
-                  <g key={dot.label}>
-                    <circle cx={dx} cy={dy} r={5} fill="#9B84D8" />
-                    <text
-                      x={labelDx}
-                      y={labelDy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize={9}
-                      fill={BODY_TXT}
-                      fontFamily="DM Sans"
-                    >
-                      {dot.label}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+            {/* Time comparison */}
+            <p className="font-bricolage font-bold text-sm mb-4" style={{ color: INK }}>
+              Generation Time — AI vs Manual
+            </p>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between mb-1.5">
+                  <span className="font-dm text-xs" style={{ color: BODY_TXT }}>Manual drafting</span>
+                  <span className="font-dm text-xs font-semibold" style={{ color: BODY_TXT }}>~30 min</span>
+                </div>
+                <div className="h-2.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                  <div className="time-bar-manual h-full rounded-full" style={{ width: 0, background: "#D0D0D8" }} />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1.5">
+                  <span className="font-dm text-xs font-semibold" style={{ color: INK }}>With ConsentGen AI</span>
+                  <span className="font-bricolage font-bold text-xs" style={{ color: "#166534" }}>30 sec ⚡</span>
+                </div>
+                <div className="h-2.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                  <div className="time-bar-ai h-full rounded-full" style={{ width: 0, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
+                </div>
+                <p className="font-dm mt-1.5" style={{ fontSize: 10, color: MUTED }}>60× faster than manual documentation</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -693,7 +871,7 @@ function FeaturesSection() {
           </span>
         </div>
         <h2
-          className="font-syne font-extrabold"
+          className="font-bricolage font-extrabold"
           style={{ margin: 0, fontSize: "clamp(32px, 4.5vw, 54px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: INK }}
         >
           Everything a doctor needs
@@ -724,7 +902,7 @@ function FeaturesSection() {
               >
                 <div className="flex items-baseline gap-3 mb-6">
                   <span
-                    className="font-syne font-extrabold"
+                    className="font-bricolage font-extrabold"
                     style={{ fontSize: 80, color: `${featureColors[i]}30`, lineHeight: 1, letterSpacing: "-0.04em" }}
                   >
                     {feat.num}
@@ -737,7 +915,7 @@ function FeaturesSection() {
                   </span>
                 </div>
                 <h3
-                  className="font-syne font-extrabold"
+                  className="font-bricolage font-extrabold"
                   style={{
                     margin: "0 0 16px", whiteSpace: "pre-line",
                     fontSize: "clamp(28px, 3.5vw, 42px)",
@@ -751,7 +929,7 @@ function FeaturesSection() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span
-                    className="font-syne font-extrabold"
+                    className="font-bricolage font-extrabold"
                     style={{ fontSize: 40, color: INK }}
                   >
                     {feat.metric.value}
@@ -801,7 +979,7 @@ function FeaturesSection() {
                     ))}
                   </div>
                   <div className="flex items-baseline gap-2 mt-6">
-                    <span className="font-syne font-bold text-3xl" style={{ color: INK }}>{feat.metric.value}</span>
+                    <span className="font-bricolage font-bold text-3xl" style={{ color: INK }}>{feat.metric.value}</span>
                     <span className="font-dm text-xs" style={{ color: MUTED }}>{feat.metric.label}</span>
                   </div>
                 </div>
@@ -838,7 +1016,7 @@ function ConsentTypesSection() {
             </span>
           </div>
           <h2
-            className="font-syne font-extrabold"
+            className="font-bricolage font-extrabold"
             style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", color: INK }}
           >
             10+ procedure-specific{" "}
@@ -872,7 +1050,7 @@ function ConsentTypesSection() {
                 }}
               >
                 <div style={{ fontSize: 24, marginBottom: 10 }}>{ct.icon}</div>
-                <div className="font-syne font-semibold text-sm mb-1" style={{ color: INK }}>{ct.name}</div>
+                <div className="font-bricolage font-semibold text-sm mb-1" style={{ color: INK }}>{ct.name}</div>
                 <div className="font-dm text-xs" style={{ color: MUTED }}>{ct.sub}</div>
               </div>
             ))}
@@ -901,7 +1079,7 @@ function HowItWorksSection() {
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
         <div style={{ marginBottom: 56 }}>
           <h2
-            className="font-syne font-extrabold"
+            className="font-bricolage font-extrabold"
             style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", color: INK }}
           >
             Three steps to a{" "}
@@ -922,13 +1100,13 @@ function HowItWorksSection() {
               }}
             >
               <div
-                className="font-syne font-extrabold"
+                className="font-bricolage font-extrabold"
                 style={{ fontSize: 80, color: `${INK}08`, lineHeight: 1, letterSpacing: "-0.04em", marginBottom: 20 }}
               >
                 {step.n}
               </div>
               <h3
-                className="font-syne font-bold"
+                className="font-bricolage font-bold"
                 style={{ fontSize: 20, color: INK, marginBottom: 10, lineHeight: 1.3 }}
               >
                 {step.title}
@@ -972,7 +1150,7 @@ function TestimonialsSection() {
     <section style={{ background: WHITE, padding: "100px 40px", position: "relative", overflow: "hidden" }}>
       {/* Decorative quote */}
       <div
-        className="font-syne"
+        className="font-bricolage"
         style={{
           position: "absolute", top: 20, left: 48, fontSize: 200,
           color: `${BORDER}`,
@@ -998,7 +1176,7 @@ function TestimonialsSection() {
 
         <div ref={containerRef}>
           <blockquote
-            className="font-syne font-bold"
+            className="font-bricolage font-bold"
             style={{
               margin: "0 0 40px",
               fontSize: "clamp(20px, 3vw, 34px)",
@@ -1017,7 +1195,7 @@ function TestimonialsSection() {
               {t.initials}
             </div>
             <div>
-              <div className="font-syne font-bold text-sm" style={{ color: INK }}>{t.name}</div>
+              <div className="font-bricolage font-bold text-sm" style={{ color: INK }}>{t.name}</div>
               <div className="font-dm text-xs" style={{ color: MUTED }}>{t.role}</div>
             </div>
           </div>
@@ -1071,7 +1249,7 @@ function CTASection() {
         >
           {/* Background watermark */}
           <div
-            className="font-syne"
+            className="font-bricolage"
             style={{
               position: "absolute", inset: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -1091,7 +1269,7 @@ function CTASection() {
               </span>
             </div>
             <h2
-              className="font-syne font-extrabold"
+              className="font-bricolage font-extrabold"
               style={{
                 margin: "0 0 16px",
                 fontSize: "clamp(32px, 5vw, 60px)",
@@ -1135,7 +1313,7 @@ function CTASection() {
                 { value: "100%", label: "IMC Compliant" },
               ].map(({ value, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
-                  <div className="font-syne font-extrabold text-3xl mb-1" style={{ color: WHITE }}>{value}</div>
+                  <div className="font-bricolage font-extrabold text-3xl mb-1" style={{ color: WHITE }}>{value}</div>
                   <div className="font-dm text-xs" style={{ color: MUTED }}>{label}</div>
                 </div>
               ))}
@@ -1164,7 +1342,7 @@ function PageFooter() {
               >
                 <ShieldCheck className="w-4 h-4 text-white" />
               </div>
-              <span className="font-syne font-bold text-base" style={{ color: INK }}>ConsentGen</span>
+              <span className="font-bricolage font-bold text-base" style={{ color: INK }}>ConsentGen</span>
             </div>
             <p className="font-dm text-sm leading-relaxed mb-4" style={{ color: BODY_TXT, maxWidth: 280 }}>
               AI-powered medico-legal consent form generator for Indian doctors. Generate, verify, and export in seconds.

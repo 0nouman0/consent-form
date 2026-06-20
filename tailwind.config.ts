@@ -9,13 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans:    ["var(--font-dm)", "system-ui", "sans-serif"],
-        dm:      ["var(--font-dm)", "system-ui", "sans-serif"],
-        syne:    ["var(--font-syne)", "system-ui", "sans-serif"],
-        display: ["var(--font-syne)", "system-ui", "sans-serif"],
-        body:    ["var(--font-dm)", "system-ui", "sans-serif"],
-        inter:   ["var(--font-dm)", "system-ui", "sans-serif"],
-        serif:   ["var(--font-syne)", "serif"],
+        sans:       ["var(--font-dm)", "system-ui", "sans-serif"],
+        dm:         ["var(--font-dm)", "system-ui", "sans-serif"],
+        bricolage:  ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        syne:       ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        display:    ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        body:       ["var(--font-dm)", "system-ui", "sans-serif"],
+        inter:      ["var(--font-dm)", "system-ui", "sans-serif"],
+        serif:      ["var(--font-bricolage)", "serif"],
       },
       colors: {
         // ─── Semantic design tokens ───
