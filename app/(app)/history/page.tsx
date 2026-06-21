@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getHistory, deleteHistoryEntry, HistoryEntry } from "@/lib/history";
 import {
   Stethoscope, CalendarBlank, MagnifyingGlass, Trash,
-  FileText, Warning, X, Plus,
+  FileText, Warning, X, Plus, Copy, Check,
 } from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
 
@@ -21,6 +21,7 @@ function HistoryContent() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [activeTab, setActiveTab] = useState<"english" | "other">("english");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     setActiveTab("english");
@@ -62,6 +63,21 @@ function HistoryContent() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete");
     }
+  };
+
+  const copyLink = (id: string) => {
+    const url = `${window.location.origin}/history?id=${id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
+
+  const getAgeBadge = (createdAt: string) => {
+    const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000);
+    if (days < 30) return { label: `${days}d ago`, color: "#166534", bg: "#f0fdf4", border: "rgba(22,101,52,0.2)" };
+    if (days < 90) return { label: `${Math.floor(days / 7)}w ago`, color: "#92400e", bg: "#fffbeb", border: "rgba(146,64,14,0.2)" };
+    return { label: `${Math.floor(days / 30)}mo ago`, color: "#991b1b", bg: "#fef2f2", border: "rgba(153,27,27,0.2)" };
   };
 
   const consentTypes = Array.from(new Set(entries.map((e) => e.consent_type).filter(Boolean)));
@@ -187,6 +203,17 @@ function HistoryContent() {
                             <CalendarBlank weight="regular" className="w-3 h-3" /> {entry.procedure_date || "No date"}
                           </span>
                           <span className="text-[11px] text-neutral-400 font-mono">#{entry.consent_id?.slice(0, 8)}</span>
+                          {(() => {
+                            const badge = getAgeBadge(entry.created_at);
+                            return (
+                              <span
+                                className="px-2 py-0.5 text-[11px] font-semibold rounded-full"
+                                style={{ color: badge.color, backgroundColor: badge.bg, border: `1px solid ${badge.border}` }}
+                              >
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                         </div>
                         {entry.hospital_name && (
                           <p className="text-xs text-neutral-400 mt-1.5 flex items-center gap-1.5">
@@ -205,6 +232,15 @@ function HistoryContent() {
                         style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0b0f1a" }}
                       >
                         View
+                      </button>
+                      <button
+                        onClick={() => copyLink(entry.id)}
+                        title="Copy link"
+                        className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-all"
+                      >
+                        {copiedId === entry.id
+                          ? <Check weight="bold" className="w-4 h-4 text-green-600" />
+                          : <Copy weight="regular" className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={() => setDeleteId(entry.id)}

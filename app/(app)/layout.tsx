@@ -4,10 +4,12 @@ import Sidebar from "@/components/Sidebar";
 import SidebarNav from "@/components/SidebarNav";
 import AppHeader from "@/components/AppHeader";
 import UserMenu from "@/components/UserMenu";
+import OfflineBanner from "@/components/OfflineBanner";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex font-body" style={{ backgroundColor: "#ededed" }}>
+      <OfflineBanner />
 
       {/* Desktop collapsible sidebar */}
       <Sidebar />

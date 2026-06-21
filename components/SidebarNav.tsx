@@ -4,15 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   SquaresFour, FileText, Columns, ClockCounterClockwise,
-  ChatCircleText,
+  ChatCircleText, BookOpen,
 } from "@phosphor-icons/react/dist/ssr";
 
 const links = [
-  { href: "/dashboard",  label: "Dashboard",  icon: SquaresFour           },
-  { href: "/generate",   label: "Generate",   icon: FileText              },
-  { href: "/templates",  label: "Templates",  icon: Columns               },
-  { href: "/history",    label: "History",    icon: ClockCounterClockwise },
-  { href: "/chat",       label: "Chat",       icon: ChatCircleText        },
+  { href: "/dashboard",   label: "Dashboard",   icon: SquaresFour           },
+  { href: "/generate",    label: "Generate",    icon: FileText              },
+  { href: "/history",     label: "History",     icon: ClockCounterClockwise },
+  { href: "/regulations", label: "Regulations", icon: BookOpen              },
+  { href: "/chat",        label: "Chat",        icon: ChatCircleText        },
 ];
 
 export default function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {

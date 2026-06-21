@@ -19,11 +19,31 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "ConsentGen — Medical Consent Form Generator",
   description: "AI-powered medico-legal consent form generator for Indian doctors. IMC 2002 compliant.",
+  manifest: "/manifest.json",
+  themeColor: "#0b0f1a",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ConsentGen",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${bricolage.variable} ${dmSans.variable}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0b0f1a" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="ConsentGen" />
+      </head>
       <body className="font-dm antialiased">{children}</body>
     </html>
   );

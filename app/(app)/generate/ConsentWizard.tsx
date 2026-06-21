@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ConsentFormSchema } from "@/lib/schema";
 import { GenerationStatus } from "@/lib/types";
 import { ConsentPreview } from "./PreviewDocument";
+import { searchProcedures, type ProcedureEntry } from "@/lib/procedures";
+import { Microphone, StopCircle } from "@phosphor-icons/react/dist/ssr";
 
 interface ConsentWizardProps {
   form: UseFormReturn<ConsentFormSchema>;
@@ -106,12 +108,81 @@ function Toggle({ id, checked, onChange, label, description }: ToggleProps) {
   );
 }
 
+function VoiceMicButton({ onResult }: { onResult: (text: string) => void }) {
+  const [listening, setListening] = useState(false);
+
+  const handleClick = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      alert("Voice input is not supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognition = new SR() as any;
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setListening(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
+      const transcript: string = e.results[0][0].transcript;
+      onResult(transcript);
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+    recognition.start();
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      title={listening ? "Listening…" : "Voice input"}
+      className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+        listening
+          ? "text-red-500 bg-red-50 animate-pulse"
+          : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+      }`}
+    >
+      {listening
+        ? <StopCircle weight="fill" className="w-4 h-4" />
+        : <Microphone weight="duotone" className="w-4 h-4" />}
+    </button>
+  );
+}
+
 export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardProps) {
   const [step, setStep] = useState(0);
   const [sliding, setSliding] = useState<"none" | "left" | "right">("none");
   const titleRef = useRef<HTMLDivElement>(null);
+  const [procSuggestions, setProcSuggestions] = useState<ProcedureEntry[]>([]);
+  const [showProcSuggestions, setShowProcSuggestions] = useState(false);
+  const procDropdownRef = useRef<HTMLDivElement>(null);
 
   const { register, watch, setValue, getValues, formState: { errors } } = form;
+
+  const handleProcedureInput = useCallback((value: string) => {
+    const results = searchProcedures(value);
+    setProcSuggestions(results);
+    setShowProcSuggestions(results.length > 0);
+  }, []);
+
+  const selectProcedure = (entry: ProcedureEntry) => {
+    setValue("clinical.procedureName", entry.name);
+    setValue("clinical.specificRisks", entry.risks);
+    setShowProcSuggestions(false);
+  };
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (procDropdownRef.current && !procDropdownRef.current.contains(e.target as Node)) {
+        setShowProcSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const patientCompetent = watch("patient.patientCompetent");
   const includeWitnessBlock = watch("includeWitnessBlock");
@@ -272,15 +343,18 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                 <label htmlFor="patient.patientName" className={labelCls}>
                   Patient Name <span aria-hidden="true">*</span>
                 </label>
-                <input
-                  id="patient.patientName"
-                  className={inputCls}
-                  aria-required="true"
-                  aria-invalid={!!getError("patient.patientName")}
-                  aria-describedby={getError("patient.patientName") ? "err-patientName" : undefined}
-                  placeholder="Full legal name"
-                  {...register("patient.patientName")}
-                />
+                <div className="relative">
+                  <input
+                    id="patient.patientName"
+                    className={`${inputCls} pr-10`}
+                    aria-required="true"
+                    aria-invalid={!!getError("patient.patientName")}
+                    aria-describedby={getError("patient.patientName") ? "err-patientName" : undefined}
+                    placeholder="Full legal name"
+                    {...register("patient.patientName")}
+                  />
+                  <VoiceMicButton onResult={(text) => setValue("patient.patientName", text)} />
+                </div>
                 <FieldError id="err-patientName" message={getError("patient.patientName")} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -517,19 +591,56 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                   ))}
                 </select>
               </div>
-              <div>
+              <div ref={procDropdownRef}>
                 <label htmlFor="clinical.procedureName" className={labelCls}>
                   Procedure Name <span aria-hidden="true">*</span>
                 </label>
-                <input
-                  id="clinical.procedureName"
-                  className={inputCls}
-                  aria-required="true"
-                  aria-invalid={!!getError("clinical.procedureName")}
-                  aria-describedby={getError("clinical.procedureName") ? "err-procedureName" : undefined}
-                  placeholder="e.g. Laparoscopic Cholecystectomy"
-                  {...register("clinical.procedureName")}
-                />
+                <div className="relative">
+                  <input
+                    id="clinical.procedureName"
+                    className={`${inputCls} pr-10`}
+                    aria-required="true"
+                    aria-invalid={!!getError("clinical.procedureName")}
+                    aria-describedby={getError("clinical.procedureName") ? "err-procedureName" : undefined}
+                    placeholder="e.g. Laparoscopic Cholecystectomy"
+                    {...register("clinical.procedureName", {
+                      onChange: (e) => handleProcedureInput(e.target.value),
+                    })}
+                    onFocus={() => {
+                      const val = getValues("clinical.procedureName");
+                      if (val) handleProcedureInput(val);
+                    }}
+                    autoComplete="off"
+                  />
+                  <VoiceMicButton
+                    onResult={(text) => {
+                      setValue("clinical.procedureName", text);
+                      handleProcedureInput(text);
+                    }}
+                  />
+                  {showProcSuggestions && (
+                    <div
+                      className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg z-50 overflow-hidden"
+                      style={{ border: "1px solid rgba(0,0,0,0.1)" }}
+                    >
+                      {procSuggestions.map((s) => (
+                        <button
+                          key={s.name}
+                          type="button"
+                          onMouseDown={() => selectProcedure(s)}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-neutral-50 transition-colors border-b last:border-b-0"
+                          style={{ borderColor: "rgba(0,0,0,0.06)", color: "#0b0f1a" }}
+                        >
+                          <span className="font-medium">{s.name}</span>
+                          <p className="text-xs text-neutral-400 mt-0.5 truncate">{s.risks.slice(0, 80)}…</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {showProcSuggestions && (
+                  <p className="text-[11px] text-neutral-400 mt-1.5">Select to auto-fill risks below</p>
+                )}
                 <FieldError id="err-procedureName" message={getError("clinical.procedureName")} />
               </div>
               <div>
