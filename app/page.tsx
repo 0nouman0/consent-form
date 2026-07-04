@@ -19,7 +19,13 @@ const RULE = "rgba(23,20,16,0.15)";
 const RULE_SOFT = "rgba(23,20,16,0.08)";
 const RED = "#BE3D2A";
 
-const serif = { fontFamily: "'Instrument Serif', serif" } as const;
+/* Display type uses the app's own Bricolage Grotesque (loaded in layout.tsx,
+   applied here via the `font-serif` utility) instead of a one-off imported
+   font — accent phrases are set in the red ink rather than italics, since
+   the grotesque has no italic cut. */
+function Accent({ children }: { children: ReactNode }) {
+  return <span style={{ color: RED }}>{children}</span>;
+}
 
 /* ─── DATA ─── */
 
@@ -235,7 +241,7 @@ function Specimen() {
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] w-24 shrink-0" style={{ color: MUTED }}>
               {k}
             </span>
-            <span className="text-[15px] italic" style={{ ...serif, color: INK }}>
+            <span className="text-[15px] font-serif font-medium" style={{ color: INK }}>
               {v}
             </span>
           </div>
@@ -254,7 +260,7 @@ function Specimen() {
         {/* Signature row */}
         <div className="mt-7 grid grid-cols-2 gap-6">
           <div>
-            <p className="text-[22px] italic leading-none mb-1.5 pl-1" style={{ ...serif, color: INK }}>
+            <p className="text-[22px] font-serif font-medium leading-none mb-1.5 pl-1" style={{ color: INK }}>
               A. Deshmukh
             </p>
             <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1.5">
@@ -324,19 +330,19 @@ export default function LandingPage() {
     <div ref={rootRef} className="landing min-h-screen font-body" style={{ backgroundColor: PAPER, color: INK }}>
 
       {/* ══ TICKER ══ */}
-      <div className="overflow-hidden py-2" style={{ backgroundColor: INK }}>
+      <div className="overflow-hidden py-2" style={{ backgroundColor: RED }}>
         <div className="ticker-track">
           {[0, 1].map((i) => (
             <div key={i} className="flex shrink-0 items-center">
               {FRAMEWORKS.map((f) => (
                 <span key={`${i}-${f.code}`} className="flex items-center font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: PAPER }}>
                   <span className="px-6">{f.code}</span>
-                  <span style={{ color: RED }}>✳</span>
+                  <span style={{ color: "rgba(244,241,233,0.55)" }}>✳</span>
                 </span>
               ))}
               <span className="flex items-center font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: PAPER }}>
                 <span className="px-6">Compliant by construction</span>
-                <span style={{ color: RED }}>✳</span>
+                <span style={{ color: "rgba(244,241,233,0.55)" }}>✳</span>
               </span>
             </div>
           ))}
@@ -347,7 +353,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50" style={{ backgroundColor: `${PAPER}F2`, backdropFilter: "blur(8px)", borderBottom: `1px solid ${RULE}` }}>
         <nav className="mx-auto flex max-w-[1320px] items-center justify-between px-5 sm:px-8 h-[68px]">
           <Link href="/" className="flex items-baseline gap-1">
-            <span className="text-[22px] tracking-tight" style={{ ...serif, color: INK }}>
+            <span className="text-[22px] font-serif font-semibold tracking-tight" style={{ color: INK }}>
               ConsentGen
             </span>
             <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
@@ -400,14 +406,14 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={80}>
               <h1
-                className="mt-6 text-[13.5vw] sm:text-[76px] lg:text-[88px] leading-[0.98] tracking-[-0.01em]"
-                style={{ ...serif, color: INK }}
+                className="mt-6 font-serif font-semibold text-[13.5vw] sm:text-[76px] lg:text-[88px] leading-[0.98] tracking-[-0.02em]"
+                style={{ color: INK }}
               >
                 Consent, drafted
                 <br />
                 to the letter
                 <br />
-                <em>of the law.</em>
+                <Accent>of the law.</Accent>
               </h1>
             </Reveal>
             <Reveal delay={160}>
@@ -483,9 +489,9 @@ export default function LandingPage() {
             <div className="lg:sticky lg:top-28">
               <Reveal>
                 <MonoLabel red>The form, dissected</MonoLabel>
-                <h2 className="mt-5 text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+                <h2 className="mt-5 font-serif font-semibold text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ color: INK }}>
                   Anatomy of a<br />
-                  <em>defensible</em> consent.
+                  <Accent>defensible</Accent> consent.
                 </h2>
                 <p className="mt-6 max-w-[38ch] text-[15px] leading-[1.7]" style={{ color: MUTED }}>
                   Eleven clauses decide whether a consent form protects you in court. ConsentGen
@@ -503,10 +509,10 @@ export default function LandingPage() {
                     className="clause-row group grid grid-cols-[3.5rem_1fr] sm:grid-cols-[4.5rem_1fr_auto] items-baseline gap-x-4 px-3 sm:px-5 py-4 cursor-default"
                     style={{ borderBottom: `1px solid ${RULE}` }}
                   >
-                    <span className="font-mono text-[11px] tracking-[0.12em] transition-colors duration-300 group-hover:text-[#BE3D2A]" style={{ color: MUTED }}>
+                    <span className="font-mono text-[11px] tracking-[0.12em] transition-colors duration-300 group-hover:text-[#F4F1E9]/70" style={{ color: MUTED }}>
                       Cl. {c.n}
                     </span>
-                    <span className="text-[19px] sm:text-[22px] leading-tight transition-colors duration-300 group-hover:text-[#F4F1E9]" style={{ ...serif, color: INK }}>
+                    <span className="font-serif font-medium text-[19px] sm:text-[22px] leading-tight transition-colors duration-300 group-hover:text-[#F4F1E9]" style={{ color: INK }}>
                       {c.title}
                     </span>
                     <span className="hidden sm:block font-mono text-[10px] uppercase tracking-[0.1em] text-right max-w-[240px] transition-colors duration-300 group-hover:text-[#F4F1E9]/60" style={{ color: MUTED }}>
@@ -540,10 +546,10 @@ export default function LandingPage() {
               </div>
               <div className={`lg:col-span-6 ${idx % 2 === 1 ? "lg:order-3" : ""}`}>
                 <Reveal delay={60}>
-                  <h3 className="text-[36px] sm:text-[48px] leading-[1.04] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+                  <h3 className="font-serif font-semibold text-[36px] sm:text-[48px] leading-[1.04] tracking-[-0.01em]" style={{ color: INK }}>
                     {s.title[0]}
                     <br />
-                    <em>{s.title[1]}</em>
+                    <Accent>{s.title[1]}</Accent>
                   </h3>
                   <p className="mt-6 max-w-[52ch] text-[15.5px] leading-[1.75]" style={{ color: MUTED }}>
                     {s.body}
@@ -553,7 +559,7 @@ export default function LandingPage() {
               <div className={`lg:col-span-4 flex lg:justify-end ${idx % 2 === 1 ? "lg:order-2 lg:justify-start" : ""}`}>
                 <Reveal delay={140}>
                   <div className="lg:text-right">
-                    <p className="text-[84px] sm:text-[104px] leading-none tracking-[-0.02em]" style={{ ...serif, color: INK }}>
+                    <p className="font-serif font-semibold text-[84px] sm:text-[104px] leading-none tracking-[-0.02em]" style={{ color: INK }}>
                       {s.metric.value}
                     </p>
                     <p className="mt-3 max-w-[26ch] font-mono text-[10px] uppercase tracking-[0.14em] leading-[1.8] lg:ml-auto" style={{ color: MUTED }}>
@@ -572,8 +578,8 @@ export default function LandingPage() {
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-28">
           <Reveal>
             <div className="flex items-baseline justify-between mb-12">
-              <h2 className="text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
-                Three steps. <em>No template hunting.</em>
+              <h2 className="font-serif font-semibold text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ color: INK }}>
+                Three steps. <Accent>No template hunting.</Accent>
               </h2>
               <MonoLabel>Procedure</MonoLabel>
             </div>
@@ -588,10 +594,10 @@ export default function LandingPage() {
                     ...(i > 0 ? {} : {}),
                   }}
                 >
-                  <span className="text-[64px] leading-none" style={{ ...serif, color: "rgba(23,20,16,0.18)" }}>
+                  <span className="font-serif font-semibold text-[64px] leading-none" style={{ color: "rgba(23,20,16,0.18)" }}>
                     {st.n}
                   </span>
-                  <h3 className="mt-5 text-[22px]" style={{ ...serif, color: INK }}>
+                  <h3 className="mt-5 font-serif font-semibold text-[22px]" style={{ color: INK }}>
                     {st.title}
                   </h3>
                   <p className="mt-3 max-w-[36ch] text-[14px] leading-[1.7]" style={{ color: MUTED }}>
@@ -609,9 +615,9 @@ export default function LandingPage() {
         <div className="mx-auto max-w-[980px] px-5 sm:px-8 py-24 sm:py-32 text-center">
           <Reveal>
             <span className="text-[28px]" style={{ color: RED }}>✳</span>
-            <blockquote className="mt-8 text-[30px] sm:text-[44px] leading-[1.25] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+            <blockquote className="mt-8 font-serif font-medium text-[30px] sm:text-[44px] leading-[1.25] tracking-[-0.01em]" style={{ color: INK }}>
               “The forms are accurate, compliant, and save me thirty minutes a day.
-              The clause register means <em>nothing critical is ever missed</em> before
+              The clause register means <Accent>nothing critical is ever missed</Accent> before
               a procedure.”
             </blockquote>
             <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
@@ -632,10 +638,10 @@ export default function LandingPage() {
                   style={{ borderLeft: i % 2 === 1 ? `1px solid ${RULE}` : undefined, paddingLeft: i % 2 === 1 ? "1.5rem" : undefined }}
                 >
                   <p className="leading-none">
-                    <span className="text-[64px] sm:text-[80px] tracking-[-0.02em]" style={{ ...serif, color: INK }}>
+                    <span className="font-serif font-semibold text-[64px] sm:text-[80px] tracking-[-0.02em]" style={{ color: INK }}>
                       {st.value}
                     </span>
-                    <span className="ml-2 text-[18px] italic" style={{ ...serif, color: RED }}>
+                    <span className="ml-2 font-serif text-[18px]" style={{ color: RED }}>
                       {st.suffix}
                     </span>
                   </p>
@@ -650,20 +656,20 @@ export default function LandingPage() {
       </section>
 
       {/* ══ FINAL CTA ══ */}
-      <section style={{ backgroundColor: INK }}>
+      <section style={{ backgroundColor: SHEET, borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}` }}>
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-24 sm:py-32">
           <Reveal>
             <MonoLabel red>Begin</MonoLabel>
-            <h2 className="mt-6 text-[12vw] sm:text-[72px] lg:text-[92px] leading-[1.0] tracking-[-0.01em]" style={{ ...serif, color: PAPER }}>
+            <h2 className="mt-6 font-serif font-semibold text-[12vw] sm:text-[72px] lg:text-[92px] leading-[1.0] tracking-[-0.01em]" style={{ color: INK }}>
               Stop drafting.
               <br />
-              <em>Start generating.</em>
+              <Accent>Start generating.</Accent>
             </h2>
             <div className="mt-12 flex flex-wrap items-center gap-6">
-              <InkButton href={primaryHref} invert>
+              <InkButton href={primaryHref}>
                 Generate your first form
               </InkButton>
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(244,241,233,0.5)" }}>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
                 1 credit = 1 form · No card required to start
               </span>
             </div>
@@ -672,14 +678,14 @@ export default function LandingPage() {
       </section>
 
       {/* ══ FOOTER ══ */}
-      <footer style={{ backgroundColor: INK, borderTop: `1px solid rgba(244,241,233,0.15)` }}>
+      <footer style={{ backgroundColor: SHEET, borderTop: `1px solid ${RULE}` }}>
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 pt-14">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-14">
             <div className="col-span-2 md:col-span-1">
-              <p className="text-[20px]" style={{ ...serif, color: PAPER }}>
+              <p className="font-serif font-semibold text-[20px]" style={{ color: INK }}>
                 ConsentGen<span className="text-[10px] align-super" style={{ color: RED }}>®</span>
               </p>
-              <p className="mt-3 max-w-[28ch] text-[12.5px] leading-[1.7]" style={{ color: "rgba(244,241,233,0.45)" }}>
+              <p className="mt-3 max-w-[28ch] text-[12.5px] leading-[1.7]" style={{ color: MUTED }}>
                 Medico-legal consent documentation for Indian clinical practice.
               </p>
             </div>
@@ -689,13 +695,13 @@ export default function LandingPage() {
               { h: "Account", links: [["Sign in", "/login"], ["Dashboard", "/dashboard"], ["Credits", "/credits"]] },
             ].map((col) => (
               <div key={col.h}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: "rgba(244,241,233,0.4)" }}>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: MUTED }}>
                   {col.h}
                 </p>
                 <ul className="space-y-2.5">
                   {col.links.map(([label, href]) => (
                     <li key={label}>
-                      <Link href={href} className="link-rule text-[13.5px]" style={{ color: "rgba(244,241,233,0.75)" }}>
+                      <Link href={href} className="link-rule text-[13.5px]" style={{ color: "#4A463C" }}>
                         {label}
                       </Link>
                     </li>
@@ -705,11 +711,11 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 py-5" style={{ borderTop: "1px solid rgba(244,241,233,0.15)" }}>
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(244,241,233,0.4)" }}>
+          <div className="flex flex-wrap items-center justify-between gap-3 py-5" style={{ borderTop: `1px solid ${RULE}` }}>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
               © {new Date().getFullYear()} ConsentGen — Not a substitute for legal counsel
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(244,241,233,0.4)" }}>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
               Made for Indian practice ✳ IMC · BNS · MoRTH
             </span>
           </div>
@@ -717,8 +723,8 @@ export default function LandingPage() {
           {/* Giant clipped wordmark */}
           <div className="overflow-hidden -mb-2" aria-hidden>
             <p
-              className="text-center whitespace-nowrap text-[19vw] leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"
-              style={{ ...serif, color: "rgba(244,241,233,0.09)" }}
+              className="text-center whitespace-nowrap font-serif font-semibold text-[19vw] leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"
+              style={{ color: "rgba(23,20,16,0.06)" }}
             >
               ConsentGen
             </p>

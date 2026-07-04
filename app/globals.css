@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -223,7 +221,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: #171410;
+  background: #BE3D2A;
   transform: scaleY(0);
   transform-origin: bottom;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
