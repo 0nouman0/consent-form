@@ -138,12 +138,13 @@ export default function ProfilePage() {
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
               style={{ backgroundColor: "#f5f2ee", border: "1px solid rgba(0,0,0,0.07)" }}>
               <span className="text-2xl font-bold" style={{ color: "#0b0f1a" }}>
-                {user?.email?.charAt(0).toUpperCase()}
+                {(profileData.doctorName?.replace(/^Dr\.?\s*/i, "").charAt(0) || user?.email?.charAt(0) || "?").toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-bold mb-0.5" style={{ color: "#0b0f1a" }}>
-                {userRole === "admin" ? "Administrator" : userRole === "viewer" ? "Viewer Account" : "Doctor Account"}
+                {profileData.doctorName ||
+                  (userRole === "admin" ? "Administrator" : userRole === "viewer" ? "Viewer Account" : "Doctor Account")}
               </h2>
               <div className="flex items-center gap-1.5 text-sm text-neutral-500 mb-3">
                 <Envelope weight="regular" className="w-3.5 h-3.5 shrink-0" />
@@ -187,14 +188,35 @@ export default function ProfilePage() {
 
         {/* Clinical Details Card */}
         <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
-          <div className="px-6 sm:px-8 py-5 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-            <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
-              <Stethoscope weight="duotone" className="w-4 h-4 text-neutral-600" />
+          <div className="px-6 sm:px-8 py-5 flex items-center justify-between gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
+                <Stethoscope weight="duotone" className="w-4 h-4 text-neutral-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold" style={{ color: "#0b0f1a" }}>Clinical Details</h3>
+                <p className="text-xs text-neutral-500">Required — auto-fills every consent form you generate</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-bold" style={{ color: "#0b0f1a" }}>Clinical Details</h3>
-              <p className="text-xs text-neutral-500">Auto-fills your consent forms</p>
-            </div>
+            {(() => {
+              const filled = [
+                profileData.doctorName,
+                profileData.doctorRegistrationNo,
+                profileData.hospitalName,
+                profileData.hospitalAddress,
+              ].filter(Boolean).length;
+              const complete = filled === 4;
+              return (
+                <span
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${
+                    complete ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"
+                  }`}
+                  style={{ border: complete ? "1px solid rgba(0,128,0,0.15)" : "1px solid rgba(180,120,0,0.2)" }}
+                >
+                  {complete ? <><Check weight="bold" className="w-3 h-3" /> Complete</> : `${filled}/4 completed`}
+                </span>
+              );
+            })()}
           </div>
           <div className="px-6 sm:px-8 py-6 space-y-5">
             <div>

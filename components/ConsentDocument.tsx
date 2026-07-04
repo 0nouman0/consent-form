@@ -10,6 +10,7 @@ import {
   FloppyDisk,
   CheckCircle,
   FileDoc,
+  Printer,
 } from "@phosphor-icons/react/dist/ssr";
 import { nowIST } from "@/lib/utils";
 import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
@@ -194,6 +195,26 @@ export default function ConsentDocument({
 
   return (
     <div>
+      {/* Print: show only the consent document body */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body * { visibility: hidden; }
+          #consent-document-body, #consent-document-body * { visibility: visible; }
+          #consent-document-body {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0 !important;
+            padding: 24px !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #fff !important;
+          }
+          #consent-document-body [contenteditable]:focus { outline: none !important; }
+          .print-hide { display: none !important; }
+        }
+      ` }} />
       {saveError && (
         <div className="mb-3 px-4 py-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 font-medium">
           {saveError}
@@ -212,6 +233,21 @@ export default function ConsentDocument({
 
         {isComplete && (
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            <button
+              onClick={() => window.print()}
+              title="Print consent form"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Print
+            </button>
             <button
               onClick={handleDownloadDOCX}
               disabled={downloadingDocx}
@@ -466,7 +502,7 @@ export default function ConsentDocument({
         )}
 
         {isComplete && (
-          <p className="text-xs font-semibold text-nq-purple/70 mb-4 text-center">
+          <p className="print-hide text-xs font-semibold text-nq-purple/70 mb-4 text-center">
             Click on any paragraph to edit
           </p>
         )}

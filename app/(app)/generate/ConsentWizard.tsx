@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { UseFormReturn } from "react-hook-form";
 import { ConsentFormSchema } from "@/lib/schema";
 import { GenerationStatus } from "@/lib/types";
@@ -32,13 +33,12 @@ const COUNSELING_LANGUAGES = [
   "Malayalam", "Bengali", "Marathi", "Gujarati", "Punjabi", "Odia", "Urdu",
 ];
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 const STEP_FIELDS: Array<Array<string>> = [
   ["patient.patientName", "patient.age", "patient.sex"],
   ["patient.patientCompetent", "patient.guardianName", "patient.guardianRelationship"],
   ["patient.hospitalOpdIpdNo", "patient.aadhaarLast4"],
-  ["clinical.doctorName", "clinical.doctorRegistrationNo", "clinical.hospitalName", "clinical.hospitalAddress"],
   ["clinical.consentType", "clinical.procedureName", "clinical.procedureDate", "clinical.counselingLanguage", "languageLevel"],
   ["clinical.specificRisks"],
   [],
@@ -48,7 +48,6 @@ const STEP_TITLES = [
   "Patient Basics",
   "Competency",
   "Hospital & ID",
-  "Clinician & Hospital",
   "Procedure",
   "Risks & Clauses",
   "Preview & Generate",
@@ -58,10 +57,9 @@ const STEP_SUBTITLES = [
   "Enter the patient's basic personal details.",
   "Confirm whether the patient can provide consent independently.",
   "Enter hospital registration and identity details.",
-  "Enter the treating doctor and hospital information.",
   "Describe the procedure and consent settings.",
   "Describe risks, alternatives, and optional clauses.",
-  "Review the consent form before generating.",
+  "Review the consent form before generating. Clinician details come from your profile.",
 ];
 
 const inputCls =
@@ -188,6 +186,13 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
   const includeWitnessBlock = watch("includeWitnessBlock");
   const includeGuardianBlock = watch("includeGuardianBlock");
   const clauses = watch("clauses");
+
+  const profileComplete = Boolean(
+    watch("clinical.doctorName") &&
+    watch("clinical.doctorRegistrationNo") &&
+    watch("clinical.hospitalName") &&
+    watch("clinical.hospitalAddress")
+  );
 
   useEffect(() => {
     if (titleRef.current) {
@@ -499,80 +504,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           </fieldset>
         )}
 
-        {/* Step 3: Clinician & Hospital */}
+        {/* Step 3: Procedure */}
         {step === 3 && (
-          <fieldset>
-            <legend className="sr-only">Clinician and hospital information</legend>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="clinical.doctorName" className={labelCls}>
-                    Doctor Name <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    id="clinical.doctorName"
-                    className={inputCls}
-                    aria-required="true"
-                    aria-invalid={!!getError("clinical.doctorName")}
-                    aria-describedby={getError("clinical.doctorName") ? "err-doctorName" : undefined}
-                    placeholder="Dr. Full Name"
-                    {...register("clinical.doctorName")}
-                  />
-                  <FieldError id="err-doctorName" message={getError("clinical.doctorName")} />
-                </div>
-                <div>
-                  <label htmlFor="clinical.doctorRegistrationNo" className={labelCls}>
-                    IMC Reg. No. <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    id="clinical.doctorRegistrationNo"
-                    className={inputCls}
-                    aria-required="true"
-                    aria-invalid={!!getError("clinical.doctorRegistrationNo")}
-                    aria-describedby={getError("clinical.doctorRegistrationNo") ? "err-regNo" : undefined}
-                    placeholder="e.g. KA-12345"
-                    {...register("clinical.doctorRegistrationNo")}
-                  />
-                  <FieldError id="err-regNo" message={getError("clinical.doctorRegistrationNo")} />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="clinical.hospitalName" className={labelCls}>
-                  Hospital Name <span aria-hidden="true">*</span>
-                </label>
-                <input
-                  id="clinical.hospitalName"
-                  className={inputCls}
-                  aria-required="true"
-                  aria-invalid={!!getError("clinical.hospitalName")}
-                  aria-describedby={getError("clinical.hospitalName") ? "err-hospitalName" : undefined}
-                  placeholder="Full hospital name"
-                  {...register("clinical.hospitalName")}
-                />
-                <FieldError id="err-hospitalName" message={getError("clinical.hospitalName")} />
-              </div>
-              <div>
-                <label htmlFor="clinical.hospitalAddress" className={labelCls}>
-                  Hospital Address <span aria-hidden="true">*</span>
-                </label>
-                <textarea
-                  id="clinical.hospitalAddress"
-                  rows={3}
-                  className={inputCls}
-                  aria-required="true"
-                  aria-invalid={!!getError("clinical.hospitalAddress")}
-                  aria-describedby={getError("clinical.hospitalAddress") ? "err-hospitalAddress" : undefined}
-                  placeholder="Full address including city and PIN"
-                  {...register("clinical.hospitalAddress")}
-                />
-                <FieldError id="err-hospitalAddress" message={getError("clinical.hospitalAddress")} />
-              </div>
-            </div>
-          </fieldset>
-        )}
-
-        {/* Step 4: Procedure */}
-        {step === 4 && (
           <fieldset>
             <legend className="sr-only">Procedure and consent settings</legend>
             <div className="space-y-4">
@@ -719,8 +652,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           </fieldset>
         )}
 
-        {/* Step 5: Risks & Clauses */}
-        {step === 5 && (
+        {/* Step 4: Risks & Clauses */}
+        {step === 4 && (
           <fieldset>
             <legend className="sr-only">Risks, alternatives, and optional clauses</legend>
             <div className="space-y-4">
@@ -809,9 +742,46 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           </fieldset>
         )}
 
-        {/* Step 6: Preview */}
-        {step === 6 && (
+        {/* Step 5: Preview */}
+        {step === 5 && (
           <div>
+            {!profileComplete && (
+              <div
+                role="alert"
+                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 flex gap-3 items-start"
+              >
+                <span className="text-red-500 text-xl leading-none mt-0.5">&#9888;</span>
+                <div className="text-sm text-red-800 leading-relaxed">
+                  <p className="font-semibold mb-0.5">Clinician profile incomplete</p>
+                  <p>
+                    Your doctor name, registration number, hospital name and address are pulled
+                    from your profile and are required on every consent form.{" "}
+                    <Link href="/profile" className="font-semibold underline hover:opacity-80">
+                      Complete your profile →
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            )}
+            {profileComplete && (
+              <div className="mb-5 rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4 flex items-start justify-between gap-3">
+                <div className="text-sm text-neutral-700 leading-relaxed">
+                  <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">
+                    Clinician (from your profile)
+                  </p>
+                  <p className="font-semibold">{watch("clinical.doctorName")}{" "}
+                    <span className="font-normal text-neutral-500">· Reg. {watch("clinical.doctorRegistrationNo")}</span>
+                  </p>
+                  <p className="text-neutral-500">{watch("clinical.hospitalName")}</p>
+                </div>
+                <Link
+                  href="/profile"
+                  className="shrink-0 text-xs font-semibold text-neutral-500 hover:text-neutral-800 underline transition-colors"
+                >
+                  Edit
+                </Link>
+              </div>
+            )}
             <ConsentPreview data={getValues()} />
           </div>
         )}
@@ -839,7 +809,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
         ) : (
           <button
             type="button"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !profileComplete}
+            title={!profileComplete ? "Complete your clinician profile first" : undefined}
             onClick={form.handleSubmit(onSubmit)}
             className="rounded-xl bg-neutral-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center gap-2"
           >

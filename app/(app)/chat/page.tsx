@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatCircleText, PaperPlaneRight, CircleNotch, Plus, ChatCircle, Trash, List, X } from "@phosphor-icons/react/dist/ssr";
+import {
+  ChatCircleText, PaperPlaneRight, CircleNotch, Plus, ChatCircle, Trash, List, X,
+  Gavel, FirstAid, FileText, ShieldCheck, Copy, Check,
+} from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
 import { v4 as uuidv4 } from "uuid";
 
@@ -22,12 +25,44 @@ const DEFAULT_MESSAGE: Message = {
   content: "Hi Doctor, I'm ConsentGen AI. How can I help you with medico-legal or procedural questions today?"
 };
 
+const SUGGESTED_PROMPTS = [
+  {
+    icon: Gavel,
+    title: "Consent law basics",
+    prompt: "What are the essential elements of valid informed consent under Indian law?",
+  },
+  {
+    icon: FirstAid,
+    title: "Emergency treatment",
+    prompt: "Can I treat an unconscious road accident victim without consent? What does BNS Section 29 say?",
+  },
+  {
+    icon: FileText,
+    title: "Minor patients",
+    prompt: "Who can give consent for a surgical procedure on a 15-year-old patient?",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Telemedicine rules",
+    prompt: "What consent requirements apply to telemedicine consultations under the 2020 guidelines?",
+  },
+];
+
+function relativeDate(iso: string) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
 export default function ChatPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -71,11 +106,10 @@ export default function ChatPage() {
     }
   };
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    const userMessage: Message = { role: "user", content: text.trim() };
     const currentMessages = [...messages, userMessage];
 
     let currentSessionId = activeSessionId;
@@ -121,6 +155,20 @@ export default function ChatPage() {
       setIsLoading(false);
     }
   };
+
+  const handleSend = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    sendMessage(input);
+  };
+
+  const handleCopyMessage = (content: string, idx: number) => {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 1500);
+    });
+  };
+
+  const isNewChat = !activeSession;
 
   return (
     <div
@@ -183,7 +231,10 @@ export default function ChatPage() {
               >
                 <div className="flex items-center gap-2.5 overflow-hidden">
                   <ChatCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-xs font-medium truncate">{session.title}</span>
+                  <div className="min-w-0">
+                    <span className="text-xs font-medium truncate block">{session.title}</span>
+                    <span className="text-[10px] text-neutral-400">{relativeDate(session.date)}</span>
+                  </div>
                 </div>
                 <button
                   onClick={(e) => handleDeleteSession(session.id, e)}
@@ -229,6 +280,40 @@ export default function ChatPage() {
 
         {/* Chat Body */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5" style={{ backgroundColor: "#ededed" }}>
+          {isNewChat ? (
+            /* Welcome / empty state */
+            <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto px-4">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+                style={{ backgroundColor: "#0b0f1a" }}>
+                <ChatCircleText weight="duotone" className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-2xl font-semibold tracking-tight mb-2 text-center" style={{ color: "#0b0f1a" }}>
+                How can I help,{" "}
+                <span className="font-serif italic font-normal text-neutral-600" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Doctor?
+                </span>
+              </h2>
+              <p className="text-sm text-neutral-500 text-center mb-8 max-w-sm">
+                Ask about consent law, medico-legal documentation, NMC regulations, or clinical procedures in India.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                {SUGGESTED_PROMPTS.map(({ icon: Icon, title, prompt }) => (
+                  <button
+                    key={title}
+                    onClick={() => sendMessage(prompt)}
+                    className="text-left p-4 rounded-2xl bg-white hover:shadow-md hover:-translate-y-0.5 transition-all group"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center mb-2.5 group-hover:bg-neutral-900 transition-colors">
+                      <Icon weight="duotone" className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="text-sm font-semibold mb-1" style={{ color: "#0b0f1a" }}>{title}</p>
+                    <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">{prompt}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
           <div className="max-w-3xl mx-auto w-full space-y-5">
             {messages.map((msg, idx) => (
               <div
@@ -241,24 +326,37 @@ export default function ChatPage() {
                     <ChatCircleText className="w-3.5 h-3.5 text-white" />
                   </div>
                 )}
-                <div
-                  className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm ${
-                    msg.role === "user"
-                      ? "text-white rounded-br-sm shadow-sm"
-                      : "bg-white text-neutral-800 rounded-bl-sm shadow-sm"
-                  }`}
-                  style={
-                    msg.role === "user"
-                      ? { backgroundColor: "#0b0f1a" }
-                      : { border: "1px solid rgba(0,0,0,0.07)" }
-                  }
-                >
-                  {msg.role === "assistant" ? (
-                    <div className="prose prose-sm prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-neutral-900 text-neutral-700">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    msg.content
+                <div className={`group relative max-w-[85%] md:max-w-[75%] ${msg.role === "user" ? "" : "min-w-0"}`}>
+                  <div
+                    className={`rounded-2xl px-4 py-3 text-sm ${
+                      msg.role === "user"
+                        ? "text-white rounded-br-sm shadow-sm"
+                        : "bg-white text-neutral-800 rounded-bl-sm shadow-sm"
+                    }`}
+                    style={
+                      msg.role === "user"
+                        ? { backgroundColor: "#0b0f1a" }
+                        : { border: "1px solid rgba(0,0,0,0.07)" }
+                    }
+                  >
+                    {msg.role === "assistant" ? (
+                      <div className="prose prose-sm prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-neutral-900 text-neutral-700">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      msg.content
+                    )}
+                  </div>
+                  {msg.role === "assistant" && idx > 0 && (
+                    <button
+                      onClick={() => handleCopyMessage(msg.content, idx)}
+                      title="Copy response"
+                      className="absolute -bottom-1 right-2 translate-y-full opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold text-neutral-400 hover:text-neutral-700 hover:bg-white transition-all"
+                    >
+                      {copiedIdx === idx
+                        ? <><Check weight="bold" className="w-3 h-3 text-green-600" /> Copied</>
+                        : <><Copy weight="regular" className="w-3 h-3" /> Copy</>}
+                    </button>
                   )}
                 </div>
               </div>
@@ -279,6 +377,7 @@ export default function ChatPage() {
             )}
             <div ref={messagesEndRef} />
           </div>
+          )}
         </div>
 
         {/* Input Area */}

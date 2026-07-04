@@ -9,8 +9,11 @@ import { getHistory, deleteHistoryEntry, HistoryEntry } from "@/lib/history";
 import {
   Stethoscope, CalendarBlank, MagnifyingGlass, Trash,
   FileText, Warning, X, Plus, Copy, Check,
+  DownloadSimple, FileDoc, Printer,
 } from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
+import { downloadConsentPDF } from "@/lib/pdf";
+import { downloadConsentDOCX } from "@/lib/docx-gen";
 
 function HistoryContent() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
@@ -22,6 +25,8 @@ function HistoryContent() {
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [activeTab, setActiveTab] = useState<"english" | "other">("english");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [modalCopied, setModalCopied] = useState(false);
+  const [modalDownloading, setModalDownloading] = useState<"pdf" | "docx" | null>(null);
 
   useEffect(() => {
     setActiveTab("english");
@@ -78,6 +83,37 @@ function HistoryContent() {
     if (days < 30) return { label: `${days}d ago`, color: "#166534", bg: "#f0fdf4", border: "rgba(22,101,52,0.2)" };
     if (days < 90) return { label: `${Math.floor(days / 7)}w ago`, color: "#92400e", bg: "#fffbeb", border: "rgba(146,64,14,0.2)" };
     return { label: `${Math.floor(days / 30)}mo ago`, color: "#991b1b", bg: "#fef2f2", border: "rgba(153,27,27,0.2)" };
+  };
+
+  const getActiveMarkdown = (entry: HistoryEntry) => {
+    const hasMultiple = entry.markdown?.includes("__LANG_SEPARATOR__");
+    if (!hasMultiple) return entry.markdown ?? "";
+    const parts = (entry.markdown ?? "").split("__LANG_SEPARATOR__");
+    return (activeTab === "english" ? parts[0] : parts[1])?.trim() ?? "";
+  };
+
+  const handleModalCopy = (entry: HistoryEntry) => {
+    navigator.clipboard.writeText(getActiveMarkdown(entry)).then(() => {
+      setModalCopied(true);
+      setTimeout(() => setModalCopied(false), 1500);
+    });
+  };
+
+  const handleModalDownload = async (entry: HistoryEntry, kind: "pdf" | "docx") => {
+    setModalDownloading(kind);
+    try {
+      const opts = {
+        markdown: getActiveMarkdown(entry),
+        consentId: entry.consent_id ?? "",
+        hospitalName: entry.hospital_name ?? "",
+        timestamp: new Date(entry.created_at).toLocaleString("en-IN"),
+        isResearch: entry.consent_type === "research",
+      };
+      if (kind === "pdf") await downloadConsentPDF(opts);
+      else await downloadConsentDOCX(opts);
+    } finally {
+      setModalDownloading(null);
+    }
   };
 
   const consentTypes = Array.from(new Set(entries.map((e) => e.consent_type).filter(Boolean)));
@@ -279,14 +315,53 @@ function HistoryContent() {
                     <span className="text-xs font-mono text-neutral-400">{selectedEntry.consent_id}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => setSelectedEntry(null)}
-                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 transition-all"
-                >
-                  <X weight="bold" className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleModalCopy(selectedEntry)}
+                    title="Copy markdown"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-neutral-600 hover:bg-neutral-100 transition-all"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)" }}
+                  >
+                    {modalCopied ? <Check weight="bold" className="w-3.5 h-3.5 text-green-600" /> : <Copy weight="regular" className="w-3.5 h-3.5" />}
+                    {modalCopied ? "Copied" : "Copy"}
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    title="Print"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-neutral-600 hover:bg-neutral-100 transition-all"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)" }}
+                  >
+                    <Printer weight="regular" className="w-3.5 h-3.5" /> Print
+                  </button>
+                  <button
+                    onClick={() => handleModalDownload(selectedEntry, "docx")}
+                    disabled={modalDownloading !== null}
+                    title="Download DOCX"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-neutral-600 hover:bg-neutral-100 transition-all disabled:opacity-50"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)" }}
+                  >
+                    <FileDoc weight="regular" className="w-3.5 h-3.5" />
+                    {modalDownloading === "docx" ? "…" : "DOCX"}
+                  </button>
+                  <button
+                    onClick={() => handleModalDownload(selectedEntry, "pdf")}
+                    disabled={modalDownloading !== null}
+                    title="Download PDF"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: "#0b0f1a" }}
+                  >
+                    <DownloadSimple weight="regular" className="w-3.5 h-3.5" />
+                    {modalDownloading === "pdf" ? "…" : "PDF"}
+                  </button>
+                  <button
+                    onClick={() => setSelectedEntry(null)}
+                    className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 transition-all ml-1"
+                  >
+                    <X weight="bold" className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex-1 overflow-auto p-6 sm:p-10 bg-white">
+              <div className="flex-1 overflow-auto p-6 sm:p-10" style={{ backgroundColor: "#f5f5f4" }}>
                 {selectedEntry.form_data?.clinical?.counselingLanguage &&
                   selectedEntry.form_data.clinical.counselingLanguage !== "English" && (
                     <div className="flex border-b mb-6" style={{ borderColor: "rgba(0,0,0,0.07)" }}>
@@ -302,15 +377,52 @@ function HistoryContent() {
                       </button>
                     </div>
                   )}
-                <div className="prose prose-slate prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-600 prose-p:leading-relaxed prose-li:text-neutral-600">
-                  <ReactMarkdown>
-                    {(() => {
-                      const hasMultiple = selectedEntry.markdown?.includes("__LANG_SEPARATOR__");
-                      if (!hasMultiple) return selectedEntry.markdown;
-                      const parts = selectedEntry.markdown.split("__LANG_SEPARATOR__");
-                      return activeTab === "english" ? (parts[0] || "") : (parts[1] || "");
-                    })()}
-                  </ReactMarkdown>
+                {/* Print: show only the history document body */}
+                <style dangerouslySetInnerHTML={{ __html: `
+                  @media print {
+                    body * { visibility: hidden; }
+                    #history-doc-body, #history-doc-body * { visibility: visible; }
+                    #history-doc-body {
+                      position: absolute;
+                      left: 0;
+                      top: 0;
+                      width: 100%;
+                      margin: 0 !important;
+                      padding: 24px !important;
+                      border: none !important;
+                      box-shadow: none !important;
+                      background: #fff !important;
+                    }
+                  }
+                ` }} />
+                <div
+                  id="history-doc-body"
+                  className="bg-white rounded-xl p-6 sm:p-10 max-w-3xl mx-auto"
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
+                >
+                  {/* Document header */}
+                  <div className="text-center border-b border-neutral-200 pb-4 mb-6">
+                    <p className="text-xs font-bold uppercase tracking-widest mb-2 text-neutral-400">
+                      {selectedEntry.consent_type === "research"
+                        ? "Research Consent Form"
+                        : "Standard Informed Consent Form"}
+                    </p>
+                    <h1 className="text-xl sm:text-2xl font-black tracking-tight" style={{ color: "#0b0f1a" }}>
+                      {selectedEntry.hospital_name || "Hospital"}
+                    </h1>
+                    <div className="mt-2 text-xs font-medium text-neutral-500 space-y-0.5">
+                      <p>Consent ID: <span className="font-mono">{selectedEntry.consent_id}</span></p>
+                      <p>
+                        Generated:{" "}
+                        {new Date(selectedEntry.created_at).toLocaleDateString("en-IN", {
+                          day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="prose prose-slate prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-headings:tracking-tight prose-h1:text-xl prose-h1:border-b prose-h1:border-neutral-200 prose-h1:pb-2 prose-h2:text-lg prose-h2:mt-6 prose-p:text-neutral-700 prose-p:leading-[1.8] prose-li:text-neutral-700 prose-strong:text-neutral-900 prose-hr:border-neutral-200">
+                    <ReactMarkdown>{getActiveMarkdown(selectedEntry)}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -56,6 +56,20 @@ function GenerateContent() {
     // Bail out after 6 s so a hung Supabase connection never blocks the UI
     const fallbackTimer = setTimeout(() => setLoadingCredits(false), 6000);
 
+    // Instant clinician auto-fill from the locally cached profile
+    try {
+      const cached = localStorage.getItem("consentgen_doctor_profile");
+      if (cached) {
+        const p = JSON.parse(cached);
+        if (p.doctorName) form.setValue("clinical.doctorName", p.doctorName);
+        if (p.doctorRegistrationNo) form.setValue("clinical.doctorRegistrationNo", p.doctorRegistrationNo);
+        if (p.hospitalName) form.setValue("clinical.hospitalName", p.hospitalName);
+        if (p.hospitalAddress) form.setValue("clinical.hospitalAddress", p.hospitalAddress);
+      }
+    } catch {
+      // ignore corrupt cache
+    }
+
     const fetchCredits = async () => {
       try {
         const supabase = createClient();
@@ -65,10 +79,17 @@ function GenerateContent() {
         if (user) {
           const { data } = await supabase
             .from("profiles")
-            .select("credits")
+            .select("credits, doctor_name, doctor_registration_no, hospital_name, hospital_address")
             .eq("id", user.id)
             .single();
-          if (data) setCredits(data.credits);
+          if (data) {
+            setCredits(data.credits);
+            // Authoritative clinician auto-fill from the server profile
+            if (data.doctor_name) form.setValue("clinical.doctorName", data.doctor_name);
+            if (data.doctor_registration_no) form.setValue("clinical.doctorRegistrationNo", data.doctor_registration_no);
+            if (data.hospital_name) form.setValue("clinical.hospitalName", data.hospital_name);
+            if (data.hospital_address) form.setValue("clinical.hospitalAddress", data.hospital_address);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch credits:", err);
@@ -80,6 +101,7 @@ function GenerateContent() {
 
     fetchCredits();
     return () => clearTimeout(fallbackTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const form = useForm<ConsentFormSchema>({
