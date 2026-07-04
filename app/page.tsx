@@ -720,11 +720,21 @@ export default function LandingPage() {
             </span>
           </div>
 
-          {/* Giant clipped wordmark */}
-          <div className="overflow-hidden -mb-2" aria-hidden>
+          {/* Giant wordmark — sized off the container's own width (not the
+              viewport) so it always fits without clipping, with a subtle
+              ink → red → ink gradient for depth */}
+          <div className="overflow-hidden -mb-2 [container-type:inline-size]" aria-hidden>
             <p
-              className="text-center whitespace-nowrap font-serif font-semibold text-[19vw] leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"
-              style={{ color: "rgba(23,20,16,0.06)" }}
+              className="text-center whitespace-nowrap font-serif font-semibold leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"
+              style={{
+                fontSize: "clamp(2.75rem, 13cqw, 240px)",
+                backgroundImage: `linear-gradient(100deg, ${INK} 0%, ${RED} 50%, ${INK} 100%)`,
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                opacity: 0.12,
+              }}
             >
               ConsentGen
             </p>

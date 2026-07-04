@@ -155,17 +155,20 @@ export default function ConsentDocument({
 
   const components = {
     h1: ({ children }: { children?: React.ReactNode }) => (
-      <h1 className="text-2xl font-black border-b border-nq-border mt-8 mb-4 pb-2 text-nq-text tracking-tight">
+      <h1
+        className="font-serif text-2xl font-semibold mt-8 mb-4 pb-2 tracking-tight"
+        style={{ borderBottom: "1px solid var(--rule)", color: "var(--ink)" }}
+      >
         {children}
       </h1>
     ),
     h2: ({ children }: { children?: React.ReactNode }) => (
-      <h2 className="text-xl font-bold mt-6 mb-3 text-nq-text tracking-tight">
+      <h2 className="font-serif text-xl font-semibold mt-6 mb-3 tracking-tight" style={{ color: "var(--ink)" }}>
         {children}
       </h2>
     ),
     h3: ({ children }: { children?: React.ReactNode }) => (
-      <h3 className="text-lg font-bold mt-4 mb-2 text-nq-text tracking-tight">
+      <h3 className="font-serif text-lg font-semibold mt-4 mb-2 tracking-tight" style={{ color: "var(--ink)" }}>
         {children}
       </h3>
     ),
@@ -174,23 +177,24 @@ export default function ConsentDocument({
         <p
           contentEditable
           suppressContentEditableWarning
-          className="leading-[1.8] mb-3 text-nq-text focus:outline focus:outline-2 focus:outline-nq-purple/40 rounded transition-all"
+          className="leading-[1.8] mb-3 focus:outline focus:outline-2 rounded transition-all"
+          style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
         >
           {children}
         </p>
       ) : (
-        <p className="leading-[1.8] mb-3 text-nq-text">{children}</p>
+        <p className="leading-[1.8] mb-3" style={{ color: "var(--ink)" }}>{children}</p>
       ),
     ul: ({ children }: { children?: React.ReactNode }) => (
-      <ul className="ml-5 list-disc mb-3 text-nq-text font-medium">{children}</ul>
+      <ul className="ml-5 list-disc mb-3 font-medium" style={{ color: "var(--ink)" }}>{children}</ul>
     ),
     ol: ({ children }: { children?: React.ReactNode }) => (
-      <ol className="ml-5 list-decimal mb-3 text-nq-text font-medium">{children}</ol>
+      <ol className="ml-5 list-decimal mb-3 font-medium" style={{ color: "var(--ink)" }}>{children}</ol>
     ),
     strong: ({ children }: { children?: React.ReactNode }) => (
-      <strong className="font-bold text-nq-text">{children}</strong>
+      <strong className="font-bold" style={{ color: "var(--ink)" }}>{children}</strong>
     ),
-    hr: () => <hr className="border-nq-border my-6" />,
+    hr: () => <hr className="my-6" style={{ borderColor: "var(--rule)" }} />,
   };
 
   return (
@@ -209,14 +213,21 @@ export default function ConsentDocument({
             padding: 24px !important;
             border: none !important;
             box-shadow: none !important;
-            background: #fff !important;
+            background: var(--sheet) !important;
           }
           #consent-document-body [contenteditable]:focus { outline: none !important; }
           .print-hide { display: none !important; }
         }
       ` }} />
       {saveError && (
-        <div className="mb-3 px-4 py-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 font-medium">
+        <div
+          className="mb-3 px-4 py-3 rounded-md text-sm font-medium"
+          style={{
+            backgroundColor: "rgba(190,61,42,0.06)",
+            border: "1px solid rgba(190,61,42,0.25)",
+            color: "var(--red)",
+          }}
+        >
           {saveError}
         </div>
       )}
@@ -225,7 +236,8 @@ export default function ConsentDocument({
       <div className="flex items-center justify-between gap-3 mb-4">
         <button
           onClick={onReset}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-neutral-400 hover:text-neutral-900 transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+          style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
         >
           <ArrowCounterClockwise className="w-3.5 h-3.5" />
           New Form
@@ -235,7 +247,8 @@ export default function ConsentDocument({
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)]"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
             >
               <Copy className="w-3.5 h-3.5" />
               {copied ? "Copied!" : "Copy"}
@@ -243,7 +256,8 @@ export default function ConsentDocument({
             <button
               onClick={() => window.print()}
               title="Print consent form"
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)]"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
             >
               <Printer className="w-3.5 h-3.5" />
               Print
@@ -251,7 +265,8 @@ export default function ConsentDocument({
             <button
               onClick={handleDownloadDOCX}
               disabled={downloadingDocx}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)] disabled:opacity-50"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
             >
               <FileDoc className="w-3.5 h-3.5" />
               {downloadingDocx ? "..." : "DOCX"}
@@ -259,7 +274,8 @@ export default function ConsentDocument({
             <button
               onClick={handleDownloadPDF}
               disabled={downloadingPdf}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)] disabled:opacity-50"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
             >
               <DownloadSimple className="w-3.5 h-3.5" />
               {downloadingPdf ? "..." : "PDF"}
@@ -268,11 +284,18 @@ export default function ConsentDocument({
               <button
                 onClick={handleSave}
                 disabled={saving || saved}
-                className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-xl transition-all ${
+                className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all disabled:opacity-50 ${
+                  saved ? "" : "nq-btn-primary"
+                }`}
+                style={
                   saved
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "nq-btn-primary"
-                } disabled:opacity-50`}
+                    ? {
+                        backgroundColor: "rgba(63,122,78,0.08)",
+                        color: "#3f7a4e",
+                        border: "1px solid rgba(63,122,78,0.2)",
+                      }
+                    : undefined
+                }
               >
                 {saved ? (
                   <>
@@ -293,15 +316,16 @@ export default function ConsentDocument({
 
       {/* Language Tabs */}
       {counselingLanguage && counselingLanguage !== "English" && (
-        <div className="flex border-b border-border mb-4">
+        <div className="flex mb-4" style={{ borderBottom: "1px solid var(--rule)" }}>
           <button
             type="button"
             onClick={() => setActiveTab("english")}
-            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
+            className="px-4 py-2.5 text-sm font-semibold border-b-2 transition-all"
+            style={
               activeTab === "english"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+                ? { borderColor: "var(--ink)", color: "var(--ink)" }
+                : { borderColor: "transparent", color: "var(--ink-muted)" }
+            }
           >
             English Form
           </button>
@@ -312,16 +336,20 @@ export default function ConsentDocument({
             }}
             disabled={!otherMarkdown.trim()}
             className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              !otherMarkdown.trim()
-                ? "opacity-50 cursor-not-allowed border-transparent text-muted-foreground"
-                : activeTab === "other"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              !otherMarkdown.trim() ? "opacity-50 cursor-not-allowed" : ""
             }`}
+            style={
+              otherMarkdown.trim() && activeTab === "other"
+                ? { borderColor: "var(--ink)", color: "var(--ink)" }
+                : { borderColor: "transparent", color: "var(--ink-muted)" }
+            }
           >
             {counselingLanguage} Form
             {!otherMarkdown.trim() && (
-              <span className="w-3.5 h-3.5 border-2 border-t-transparent border-muted-foreground rounded-full animate-spin" />
+              <span
+                className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin"
+                style={{ borderColor: "var(--ink-muted)", borderTopColor: "transparent" }}
+              />
             )}
           </button>
         </div>
@@ -329,7 +357,8 @@ export default function ConsentDocument({
 
       <motion.div
         id="consent-document-body"
-        className="consent-document bg-white border border-neutral-200 shadow-md p-8 sm:p-12 font-serif text-neutral-900"
+        className="consent-document p-8 sm:p-12 rounded-md"
+        style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", boxShadow: "var(--shadow-dashboard)", color: "var(--ink)" }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -337,28 +366,28 @@ export default function ConsentDocument({
         {formData ? (
           <>
             {/* Header */}
-            <div className="flex justify-between items-start mb-6 pb-5 border-b border-neutral-200">
+            <div className="flex justify-between items-start mb-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
               <div>
-                <p className="text-lg font-bold leading-tight text-left">
+                <p className="font-serif text-lg font-semibold leading-tight text-left" style={{ color: "var(--ink)" }}>
                   {isResearch
                     ? (formData as ResearchConsentFormSchema).study?.institutionName || hospitalName
                     : (formData as ConsentFormSchema).clinical?.hospitalName || hospitalName}
                 </p>
-                <p className="text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs text-left">
+                <p className="text-xs mt-1 leading-relaxed max-w-xs text-left" style={{ color: "var(--ink-muted)" }}>
                   {isResearch
                     ? (formData as ResearchConsentFormSchema).study?.institutionAddress
                     : (formData as ConsentFormSchema).clinical?.hospitalAddress}
                 </p>
               </div>
-              <div className="text-right text-xs text-neutral-500 space-y-0.5">
-                <p className="text-left sm:text-right">Consent ID: <span className="font-semibold text-neutral-700 font-mono">{consentId}</span></p>
-                <p className="text-left sm:text-right">Date: <span className="font-semibold text-neutral-700">{timestamp}</span></p>
+              <div className="text-right text-xs space-y-0.5" style={{ color: "var(--ink-muted)" }}>
+                <p className="text-left sm:text-right">Consent ID: <span className="font-semibold font-mono" style={{ color: "var(--ink-soft)" }}>{consentId}</span></p>
+                <p className="text-left sm:text-right">Date: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>{timestamp}</span></p>
               </div>
             </div>
 
             {/* Title bar */}
-            <div className="bg-neutral-100 rounded-md py-2.5 px-4 mb-6 text-center">
-              <p className="text-sm font-bold tracking-widest uppercase text-neutral-900">
+            <div className="rounded-md py-2.5 px-4 mb-6 text-center" style={{ backgroundColor: "var(--paper)" }}>
+              <p className="font-serif text-sm font-semibold tracking-widest uppercase" style={{ color: "var(--ink)" }}>
                 {isResearch
                   ? "INFORMED CONSENT FOR RESEARCH PARTICIPATION"
                   : `INFORMED CONSENT FORM — ${(CONSENT_TYPE_LABELS[(formData as ConsentFormSchema).clinical?.consentType ?? "surgical"] ?? "SURGICAL")} PROCEDURE`}
@@ -370,10 +399,10 @@ export default function ConsentDocument({
               <>
                 {/* Patient info table */}
                 <div className="mb-6">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                  <h3 className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold mb-2 text-left" style={{ color: "var(--ink-muted)" }}>
                     Patient Information
                   </h3>
-                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                  <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
                     <tbody>
                       {[
                         ["Patient Name", (formData as ConsentFormSchema).patient?.patientName || "—"],
@@ -393,11 +422,14 @@ export default function ConsentDocument({
                             ]
                           : []),
                       ].map(([label, value], i) => (
-                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                        <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                          <td
+                            className="py-1.5 px-3 font-mono text-[11px] uppercase tracking-[0.06em] font-semibold w-44 text-left"
+                            style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}
+                          >
                             {label}
                           </td>
-                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                          <td className="py-1.5 px-3 text-sm text-left" style={{ color: "var(--ink)" }}>{value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -406,10 +438,10 @@ export default function ConsentDocument({
 
                 {/* Clinical info table */}
                 <div className="mb-6">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                  <h3 className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold mb-2 text-left" style={{ color: "var(--ink-muted)" }}>
                     Clinical Details
                   </h3>
-                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                  <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
                     <tbody>
                       {[
                         ["Physician", `${(formData as ConsentFormSchema).clinical?.doctorName || "—"} (Reg. ${(formData as ConsentFormSchema).clinical?.doctorRegistrationNo || "—"})`],
@@ -417,11 +449,14 @@ export default function ConsentDocument({
                         ["Scheduled Date", (formData as ConsentFormSchema).clinical?.procedureDate || "—"],
                         ["Counseling Language", (formData as ConsentFormSchema).clinical?.counselingLanguage || "—"],
                       ].map(([label, value], i) => (
-                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                        <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                          <td
+                            className="py-1.5 px-3 font-mono text-[11px] uppercase tracking-[0.06em] font-semibold w-44 text-left"
+                            style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}
+                          >
                             {label}
                           </td>
-                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                          <td className="py-1.5 px-3 text-sm text-left" style={{ color: "var(--ink)" }}>{value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -432,10 +467,10 @@ export default function ConsentDocument({
               <>
                 {/* Study info table */}
                 <div className="mb-6">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                  <h3 className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold mb-2 text-left" style={{ color: "var(--ink-muted)" }}>
                     Study Information
                   </h3>
-                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                  <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
                     <tbody>
                       {[
                         ["Study Title", (formData as ResearchConsentFormSchema).study?.studyTitle || "—"],
@@ -444,11 +479,14 @@ export default function ConsentDocument({
                         ["Contact", (formData as ResearchConsentFormSchema).study?.contactMobile || "—"],
                         ["Counseling Language", (formData as ResearchConsentFormSchema).study?.counselingLanguage || "—"],
                       ].map(([label, value], i) => (
-                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                        <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                          <td
+                            className="py-1.5 px-3 font-mono text-[11px] uppercase tracking-[0.06em] font-semibold w-44 text-left"
+                            style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}
+                          >
                             {label}
                           </td>
-                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                          <td className="py-1.5 px-3 text-sm text-left" style={{ color: "var(--ink)" }}>{value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -457,10 +495,10 @@ export default function ConsentDocument({
 
                 {/* Participant info table */}
                 <div className="mb-6">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                  <h3 className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold mb-2 text-left" style={{ color: "var(--ink-muted)" }}>
                     Participant Information
                   </h3>
-                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                  <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
                     <tbody>
                       {[
                         ["Participant Name", (formData as ResearchConsentFormSchema).participant?.participantName || "—"],
@@ -473,11 +511,14 @@ export default function ConsentDocument({
                             ]
                           : []),
                       ].map(([label, value], i) => (
-                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                        <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                          <td
+                            className="py-1.5 px-3 font-mono text-[11px] uppercase tracking-[0.06em] font-semibold w-44 text-left"
+                            style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}
+                          >
                             {label}
                           </td>
-                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                          <td className="py-1.5 px-3 text-sm text-left" style={{ color: "var(--ink)" }}>{value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -487,12 +528,12 @@ export default function ConsentDocument({
             )}
           </>
         ) : (
-          <div className="text-center border-b border-nq-border pb-4 mb-6">
-            <p className="text-sm font-bold uppercase tracking-widest mb-2 text-nq-purple">
+          <div className="text-center pb-4 mb-6" style={{ borderBottom: "1px solid var(--rule)" }}>
+            <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold mb-2" style={{ color: "var(--red)" }}>
               {isResearch ? "Research Consent Form" : "Standard Informed Consent Form"}
             </p>
-            <h1 className="text-2xl font-black text-nq-text tracking-tight text-left">{hospitalName}</h1>
-            <div className="mt-3 text-sm font-medium text-nq-text-muted space-y-1">
+            <h1 className="font-serif text-2xl font-bold tracking-tight text-left" style={{ color: "var(--ink)" }}>{hospitalName}</h1>
+            <div className="mt-3 text-sm font-medium space-y-1" style={{ color: "var(--ink-muted)" }}>
               <p className="text-left">
                 Consent ID: <span className="font-mono">{consentId}</span>
               </p>
@@ -502,17 +543,17 @@ export default function ConsentDocument({
         )}
 
         {isComplete && (
-          <p className="print-hide text-xs font-semibold text-nq-purple/70 mb-4 text-center">
+          <p className="print-hide text-xs font-semibold mb-4 text-center" style={{ color: "rgba(190,61,42,0.7)" }}>
             Click on any paragraph to edit
           </p>
         )}
 
-        <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-nq-text prose-p:font-medium text-left">
+        <div className="prose prose-sm sm:prose-base max-w-none prose-p:font-medium text-left" style={{ color: "var(--ink)" }}>
           <ReactMarkdown components={components}>{activeMarkdown}</ReactMarkdown>
         </div>
 
         {!isComplete && markdown.length > 0 && (
-          <span className="inline-block w-2.5 h-5 bg-nq-purple animate-pulse ml-1 align-middle rounded-sm" />
+          <span className="inline-block w-2.5 h-5 animate-pulse ml-1 align-middle rounded-sm" style={{ backgroundColor: "var(--red)" }} />
         )}
       </motion.div>
     </div>

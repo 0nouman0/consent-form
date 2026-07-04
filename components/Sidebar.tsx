@@ -64,8 +64,8 @@ export default function Sidebar() {
         width: collapsed ? "68px" : "240px",
         minWidth: collapsed ? "68px" : "240px",
         transition: "width 0.25s cubic-bezier(0.4,0,0.2,1), min-width 0.25s cubic-bezier(0.4,0,0.2,1)",
-        background: "#ffffff",
-        borderRight: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--sheet)",
+        borderRight: "1px solid var(--rule)",
       }}
     >
       {/* ── Header ── */}
@@ -75,7 +75,7 @@ export default function Sidebar() {
           padding: collapsed ? "0" : "0 14px",
           height: "64px",
           justifyContent: collapsed ? "center" : "space-between",
-          borderBottom: "1px solid rgba(0,0,0,0.07)",
+          borderBottom: "1px solid var(--rule)",
         }}
       >
         <Link
@@ -89,17 +89,18 @@ export default function Sidebar() {
             whiteSpace: "nowrap",
           }}
         >
-          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-            style={{ backgroundColor: "#0b0f1a" }}>
-            <ShieldCheck weight="bold" className="w-[16px] h-[16px] text-white" />
+          <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+            style={{ backgroundColor: "var(--ink)" }}>
+            <ShieldCheck weight="bold" className="w-[16px] h-[16px]" style={{ color: "var(--sheet)" }} />
           </div>
-          <span className="text-sm font-semibold tracking-tight" style={{ color: "#0b0f1a" }}>ConsentGen</span>
+          <span className="font-serif font-semibold text-sm tracking-tight" style={{ color: "var(--ink)" }}>ConsentGen</span>
         </Link>
 
         <button
           onClick={toggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+          className="w-8 h-8 rounded-md flex items-center justify-center transition-all shrink-0 hover:bg-[var(--paper)]"
+          style={{ color: "var(--ink-muted)" }}
         >
           {collapsed
             ? <CaretRight weight="bold" className="w-3.5 h-3.5" />
@@ -116,23 +117,20 @@ export default function Sidebar() {
               key={href}
               href={href}
               title={collapsed ? label : undefined}
-              className={`flex items-center rounded-xl font-medium transition-all text-sm group overflow-hidden ${
-                isActive
-                  ? "text-white shadow-sm"
-                  : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-              }`}
+              className="flex items-center rounded-md font-medium transition-all text-sm group overflow-hidden"
               style={{
                 gap: collapsed ? 0 : "12px",
                 padding: collapsed ? "10px 0" : "10px 12px",
                 justifyContent: collapsed ? "center" : "flex-start",
-                transition: "padding 0.25s ease, gap 0.25s ease, background 0.15s ease",
-                backgroundColor: isActive ? "#0b0f1a" : undefined,
+                transition: "padding 0.25s ease, gap 0.25s ease, background 0.15s ease, color 0.15s ease",
+                backgroundColor: isActive ? "var(--ink)" : undefined,
+                color: isActive ? "var(--sheet)" : "var(--ink-muted)",
               }}
             >
               <Icon
                 weight={isActive ? "fill" : "duotone"}
-                className={`shrink-0 ${isActive ? "text-white" : "text-neutral-400 group-hover:text-neutral-700"}`}
-                style={{ width: "18px", height: "18px" }}
+                className="shrink-0"
+                style={{ width: "18px", height: "18px", color: isActive ? "var(--sheet)" : "var(--ink-muted)" }}
               />
               <span
                 style={{
@@ -152,19 +150,20 @@ export default function Sidebar() {
       </nav>
 
       {/* ── Footer ── */}
-      <div className="shrink-0 p-3" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+      <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--rule)" }}>
         <Link
           href="/profile"
-          className="flex items-center rounded-xl font-medium transition-all text-xs group overflow-hidden text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+          className="flex items-center rounded-md font-medium transition-all text-xs group overflow-hidden"
           style={{
             gap: collapsed ? 0 : "10px",
             padding: collapsed ? "8px 0" : "8px 10px",
             justifyContent: collapsed ? "center" : "flex-start",
             transition: "padding 0.25s ease, gap 0.25s ease",
+            color: "var(--ink-muted)",
           }}
         >
-          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-neutral-100 transition-colors group-hover:bg-neutral-200">
-            <User weight="duotone" className="w-[16px] h-[16px] text-neutral-500 group-hover:text-neutral-700" />
+          <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors" style={{ backgroundColor: "var(--paper)" }}>
+            <User weight="duotone" className="w-[16px] h-[16px]" style={{ color: "var(--ink-muted)" }} />
           </div>
           <span
             style={{

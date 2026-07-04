@@ -160,7 +160,7 @@ export default function CreditsPage() {
           email: user?.email || "",
         },
         theme: {
-          color: "#0b0f1a",
+          color: "#171410",
         },
         handler: async function (response: any) {
           setLoading(true);
@@ -185,10 +185,10 @@ export default function CreditsPage() {
               type: "success",
               text: `Payment successful! ${PACKAGES.find(p => p.amount === amount)?.credits} credits have been added.`
             });
-            
+
             // Dispatch global event for components (e.g. AppHeader) to reload credits
             window.dispatchEvent(new Event("credits-updated"));
-            
+
             // Reload user data to update credit balance
             await loadData();
             setBuyingAmount(null);
@@ -223,27 +223,27 @@ export default function CreditsPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4" style={{ backgroundColor: "#ededed" }}>
+    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4" style={{ backgroundColor: "var(--paper)" }}>
       <div className="max-w-screen-xl mx-auto space-y-4">
-        
+
         {/* Header Card */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-          style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-1">Billing</p>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#0b0f1a", letterSpacing: "-0.02em" }}>
-              Credit <span className="font-serif italic font-normal text-neutral-600" style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic" }}>balance</span>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Billing</p>
+            <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
+              Credit <span style={{ color: "var(--red)" }}>balance</span>
             </h1>
-            <p className="text-sm text-neutral-500 mt-1">Top up your balance to generate new consent forms</p>
+            <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>Top up your balance to generate new consent forms</p>
           </div>
 
-          <div className="bg-neutral-50 rounded-2xl px-6 py-4 flex items-center gap-4 shrink-0 border border-neutral-100">
-            <div className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center">
-              <Coins className="w-5 h-5 text-white" weight="duotone" />
+          <div className="rounded-md px-6 py-4 flex items-center gap-4 shrink-0" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
+            <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--ink)" }}>
+              <Coins className="w-5 h-5" weight="duotone" style={{ color: "var(--sheet)" }} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-neutral-400">Available Credits</p>
-              <p className="text-2xl font-black text-neutral-900 leading-tight">
+              <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>Available Credits</p>
+              <p className="font-serif text-2xl font-bold leading-tight" style={{ color: "var(--ink)" }}>
                 {credits !== null ? credits : "—"}
               </p>
             </div>
@@ -257,16 +257,17 @@ export default function CreditsPage() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className={`p-4 rounded-xl flex items-start gap-3 border ${
-                message.type === "success" 
-                  ? "bg-emerald-50 border-emerald-100 text-emerald-800" 
-                  : "bg-red-50 border-red-100 text-red-800"
-              }`}
+              className="p-4 rounded-md flex items-start gap-3"
+              style={
+                message.type === "success"
+                  ? { backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)", color: "#3f7a4e" }
+                  : { backgroundColor: "rgba(190,61,42,0.06)", border: "1px solid rgba(190,61,42,0.25)", color: "var(--red)" }
+              }
             >
               {message.type === "success" ? (
-                <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" weight="fill" />
+                <CheckCircle className="w-5 h-5 shrink-0" weight="fill" style={{ color: "#3f7a4e" }} />
               ) : (
-                <XCircle className="w-5 h-5 shrink-0 text-red-600" weight="fill" />
+                <XCircle className="w-5 h-5 shrink-0" weight="fill" style={{ color: "var(--red)" }} />
               )}
               <div className="text-sm font-medium">{message.text}</div>
             </motion.div>
@@ -278,35 +279,35 @@ export default function CreditsPage() {
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.amount}
-              className={`bg-white rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 border ${
-                pkg.popular 
-                  ? "ring-2 ring-neutral-950 border-neutral-950 scale-[1.01]" 
-                  : "border-black/[0.06] hover:border-black/[0.12]"
-              }`}
-              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}
+              className="rounded-md p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300"
+              style={{
+                backgroundColor: "var(--sheet)",
+                border: pkg.popular ? "1.5px solid var(--ink)" : "1px solid var(--rule)",
+              }}
             >
               {pkg.popular && (
-                <div className="absolute top-3 right-3 bg-neutral-900 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
+                <div className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1"
+                  style={{ backgroundColor: "var(--red)", color: "var(--sheet)" }}>
                   <Sparkle weight="fill" className="w-2.5 h-2.5" /> Best Deal
                 </div>
               )}
               <div>
-                <p className="text-xs uppercase font-bold text-neutral-400">{pkg.label}</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>{pkg.label}</p>
                 <div className="flex items-baseline gap-1 mt-2 mb-2">
-                  <span className="text-4xl font-black text-neutral-950">₹{pkg.amount}</span>
+                  <span className="font-serif text-4xl font-bold" style={{ color: "var(--ink)" }}>₹{pkg.amount}</span>
                 </div>
-                <p className="text-sm font-semibold text-neutral-600 mb-4">{pkg.credits} Credit{pkg.credits > 1 ? "s" : ""}</p>
-                <p className="text-xs text-neutral-500 leading-relaxed mb-6">{pkg.description}</p>
+                <p className="text-sm font-semibold mb-4" style={{ color: "var(--ink-soft)" }}>{pkg.credits} Credit{pkg.credits > 1 ? "s" : ""}</p>
+                <p className="text-xs leading-relaxed mb-6" style={{ color: "var(--ink-muted)" }}>{pkg.description}</p>
               </div>
 
               <button
                 onClick={() => handlePurchase(pkg.amount)}
                 disabled={buyingAmount !== null || loading}
-                className="w-full py-2.5 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center"
+                className="w-full py-2.5 rounded-md text-xs font-bold transition-all text-center flex items-center justify-center hover:opacity-90"
                 style={{
-                  backgroundColor: pkg.popular ? "#0b0f1a" : "#ffffff",
-                  color: pkg.popular ? "#ffffff" : "#0b0f1a",
-                  border: pkg.popular ? "none" : "1px solid rgba(0,0,0,0.15)",
+                  backgroundColor: pkg.popular ? "var(--ink)" : "var(--sheet)",
+                  color: pkg.popular ? "var(--sheet)" : "var(--ink)",
+                  border: pkg.popular ? "none" : "1px solid var(--rule)",
                 }}
               >
                 {buyingAmount === pkg.amount ? (
@@ -321,26 +322,31 @@ export default function CreditsPage() {
 
         {/* History Tables Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          
+
           {/* Credit Usage History */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-black/[0.06]" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-            <div className="flex items-center gap-3 px-6 py-5 border-b border-black/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center">
-                <ClockCounterClockwise weight="duotone" className="w-4 h-4 text-neutral-600" />
+          <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+            <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: "1px solid var(--rule)" }}>
+              <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
+                <ClockCounterClockwise weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               </div>
-              <h2 className="text-sm font-bold text-neutral-950">Usage & Balance Log</h2>
+              <h2 className="font-serif text-sm font-bold" style={{ color: "var(--ink)" }}>Usage & Balance Log</h2>
             </div>
-            
+
             {logs.length === 0 ? (
-              <div className="text-center py-12 text-xs text-neutral-400">No credits used or added yet.</div>
+              <div className="text-center py-12 text-xs" style={{ color: "var(--ink-muted)" }}>No credits used or added yet.</div>
             ) : (
-              <div className="divide-y divide-black/[0.04] max-h-96 overflow-y-auto">
+              <div className="divide-y divide-[var(--rule-soft)] max-h-96 overflow-y-auto">
                 {logs.map((log) => (
                   <div key={log.id} className="px-6 py-4 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-3">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                        log.amount < 0 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
-                      }`}>
+                      <div
+                        className="w-7 h-7 rounded-md flex items-center justify-center"
+                        style={
+                          log.amount < 0
+                            ? { color: "var(--red)", backgroundColor: "rgba(190,61,42,0.08)" }
+                            : { color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)" }
+                        }
+                      >
                         {log.amount < 0 ? (
                           <ArrowDownLeft weight="bold" className="w-3 h-3" />
                         ) : (
@@ -348,10 +354,10 @@ export default function CreditsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="font-bold text-neutral-800 capitalize">
+                        <p className="font-bold capitalize" style={{ color: "var(--ink)" }}>
                           {log.action.replace(/_/g, " ")}
                         </p>
-                        <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
+                        <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           <CalendarBlank className="w-3 h-3" />
                           {new Date(log.created_at).toLocaleDateString("en-IN", {
                             day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
@@ -360,10 +366,10 @@ export default function CreditsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${log.amount < 0 ? "text-red-600" : "text-emerald-600"}`}>
+                      <p className="font-bold" style={{ color: log.amount < 0 ? "var(--red)" : "#3f7a4e" }}>
                         {log.amount > 0 ? `+${log.amount}` : log.amount}
                       </p>
-                      <p className="text-[10px] text-neutral-400">Bal: {log.balance_after}</p>
+                      <p className="text-[10px]" style={{ color: "var(--ink-muted)" }}>Bal: {log.balance_after}</p>
                     </div>
                   </div>
                 ))}
@@ -372,32 +378,32 @@ export default function CreditsPage() {
           </div>
 
           {/* Payment Transactions */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-black/[0.06]" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-            <div className="flex items-center gap-3 px-6 py-5 border-b border-black/[0.06]">
-              <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center">
-                <CreditCard weight="duotone" className="w-4 h-4 text-neutral-600" />
+          <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+            <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: "1px solid var(--rule)" }}>
+              <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
+                <CreditCard weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               </div>
-              <h2 className="text-sm font-bold text-neutral-950">Payment Transactions</h2>
+              <h2 className="font-serif text-sm font-bold" style={{ color: "var(--ink)" }}>Payment Transactions</h2>
             </div>
-            
+
             {txs.length === 0 ? (
-              <div className="text-center py-12 text-xs text-neutral-400">No payment transaction records found.</div>
+              <div className="text-center py-12 text-xs" style={{ color: "var(--ink-muted)" }}>No payment transaction records found.</div>
             ) : (
-              <div className="divide-y divide-black/[0.04] max-h-96 overflow-y-auto">
+              <div className="divide-y divide-[var(--rule-soft)] max-h-96 overflow-y-auto">
                 {txs.map((tx) => (
                   <div key={tx.id} className="px-6 py-4 flex items-center justify-between text-xs">
                     <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500">
+                      <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
                         <CreditCard className="w-3.5 h-3.5" />
                       </div>
                       <div>
-                        <p className="font-mono font-bold text-neutral-800">
+                        <p className="font-mono font-bold" style={{ color: "var(--ink)" }}>
                           {tx.order_id}
                         </p>
-                        <p className="text-[9px] text-neutral-400 font-mono mt-0.5">
+                        <p className="text-[9px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           ID: {tx.payment_id || "Pending"}
                         </p>
-                        <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-1">
+                        <p className="text-[10px] flex items-center gap-1 mt-1" style={{ color: "var(--ink-muted)" }}>
                           <CalendarBlank className="w-3 h-3" />
                           {new Date(tx.created_at).toLocaleDateString("en-IN")}
                         </p>
@@ -405,21 +411,25 @@ export default function CreditsPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <p className="font-bold text-neutral-950">₹{(tx.amount / 100).toFixed(0)}</p>
-                        <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-1 ${
-                          tx.status === "paid" 
-                            ? "bg-emerald-50 text-emerald-700" 
-                            : tx.status === "failed" 
-                            ? "bg-red-50 text-red-700" 
-                            : "bg-amber-50 text-amber-700"
-                        }`}>
+                        <p className="font-bold" style={{ color: "var(--ink)" }}>₹{(tx.amount / 100).toFixed(0)}</p>
+                        <span
+                          className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-md mt-1"
+                          style={
+                            tx.status === "paid"
+                              ? { color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)" }
+                              : tx.status === "failed"
+                              ? { color: "var(--red)", backgroundColor: "rgba(190,61,42,0.08)" }
+                              : { color: "#92400e", backgroundColor: "rgba(146,64,14,0.08)" }
+                          }
+                        >
                           {tx.status}
                         </span>
                       </div>
                       {tx.status === "paid" && (
                         <button
                           onClick={() => setInvoiceTx(tx)}
-                          className="p-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border border-neutral-200 transition-all cursor-pointer"
+                          className="p-2 rounded-md transition-all cursor-pointer hover:bg-[rgba(23,20,16,0.06)]"
+                          style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)", border: "1px solid var(--rule)" }}
                           title="View Invoice"
                         >
                           <Receipt weight="bold" className="w-3.5 h-3.5" />
@@ -438,7 +448,7 @@ export default function CreditsPage() {
 
       {/* Invoice Modal */}
       {invoiceTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:p-0 print:bg-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 print:p-0 print:bg-white" style={{ backgroundColor: "rgba(23,20,16,0.5)" }}>
           <style dangerouslySetInnerHTML={{__html: `
             @media print {
               body * {
@@ -462,64 +472,64 @@ export default function CreditsPage() {
               }
             }
           `}} />
-          <div id="printable-invoice-modal" className="w-full max-w-[500px] bg-white rounded-3xl p-6 sm:p-8 text-neutral-800 border border-neutral-100 shadow-2xl relative">
+          <div id="printable-invoice-modal" className="w-full max-w-[500px] rounded-md p-6 sm:p-8 relative" style={{ backgroundColor: "var(--sheet)", color: "var(--ink-soft)", border: "1px solid var(--rule)" }}>
             {/* Header */}
-            <div className="text-center border-b border-neutral-100 pb-5 mb-5">
-              <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Payment Invoice</h2>
-              <p className="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-semibold">Consent Form Generator</p>
+            <div className="text-center pb-5 mb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
+              <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>Payment Invoice</h2>
+              <p className="font-mono text-[11px] mt-1 uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>Consent Form Generator</p>
             </div>
 
             {/* Info details */}
             <div className="space-y-4 text-xs mb-6">
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Payer</span>
-                <span className="font-bold text-neutral-800 text-right">
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Payer</span>
+                <span className="font-bold text-right" style={{ color: "var(--ink)" }}>
                   {invoiceTx.metadata?.billing_doctor_name || profileData.doctorName || "Dr. User"}
                 </span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Registration No.</span>
-                <span className="font-bold text-neutral-800 text-right font-mono">
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Registration No.</span>
+                <span className="font-bold text-right font-mono" style={{ color: "var(--ink)" }}>
                   {invoiceTx.metadata?.billing_doctor_registration_no || profileData.doctorRegistrationNo || "N/A"}
                 </span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Hospital</span>
-                <span className="font-bold text-neutral-800 text-right">
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Hospital</span>
+                <span className="font-bold text-right" style={{ color: "var(--ink)" }}>
                   {invoiceTx.metadata?.billing_hospital_name || profileData.hospitalName || "N/A"}
                 </span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Billing Address</span>
-                <span className="font-bold text-neutral-800 text-right" style={{ whiteSpace: "pre-line" }}>
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Billing Address</span>
+                <span className="font-bold text-right" style={{ color: "var(--ink)", whiteSpace: "pre-line" }}>
                   {invoiceTx.metadata?.billing_address || profileData.billingAddress || profileData.hospitalAddress || "N/A"}
                 </span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Order ID</span>
-                <span className="font-mono text-neutral-800 text-right">{invoiceTx.order_id}</span>
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Order ID</span>
+                <span className="font-mono text-right" style={{ color: "var(--ink)" }}>{invoiceTx.order_id}</span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Payment ID</span>
-                <span className="font-mono text-neutral-800 text-right">{invoiceTx.payment_id}</span>
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Payment ID</span>
+                <span className="font-mono text-right" style={{ color: "var(--ink)" }}>{invoiceTx.payment_id}</span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Payment Date</span>
-                <span className="font-bold text-neutral-800 text-right">
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Payment Date</span>
+                <span className="font-bold text-right" style={{ color: "var(--ink)" }}>
                   {new Date(invoiceTx.created_at).toLocaleDateString("en-IN")} {new Date(invoiceTx.created_at).toLocaleTimeString("en-IN")}
                 </span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Payment Method</span>
-                <span className="font-bold text-neutral-800 capitalize text-right">{invoiceTx.metadata?.method || "Razorpay"}</span>
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Payment Method</span>
+                <span className="font-bold capitalize text-right" style={{ color: "var(--ink)" }}>{invoiceTx.metadata?.method || "Razorpay"}</span>
               </div>
-              <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                <span className="text-neutral-400">Credits Purchased</span>
-                <span className="font-bold text-neutral-800 text-right text-green-600">+{invoiceTx.credits} Credits</span>
+              <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>Credits Purchased</span>
+                <span className="font-bold text-right" style={{ color: "#3f7a4e" }}>+{invoiceTx.credits} Credits</span>
               </div>
-              <div className="flex justify-between pt-2 border-t-2 border-neutral-900">
-                <span className="font-bold text-neutral-900 text-sm">Total Paid Amount</span>
-                <span className="font-extrabold text-neutral-900 text-base">₹{(invoiceTx.amount / 100).toFixed(2)}</span>
+              <div className="flex justify-between pt-2" style={{ borderTop: "2px solid var(--ink)" }}>
+                <span className="font-bold text-sm" style={{ color: "var(--ink)" }}>Total Paid Amount</span>
+                <span className="font-extrabold text-base" style={{ color: "var(--ink)" }}>₹{(invoiceTx.amount / 100).toFixed(2)}</span>
               </div>
             </div>
 
@@ -527,13 +537,15 @@ export default function CreditsPage() {
             <div className="flex gap-3 mt-6 no-print">
               <button
                 onClick={() => window.print()}
-                className="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 font-bold rounded-md text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 hover:opacity-90"
+                style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
               >
                 Print Invoice
               </button>
               <button
                 onClick={() => setInvoiceTx(null)}
-                className="px-4 py-2.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 font-bold rounded-xl text-xs border border-neutral-200 transition-all cursor-pointer"
+                className="px-4 py-2.5 font-bold rounded-md text-xs transition-all cursor-pointer hover:bg-[rgba(23,20,16,0.06)]"
+                style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)", border: "1px solid var(--rule)" }}
               >
                 Close
               </button>

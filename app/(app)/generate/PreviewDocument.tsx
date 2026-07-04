@@ -20,19 +20,19 @@ function ShimmerBlock({ label, sublabel, compact = false }: { label: string; sub
   return (
     <div className={compact ? "mb-4" : "mb-6"}>
       <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500">{label}</h4>
+        <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em]" style={{ color: "var(--ink-muted)" }}>{label}</h4>
         {sublabel && (
-          <span className="text-[10px] text-neutral-400 font-medium">{sublabel}</span>
+          <span className="text-[10px] font-medium" style={{ color: "var(--ink-muted)" }}>{sublabel}</span>
         )}
-        <span className="text-[10px] bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
+        <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-md" style={{ backgroundColor: "rgba(190,61,42,0.08)", color: "var(--red)" }}>
           AI generated
         </span>
       </div>
-      <div className={`rounded-lg bg-neutral-100 p-3 space-y-2 ${compact ? "" : "p-4 space-y-2.5"}`}>
-        <div className="h-2.5 bg-neutral-200 rounded-full w-full" />
-        <div className="h-2.5 bg-neutral-200 rounded-full w-11/12" />
-        {!compact && <div className="h-2.5 bg-neutral-200 rounded-full w-4/5" />}
-        <div className="h-2.5 bg-neutral-200 rounded-full w-3/4" />
+      <div className={`rounded-md p-3 space-y-2 ${compact ? "" : "p-4 space-y-2.5"}`} style={{ backgroundColor: "var(--paper)" }}>
+        <div className="h-2.5 rounded-md w-full" style={{ backgroundColor: "var(--rule)" }} />
+        <div className="h-2.5 rounded-md w-11/12" style={{ backgroundColor: "var(--rule)" }} />
+        {!compact && <div className="h-2.5 rounded-md w-4/5" style={{ backgroundColor: "var(--rule)" }} />}
+        <div className="h-2.5 rounded-md w-3/4" style={{ backgroundColor: "var(--rule)" }} />
       </div>
     </div>
   );
@@ -42,11 +42,12 @@ function InfoBanner() {
   return (
     <div
       role="note"
-      className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex gap-3 items-start"
+      className="mb-6 rounded-md px-5 py-4 flex gap-3 items-start"
+      style={{ backgroundColor: "rgba(190,61,42,0.06)", border: "1px solid rgba(190,61,42,0.25)" }}
     >
-      <span className="text-amber-500 text-xl leading-none mt-0.5">&#9888;</span>
-      <p className="text-sm text-amber-800 leading-relaxed">
-        <strong>This preview shows your entered data.</strong> The AI will generate all legal consent
+      <span className="text-xl leading-none mt-0.5" style={{ color: "var(--red)" }}>&#9888;</span>
+      <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+        <strong style={{ color: "var(--ink)" }}>This preview shows your entered data.</strong> The AI will generate all legal consent
         clauses during generation. Review your details carefully before spending 1 credit.
       </p>
     </div>
@@ -56,9 +57,9 @@ function InfoBanner() {
 function SignatureLine({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className="w-36 border-b border-neutral-400" />
-      <p className="text-xs text-neutral-600 font-medium">{label}</p>
-      <p className="text-xs text-neutral-400">Date: ________ Time: ______</p>
+      <div className="w-36 border-b" style={{ borderColor: "var(--ink-muted)" }} />
+      <p className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>{label}</p>
+      <p className="text-xs" style={{ color: "var(--ink-muted)" }}>Date: ________ Time: ______</p>
     </div>
   );
 }
@@ -84,25 +85,25 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
   return (
     <div>
       <InfoBanner />
-      <div className="max-w-2xl mx-auto bg-white border border-neutral-200 shadow-md p-8 font-serif text-neutral-900">
+      <div className="max-w-2xl mx-auto rounded-md p-8 font-serif" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}>
         {/* Header */}
-        <div className="flex justify-between items-start mb-6 pb-5 border-b border-neutral-200">
+        <div className="flex justify-between items-start mb-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
           <div>
             <p className="text-lg font-bold leading-tight">
               {data.clinical?.hospitalName || "Hospital Name"}
             </p>
-            <p className="text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs">
+            <p className="text-xs mt-1 leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
               {data.clinical?.hospitalAddress || "Hospital Address"}
             </p>
           </div>
-          <div className="text-right text-xs text-neutral-500 space-y-0.5">
-            <p>Consent ID: <span className="font-semibold text-neutral-700">AUTO-GENERATED</span></p>
-            <p>Date: <span className="font-semibold text-neutral-700">{today}</span></p>
+          <div className="text-right text-xs space-y-0.5" style={{ color: "var(--ink-muted)" }}>
+            <p>Consent ID: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>AUTO-GENERATED</span></p>
+            <p>Date: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>{today}</span></p>
           </div>
         </div>
 
         {/* Title bar */}
-        <div className="bg-neutral-100 rounded-md py-2.5 px-4 mb-6 text-center">
+        <div className="rounded-md py-2.5 px-4 mb-6 text-center" style={{ backgroundColor: "var(--paper)" }}>
           <p className="text-sm font-bold tracking-widest uppercase">
             INFORMED CONSENT FORM &mdash; {consentTypeLabel} PROCEDURE
           </p>
@@ -110,10 +111,10 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
 
         {/* Patient info table */}
         <div className="mb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
             Patient Information
           </h3>
-          <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
             <tbody>
               {[
                 ["Patient Name", data.patient?.patientName || "—"],
@@ -133,8 +134,8 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
                     ]
                   : []),
               ].map(([label, value], i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                  <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200">
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
                     {label}
                   </td>
                   <td className="py-1.5 px-3 text-sm">{value}</td>
@@ -146,10 +147,10 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
 
         {/* Clinical info table */}
         <div className="mb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
             Clinical Details
           </h3>
-          <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
             <tbody>
               {[
                 ["Physician", `${data.clinical?.doctorName || "—"} (Reg. ${data.clinical?.doctorRegistrationNo || "—"})`],
@@ -157,8 +158,8 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
                 ["Scheduled Date", data.clinical?.procedureDate || "—"],
                 ["Counseling Language", data.clinical?.counselingLanguage || "—"],
               ].map(([label, value], i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                  <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200">
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
                     {label}
                   </td>
                   <td className="py-1.5 px-3 text-sm">{value}</td>
@@ -171,10 +172,10 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
         {/* Specific risks entered by user */}
         {data.clinical?.specificRisks && (
           <div className="mb-6">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+            <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
               Specific Risks (Entered)
             </h4>
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
               {data.clinical.specificRisks}
             </div>
           </div>
@@ -182,7 +183,7 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
 
         {/* Part B — applicable consent clauses (exact sections the AI will generate) */}
         <div className="mb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-3">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>
             Part B — Consent Clauses
           </h3>
           {REQUIRED_CLAUSES.filter(
@@ -201,8 +202,8 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
         </div>
 
         {/* Part C — signature block */}
-        <div className="mt-8 pt-6 border-t border-neutral-200">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-4">
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-4" style={{ color: "var(--ink-muted)" }}>
             Part C — Signatures
           </h3>
           <div className="flex justify-around flex-wrap gap-6">
@@ -215,11 +216,11 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
         </div>
 
         {/* Part D — doctor's declaration */}
-        <div className="mt-8 pt-6 border-t border-neutral-200">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-3">
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>
             Part D — Doctor&apos;s Declaration
           </h3>
-          <p className="text-sm leading-relaxed text-neutral-700 mb-4">
+          <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--ink-soft)" }}>
             I, <strong>{data.clinical?.doctorName || "Dr. ____________"}</strong> (Reg. No.{" "}
             {data.clinical?.doctorRegistrationNo || "________"}), declare that I have personally
             explained the procedure, its risks, and the alternatives to the patient in{" "}
@@ -232,15 +233,15 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
         </div>
 
         {/* Footer — mirrors the generated document footer */}
-        <div className="mt-8 pt-4 border-t border-neutral-100 text-center space-y-1">
-          <p className="text-xs text-neutral-400">
+        <div className="mt-8 pt-4 text-center space-y-1" style={{ borderTop: "1px solid var(--rule-soft)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             Consent ID: AUTO-GENERATED &middot; Generated by ConsentGen
           </p>
-          <p className="text-[11px] text-neutral-400">
+          <p className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
             This form is legally binding per IMC (Professional Conduct, Etiquette and Ethics)
             Regulations 2002.
           </p>
-          <p className="text-[11px] text-neutral-400">
+          <p className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
             Aadhaar data is masked per the Aadhaar Act 2016. This consent applies to the named
             procedure only — blanket consent is void in India.
           </p>
@@ -264,25 +265,25 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
   return (
     <div>
       <InfoBanner />
-      <div className="max-w-2xl mx-auto bg-white border border-neutral-200 shadow-md p-8 font-serif text-neutral-900">
+      <div className="max-w-2xl mx-auto rounded-md p-8 font-serif" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}>
         {/* Header */}
-        <div className="flex justify-between items-start mb-6 pb-5 border-b border-neutral-200">
+        <div className="flex justify-between items-start mb-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
           <div>
             <p className="text-lg font-bold leading-tight">
               {data.study?.institutionName || "Institution Name"}
             </p>
-            <p className="text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs">
+            <p className="text-xs mt-1 leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
               {data.study?.institutionAddress || "Institution Address"}
             </p>
           </div>
-          <div className="text-right text-xs text-neutral-500 space-y-0.5">
-            <p>Consent ID: <span className="font-semibold text-neutral-700">AUTO-GENERATED</span></p>
-            <p>Date: <span className="font-semibold text-neutral-700">{today}</span></p>
+          <div className="text-right text-xs space-y-0.5" style={{ color: "var(--ink-muted)" }}>
+            <p>Consent ID: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>AUTO-GENERATED</span></p>
+            <p>Date: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>{today}</span></p>
           </div>
         </div>
 
         {/* Title bar */}
-        <div className="bg-neutral-100 rounded-md py-2.5 px-4 mb-6 text-center">
+        <div className="rounded-md py-2.5 px-4 mb-6 text-center" style={{ backgroundColor: "var(--paper)" }}>
           <p className="text-sm font-bold tracking-widest uppercase">
             INFORMED CONSENT FOR RESEARCH PARTICIPATION
           </p>
@@ -290,10 +291,10 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
 
         {/* Study info table */}
         <div className="mb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
             Study Information
           </h3>
-          <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
             <tbody>
               {[
                 ["Study Title", data.study?.studyTitle || "—"],
@@ -302,8 +303,8 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
                 ["Contact", data.study?.contactMobile || "—"],
                 ["Counseling Language", data.study?.counselingLanguage || "—"],
               ].map(([label, value], i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                  <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200">
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
                     {label}
                   </td>
                   <td className="py-1.5 px-3 text-sm">{value}</td>
@@ -315,10 +316,10 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
 
         {/* Participant info table */}
         <div className="mb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
             Participant Information
           </h3>
-          <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
             <tbody>
               {[
                 ["Participant Name", data.participant?.participantName || "—"],
@@ -331,8 +332,8 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
                     ]
                   : []),
               ].map(([label, value], i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                  <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200">
+                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
+                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
                     {label}
                   </td>
                   <td className="py-1.5 px-3 text-sm">{value}</td>
@@ -345,10 +346,10 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
         {/* Study purpose entered */}
         {data.study?.studyPurpose && (
           <div className="mb-6">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+            <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
               Study Purpose (Entered)
             </h4>
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
               {data.study.studyPurpose}
             </div>
           </div>
@@ -360,7 +361,7 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
         <ShimmerBlock label="Participant Consent Declaration (AI Generated)" />
 
         {/* Signature block */}
-        <div className="mt-8 pt-6 border-t border-neutral-200">
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
           <div className="flex justify-around flex-wrap gap-6">
             <SignatureLine label="Participant Signature" />
             {data.includeResearcherDeclaration && (
@@ -371,8 +372,8 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t border-neutral-100 text-center">
-          <p className="text-xs text-neutral-400">
+        <div className="mt-8 pt-4 text-center" style={{ borderTop: "1px solid var(--rule-soft)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             Generated by ConsentGen &middot; ICMR Guidelines Compliant &middot; [timestamp to be added on generation]
           </p>
         </div>

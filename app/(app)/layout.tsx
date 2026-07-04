@@ -8,7 +8,7 @@ import OfflineBanner from "@/components/OfflineBanner";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex font-body" style={{ backgroundColor: "#ededed" }}>
+    <div className="min-h-screen flex font-body" style={{ backgroundColor: "var(--paper)" }}>
       <OfflineBanner />
 
       {/* Desktop collapsible sidebar */}
@@ -21,21 +21,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Header */}
         <header
-          className="md:hidden fixed top-3 left-3 right-3 z-50 flex items-center justify-between px-4 py-2 rounded-full"
+          className="md:hidden fixed top-3 left-3 right-3 z-50 flex items-center justify-between px-4 py-2 rounded-md"
           style={{
-            background: "#ffffff",
-            boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            background: "var(--sheet)",
+            boxShadow: "0 2px 16px rgba(23,20,16,0.08)",
+            border: "1px solid var(--rule)",
           }}
         >
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#0b0f1a" }}
+              className="w-7 h-7 rounded-md flex items-center justify-center"
+              style={{ backgroundColor: "var(--ink)" }}
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-white" weight="fill" />
+              <ShieldCheck className="w-3.5 h-3.5" weight="fill" style={{ color: "var(--sheet)" }} />
             </div>
-            <span className="text-sm font-semibold tracking-tight" style={{ color: "#0b0f1a" }}>
+            <span className="font-serif font-semibold text-sm tracking-tight" style={{ color: "var(--ink)" }}>
               ConsentGen
             </span>
           </Link>
@@ -49,8 +49,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Nav */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 border-t border-black/[0.08] z-50 px-2 pb-safe pt-1"
-        style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(16px)" }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-2 pb-safe pt-1"
+        style={{ background: "rgba(252,251,247,0.98)", backdropFilter: "blur(16px)", borderTop: "1px solid var(--rule)" }}
       >
         <SidebarNav isMobile />
       </nav>

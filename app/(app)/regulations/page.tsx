@@ -89,7 +89,7 @@ const UPDATES: RegUpdate[] = [
 
 const CATEGORY_META: Record<RegUpdate["category"], { color: string; bg: string; icon: Icon }> = {
   NMC:   { color: "#1e40af", bg: "#eff6ff", icon: ShieldCheck },
-  MCI:   { color: "#6d28d9", bg: "#f5f3ff", icon: Hospital },
+  MCI:   { color: "var(--red)", bg: "rgba(190,61,42,0.08)", icon: Hospital },
   BNS:   { color: "#b45309", bg: "#fffbeb", icon: Gavel },
   DPDP:  { color: "#0f766e", bg: "#f0fdfa", icon: FileText },
   ICMR:  { color: "#be185d", bg: "#fdf2f8", icon: BookOpen },
@@ -113,25 +113,19 @@ export default function RegulationsPage() {
     : UPDATES.filter((u) => u.category === activeCategory);
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-4 font-body" style={{ backgroundColor: "#ededed" }}>
+    <div className="flex-1 overflow-y-auto p-3 sm:p-4 font-body" style={{ backgroundColor: "var(--paper)" }}>
       <div className="max-w-4xl mx-auto space-y-4">
 
         {/* Header */}
         <div
-          className="bg-white rounded-2xl sm:rounded-3xl px-6 sm:px-8 py-6 sm:py-7"
-          style={{ border: "1px solid rgba(0,0,0,0.07)" }}
+          className="rounded-md px-6 sm:px-8 py-6 sm:py-7"
+          style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-1">India</p>
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#0b0f1a", letterSpacing: "-0.02em" }}>
-            Regulatory{" "}
-            <span
-              className="font-serif italic font-normal text-neutral-600"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
-            >
-              updates
-            </span>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>India</p>
+          <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
+            Regulatory <span style={{ color: "var(--red)" }}>updates</span>
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>
             Key laws, guidelines and notifications governing medical consent in India.
           </p>
         </div>
@@ -144,11 +138,11 @@ export default function RegulationsPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat as typeof activeCategory)}
-                className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
+                className="px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all"
                 style={
                   isActive
-                    ? { backgroundColor: "#0b0f1a", color: "#fff", border: "1px solid #0b0f1a" }
-                    : { backgroundColor: "#fff", color: "#374151", border: "1px solid rgba(0,0,0,0.1)" }
+                    ? { backgroundColor: "var(--ink)", color: "var(--sheet)", border: "1px solid var(--ink)" }
+                    : { backgroundColor: "var(--sheet)", color: "var(--ink-soft)", border: "1px solid var(--rule)" }
                 }
               >
                 {cat}
@@ -166,17 +160,17 @@ export default function RegulationsPage() {
             return (
               <div
                 key={update.id}
-                className="bg-white rounded-2xl overflow-hidden transition-all"
-                style={{ border: "1px solid rgba(0,0,0,0.07)" }}
+                className="rounded-md overflow-hidden transition-all"
+                style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <button
                   type="button"
-                  className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-start gap-4 hover:bg-neutral-50 transition-colors"
+                  className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-start gap-4 transition-colors hover:bg-[var(--paper)]"
                   onClick={() => setExpanded(isOpen ? null : update.id)}
                   aria-expanded={isOpen}
                 >
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                    className="w-9 h-9 rounded-md flex items-center justify-center shrink-0 mt-0.5"
                     style={{ backgroundColor: meta.bg }}
                   >
                     <Icon weight="duotone" className="w-4 h-4" style={{ color: meta.color }} />
@@ -184,25 +178,25 @@ export default function RegulationsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase tracking-wider"
                         style={{ backgroundColor: meta.bg, color: meta.color }}
                       >
                         <Tag weight="fill" className="w-2.5 h-2.5" />
                         {update.category}
                       </span>
-                      <span className="text-xs text-neutral-400 flex items-center gap-1">
+                      <span className="text-xs flex items-center gap-1" style={{ color: "var(--ink-muted)" }}>
                         <CalendarBlank weight="regular" className="w-3 h-3" />
                         {formatDate(update.date)}
                       </span>
                     </div>
-                    <h2 className="text-sm font-semibold leading-snug" style={{ color: "#0b0f1a" }}>
+                    <h2 className="text-sm font-semibold leading-snug" style={{ color: "var(--ink)" }}>
                       {update.title}
                     </h2>
-                    <p className="text-xs text-neutral-400 mt-0.5">{update.source}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>{update.source}</p>
                   </div>
                   <svg
-                    className="w-4 h-4 text-neutral-400 shrink-0 mt-1 transition-transform"
-                    style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                    className="w-4 h-4 shrink-0 mt-1 transition-transform"
+                    style={{ color: "var(--ink-muted)", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
                     viewBox="0 0 16 16" fill="none"
                   >
                     <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -212,7 +206,7 @@ export default function RegulationsPage() {
                 {isOpen && (
                   <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
                     <div className="pl-[52px]">
-                      <p className="text-sm text-neutral-600 leading-relaxed">{update.body}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{update.body}</p>
                       {update.link && (
                         <a
                           href={update.link}
@@ -233,7 +227,7 @@ export default function RegulationsPage() {
           })}
         </div>
 
-        <p className="text-center text-xs text-neutral-400 pb-4">
+        <p className="text-center text-xs pb-4" style={{ color: "var(--ink-muted)" }}>
           Information is for reference only. Always verify with the official source before clinical or legal use.
         </p>
       </div>

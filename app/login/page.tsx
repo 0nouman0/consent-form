@@ -10,6 +10,9 @@ import {
 
 const TRUST_BADGES = ["IMC 2002", "NMC 2023", "BNS §§24-30", "ICMR Guidelines"];
 
+const INK = "#171410";
+const RED = "#BE3D2A";
+
 function LoginContent() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -57,51 +60,54 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen flex font-body">
+    <div className="min-h-screen flex font-body" style={{ backgroundColor: "var(--paper)" }}>
       {/* ── Left branding panel (lg+) ── */}
       <div
         className="hidden lg:flex flex-col w-[460px] xl:w-[520px] shrink-0 relative overflow-hidden"
-        style={{ backgroundColor: "#0b0f1a" }}
+        style={{ backgroundColor: "var(--ink)" }}
       >
         {/* Grid texture */}
         <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+              "linear-gradient(rgba(252,251,247,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(252,251,247,0.6) 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
         {/* Radial glow top-right */}
         <div
           className="absolute -top-32 -right-32 w-[500px] h-[500px] pointer-events-none opacity-20"
-          style={{ background: "radial-gradient(circle, #7c3aed, transparent 65%)" }}
+          style={{ background: `radial-gradient(circle, ${RED}, transparent 65%)` }}
         />
 
         <div className="relative flex flex-col h-full p-10 xl:p-12">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 mb-14 group w-fit">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              className="w-9 h-9 rounded-md flex items-center justify-center"
               style={{
-                backgroundColor: "rgba(255,255,255,0.1)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                backgroundColor: "rgba(252,251,247,0.1)",
+                border: "1px solid rgba(252,251,247,0.15)",
               }}
             >
-              <ShieldCheck weight="bold" className="w-5 h-5 text-white" />
+              <ShieldCheck weight="bold" className="w-5 h-5" style={{ color: "var(--sheet)" }} />
             </div>
-            <span className="text-base font-bold text-white tracking-tight">ConsentGen</span>
+            <span className="font-serif font-semibold text-base tracking-tight" style={{ color: "var(--sheet)" }}>
+              ConsentGen
+            </span>
           </Link>
 
           {/* Headline + copy */}
           <div className="flex-1">
             <h2
-              className="text-4xl xl:text-[44px] font-black text-white leading-[1.1] tracking-tight mb-5"
+              className="font-serif font-semibold text-4xl xl:text-[44px] leading-[1.1] tracking-tight mb-5"
+              style={{ color: "var(--sheet)" }}
             >
               Consent forms<br />
-              <span style={{ color: "#a78bfa" }}>built for India.</span>
+              <span style={{ color: RED }}>built for India.</span>
             </h2>
-            <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.52)" }}>
+            <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(252,251,247,0.56)" }}>
               Purpose-built for Indian doctors. Generate IMC&nbsp;2002-compliant
               informed consent in under 30 seconds — bilingual, medico-legally
               sound, and PDF-ready.
@@ -112,14 +118,14 @@ function LoginContent() {
               {TRUST_BADGES.map((badge) => (
                 <span
                   key={badge}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.06em] font-semibold px-3 py-1.5 rounded-md"
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.07)",
-                    color: "rgba(255,255,255,0.72)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    backgroundColor: "rgba(252,251,247,0.07)",
+                    color: "rgba(252,251,247,0.75)",
+                    border: "1px solid rgba(252,251,247,0.12)",
                   }}
                 >
-                  <CheckCircle weight="fill" className="w-3 h-3" style={{ color: "#a78bfa" }} />
+                  <CheckCircle weight="fill" className="w-3 h-3" style={{ color: RED }} />
                   {badge}
                 </span>
               ))}
@@ -134,14 +140,16 @@ function LoginContent() {
               ].map(({ value, label }) => (
                 <div
                   key={label}
-                  className="rounded-2xl p-4"
+                  className="rounded-md p-4"
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                    backgroundColor: "rgba(252,251,247,0.05)",
+                    border: "1px solid rgba(252,251,247,0.09)",
                   }}
                 >
-                  <p className="text-2xl font-black text-white mb-0.5">{value}</p>
-                  <p className="text-[11px] leading-tight" style={{ color: "rgba(255,255,255,0.42)" }}>
+                  <p className="font-serif font-semibold text-2xl mb-0.5" style={{ color: "var(--sheet)" }}>
+                    {value}
+                  </p>
+                  <p className="text-[11px] leading-tight" style={{ color: "rgba(252,251,247,0.42)" }}>
                     {label}
                   </p>
                 </div>
@@ -151,26 +159,28 @@ function LoginContent() {
 
           {/* Testimonial */}
           <div
-            className="mt-10 rounded-2xl p-5"
+            className="mt-10 rounded-md p-5"
             style={{
-              backgroundColor: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "rgba(252,251,247,0.05)",
+              border: "1px solid rgba(252,251,247,0.1)",
             }}
           >
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.60)" }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(252,251,247,0.62)" }}>
               &ldquo;ConsentGen has saved our clinic hours every week. The forms
               are legally sound and patients appreciate the bilingual option.&rdquo;
             </p>
             <div className="flex items-center gap-3">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ backgroundColor: "rgba(124,58,237,0.55)" }}
+                className="w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ backgroundColor: "rgba(190,61,42,0.55)", color: "var(--sheet)" }}
               >
                 RK
               </div>
               <div>
-                <p className="text-sm font-semibold text-white leading-tight">Dr. Rajesh Kumar</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.42)" }}>
+                <p className="font-serif font-semibold text-sm leading-tight" style={{ color: "var(--sheet)" }}>
+                  Dr. Rajesh Kumar
+                </p>
+                <p className="text-xs" style={{ color: "rgba(252,251,247,0.42)" }}>
                   General Surgeon, Apollo Hospitals
                 </p>
               </div>
@@ -180,17 +190,20 @@ function LoginContent() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div className="flex-1 flex items-center justify-center bg-white p-6 sm:p-10 min-h-screen">
+      <div
+        className="flex-1 flex items-center justify-center p-6 sm:p-10 min-h-screen"
+        style={{ backgroundColor: "var(--sheet)" }}
+      >
         <div className="w-full max-w-[360px]">
           {/* Mobile-only logo */}
           <Link href="/" className="lg:hidden flex items-center gap-2.5 mb-10 w-fit">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "#0b0f1a" }}
+              className="w-9 h-9 rounded-md flex items-center justify-center"
+              style={{ backgroundColor: "var(--ink)" }}
             >
-              <ShieldCheck weight="bold" className="w-5 h-5 text-white" />
+              <ShieldCheck weight="bold" className="w-5 h-5" style={{ color: "var(--sheet)" }} />
             </div>
-            <span className="text-base font-bold tracking-tight" style={{ color: "#0b0f1a" }}>
+            <span className="font-serif font-semibold text-base tracking-tight" style={{ color: "var(--ink)" }}>
               ConsentGen
             </span>
           </Link>
@@ -198,12 +211,12 @@ function LoginContent() {
           {/* Heading */}
           <div className="mb-8">
             <h1
-              className="text-3xl font-black tracking-tight mb-2"
-              style={{ color: "#0b0f1a" }}
+              className="font-serif font-semibold text-3xl tracking-tight mb-2"
+              style={{ color: "var(--ink)" }}
             >
               {mode === "signin" ? "Welcome back" : "Create account"}
             </h1>
-            <p className="text-sm" style={{ color: "#6b7280" }}>
+            <p className="text-sm" style={{ color: "var(--ink-muted)" }}>
               {mode === "signin"
                 ? "Sign in to access your dashboard and history."
                 : "Sign up to start generating consent forms."}
@@ -213,11 +226,11 @@ function LoginContent() {
           {/* Error / success */}
           {error && (
             <div
-              className="mb-5 px-4 py-3 rounded-xl text-sm flex items-start gap-2"
+              className="mb-5 px-4 py-3 rounded-md text-sm flex items-start gap-2"
               style={{
-                backgroundColor: "#fef2f2",
-                border: "1px solid #fecaca",
-                color: "#dc2626",
+                backgroundColor: "rgba(190,61,42,0.06)",
+                border: "1px solid rgba(190,61,42,0.25)",
+                color: RED,
               }}
             >
               <span className="font-semibold shrink-0">Error:</span>
@@ -226,11 +239,11 @@ function LoginContent() {
           )}
           {message && (
             <div
-              className="mb-5 px-4 py-3 rounded-xl text-sm"
+              className="mb-5 px-4 py-3 rounded-md text-sm"
               style={{
-                backgroundColor: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                color: "#166534",
+                backgroundColor: "rgba(63,122,78,0.08)",
+                border: "1px solid rgba(63,122,78,0.25)",
+                color: "#3f7a4e",
               }}
             >
               {message}
@@ -241,8 +254,8 @@ function LoginContent() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[11px] font-bold uppercase tracking-wider mb-1.5"
-                style={{ color: "#374151" }}
+                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                style={{ color: "var(--ink-soft)" }}
               >
                 Email Address
               </label>
@@ -250,7 +263,7 @@ function LoginContent() {
                 <Envelope
                   weight="regular"
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: "#9ca3af" }}
+                  style={{ color: "var(--ink-muted)" }}
                 />
                 <input
                   type="email"
@@ -258,20 +271,20 @@ function LoginContent() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="doctor@hospital.com"
                   required
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-md outline-none transition-all"
                   style={{
-                    border: "1.5px solid #e5e7eb",
-                    color: "#111827",
-                    backgroundColor: "#f9fafb",
+                    border: "1.5px solid var(--rule)",
+                    color: "var(--ink)",
+                    backgroundColor: "var(--paper)",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#7c3aed";
-                    e.currentTarget.style.backgroundColor = "#fff";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.08)";
+                    e.currentTarget.style.borderColor = INK;
+                    e.currentTarget.style.backgroundColor = "var(--sheet)";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(23,20,16,0.08)";
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                    e.currentTarget.style.borderColor = "var(--rule)";
+                    e.currentTarget.style.backgroundColor = "var(--paper)";
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 />
@@ -280,8 +293,8 @@ function LoginContent() {
 
             <div>
               <label
-                className="block text-[11px] font-bold uppercase tracking-wider mb-1.5"
-                style={{ color: "#374151" }}
+                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                style={{ color: "var(--ink-soft)" }}
               >
                 Password
               </label>
@@ -289,7 +302,7 @@ function LoginContent() {
                 <Lock
                   weight="regular"
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: "#9ca3af" }}
+                  style={{ color: "var(--ink-muted)" }}
                 />
                 <input
                   type="password"
@@ -297,20 +310,20 @@ function LoginContent() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-md outline-none transition-all"
                   style={{
-                    border: "1.5px solid #e5e7eb",
-                    color: "#111827",
-                    backgroundColor: "#f9fafb",
+                    border: "1.5px solid var(--rule)",
+                    color: "var(--ink)",
+                    backgroundColor: "var(--paper)",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#7c3aed";
-                    e.currentTarget.style.backgroundColor = "#fff";
-                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,58,237,0.08)";
+                    e.currentTarget.style.borderColor = INK;
+                    e.currentTarget.style.backgroundColor = "var(--sheet)";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(23,20,16,0.08)";
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                    e.currentTarget.style.borderColor = "var(--rule)";
+                    e.currentTarget.style.backgroundColor = "var(--paper)";
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 />
@@ -320,12 +333,15 @@ function LoginContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-opacity mt-2 disabled:opacity-60"
-              style={{ backgroundColor: "#0b0f1a" }}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-md text-sm font-semibold transition-opacity mt-2 disabled:opacity-60"
+              style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div
+                    className="w-4 h-4 border-2 rounded-full animate-spin"
+                    style={{ borderColor: "rgba(252,251,247,0.3)", borderTopColor: "var(--sheet)" }}
+                  />
                   Processing…
                 </>
               ) : (
@@ -338,25 +354,25 @@ function LoginContent() {
           </form>
 
           {/* Mode switch */}
-          <p className="mt-6 text-center text-sm" style={{ color: "#6b7280" }}>
+          <p className="mt-6 text-center text-sm" style={{ color: "var(--ink-muted)" }}>
             {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={switchMode}
               className="font-semibold transition-colors hover:opacity-80"
-              style={{ color: "#7c3aed" }}
+              style={{ color: RED }}
             >
               {mode === "signin" ? "Sign up" : "Sign in"}
             </button>
           </p>
 
-          <p className="mt-8 text-center text-xs leading-relaxed" style={{ color: "#9ca3af" }}>
+          <p className="mt-8 text-center text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
             By continuing, you agree to our{" "}
-            <span className="underline cursor-pointer hover:text-neutral-600 transition-colors">
+            <span className="underline cursor-pointer transition-colors hover:opacity-70">
               Terms of Service
             </span>{" "}
             and{" "}
-            <span className="underline cursor-pointer hover:text-neutral-600 transition-colors">
+            <span className="underline cursor-pointer transition-colors hover:opacity-70">
               Privacy Policy
             </span>
             .
@@ -371,8 +387,11 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="w-9 h-9 border-2 border-neutral-200 border-t-neutral-800 rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--sheet)" }}>
+          <div
+            className="w-9 h-9 border-2 rounded-full animate-spin"
+            style={{ borderColor: "var(--rule)", borderTopColor: "var(--ink)" }}
+          />
         </div>
       }
     >

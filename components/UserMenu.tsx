@@ -17,9 +17,9 @@ interface ProfileInfo {
 }
 
 const ROLE_LABELS: Record<UserRole, { label: string; color: string; icon: React.ElementType }> = {
-  admin:  { label: "Admin",   color: "#7c3aed", icon: Crown      },
-  doctor: { label: "Doctor",  color: "#0b0f1a", icon: Stethoscope },
-  viewer: { label: "Viewer",  color: "#2563eb", icon: Eye        },
+  admin:  { label: "Admin",   color: "#BE3D2A", icon: Crown      },
+  doctor: { label: "Doctor",  color: "#171410", icon: Stethoscope },
+  viewer: { label: "Viewer",  color: "#7A7466", icon: Eye        },
 };
 
 export default function UserMenu({ compact = false }: { compact?: boolean }) {
@@ -91,15 +91,15 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
         className="flex items-center gap-2 rounded-full transition-all hover:opacity-90 focus:outline-none"
         style={{
           padding: compact ? "3px" : "3px 10px 3px 3px",
-          border: "1px solid rgba(0,0,0,0.14)",
-          background: "#f4f4f5",
+          border: "1px solid var(--rule)",
+          background: "var(--paper)",
         }}
         aria-label="Open user menu"
       >
         {/* Avatar */}
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-          style={{ backgroundColor: "#0b0f1a" }}
+          className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
+          style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
         >
           {initials}
         </div>
@@ -108,16 +108,16 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
         {!compact && (
           <>
             <div className="text-left hidden sm:block">
-              <p className="text-xs font-semibold leading-tight" style={{ color: "#0b0f1a" }}>
+              <p className="font-serif font-semibold text-xs leading-tight" style={{ color: "var(--ink)" }}>
                 {profile?.doctorName || "Account"}
               </p>
-              <p className="text-[10px] leading-tight" style={{ color: roleInfo.color }}>
+              <p className="text-[10px] leading-tight font-mono uppercase tracking-[0.06em]" style={{ color: roleInfo.color }}>
                 {roleInfo.label}
               </p>
             </div>
             <CaretDown
-              className="w-3 h-3 text-neutral-400 transition-transform"
-              style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+              className="w-3 h-3 transition-transform"
+              style={{ color: "var(--ink-muted)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
             />
           </>
         )}
@@ -126,30 +126,30 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-64 rounded-2xl z-[9999]"
+          className="absolute right-0 top-full mt-2 w-64 rounded-md z-[9999]"
           style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.09)",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08)",
+            background: "var(--sheet)",
+            border: "1px solid var(--rule)",
+            boxShadow: "0 16px 48px rgba(23,20,16,0.14), 0 4px 12px rgba(23,20,16,0.08)",
             overflow: "hidden",
           }}
         >
           {/* Header */}
-          <div className="px-4 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="px-4 py-4" style={{ borderBottom: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-                style={{ backgroundColor: "#0b0f1a" }}
+                className="w-10 h-10 rounded-md flex items-center justify-center text-sm font-bold shrink-0"
+                style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
               >
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: "#0b0f1a" }}>
+                <p className="font-serif font-semibold text-sm truncate" style={{ color: "var(--ink)" }}>
                   {profile?.doctorName || "Doctor"}
                 </p>
-                <p className="text-xs text-neutral-400 truncate">{email}</p>
+                <p className="text-xs truncate" style={{ color: "var(--ink-muted)" }}>{email}</p>
                 {profile?.hospitalName && (
-                  <p className="text-xs text-neutral-400 truncate mt-0.5">{profile.hospitalName}</p>
+                  <p className="text-xs truncate mt-0.5" style={{ color: "var(--ink-muted)" }}>{profile.hospitalName}</p>
                 )}
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
             {/* Role badge */}
             <div className="mt-3 flex items-center gap-2">
               <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
                 style={{
                   color: roleInfo.color,
                   backgroundColor: `${roleInfo.color}12`,
@@ -167,8 +167,8 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
                 <RoleIcon weight="fill" className="w-3.5 h-3.5" />
                 {roleInfo.label}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-green-700 bg-green-50"
-                style={{ border: "1px solid rgba(0,128,0,0.15)" }}>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                style={{ color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }}>
                 <ShieldCheck weight="fill" className="w-3.5 h-3.5" /> Verified
               </span>
             </div>
@@ -179,26 +179,29 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
             <Link
               href="/dashboard"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[var(--paper)]"
+              style={{ color: "var(--ink-soft)" }}
             >
-              <ChartBar weight="duotone" className="w-4 h-4 text-neutral-500" />
+              <ChartBar weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               Dashboard
             </Link>
             <Link
               href="/profile"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[var(--paper)]"
+              style={{ color: "var(--ink-soft)" }}
             >
-              <User weight="duotone" className="w-4 h-4 text-neutral-500" />
+              <User weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               Profile & Settings
             </Link>
           </div>
 
           {/* Sign out */}
-          <div className="p-2" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+          <div className="p-2" style={{ borderTop: "1px solid var(--rule)" }}>
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[rgba(190,61,42,0.08)]"
+              style={{ color: "var(--red)" }}
             >
               <SignOut weight="bold" className="w-4 h-4" />
               Sign Out

@@ -47,28 +47,27 @@ export default function AppHeader() {
 
   return (
     <header
-      className="hidden md:flex items-center justify-between px-6 py-2 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-full shrink-0"
+      className="hidden md:flex items-center justify-between px-6 py-2.5 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-md shrink-0"
       style={{
-        background: "rgba(255,255,255,0.85)",
+        background: "rgba(252,251,247,0.9)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--rule)",
       }}
     >
       {/* Left — greeting / doctor info */}
       <div className="pl-2">
         {profile?.doctorName ? (
           <div>
-            <p className="text-sm font-bold tracking-tight text-neutral-900 leading-tight">
+            <p className="font-serif font-semibold text-sm tracking-tight leading-tight" style={{ color: "var(--ink)" }}>
               {profile.doctorName}
             </p>
             {profile.hospitalName && (
-              <p className="text-[10px] text-neutral-400 mt-0.5 leading-tight">{profile.hospitalName}</p>
+              <p className="text-[10px] mt-0.5 leading-tight font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>{profile.hospitalName}</p>
             )}
           </div>
         ) : (
-          <p className="text-sm font-bold tracking-tight text-neutral-900">Welcome back</p>
+          <p className="font-serif font-semibold text-sm tracking-tight" style={{ color: "var(--ink)" }}>Welcome back</p>
         )}
       </div>
 
@@ -76,9 +75,10 @@ export default function AppHeader() {
       <div className="flex items-center gap-3">
         <Link
           href="/credits"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-100 border border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-neutral-400 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-[11px] uppercase tracking-[0.08em] font-semibold transition-all"
+          style={{ background: "var(--paper)", border: "1px solid var(--rule)", color: "var(--ink)" }}
         >
-          <Coins className="w-3.5 h-3.5 text-neutral-500" weight="fill" />
+          <Coins className="w-3.5 h-3.5" weight="fill" style={{ color: "var(--red)" }} />
           <span>{credits !== null ? `${credits} Credits` : "—"}</span>
         </Link>
         <UserMenu />

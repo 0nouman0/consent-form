@@ -2,7 +2,16 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ["/dashboard", "/history", "/generate", "/templates", "/profile"];
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/history",
+  "/generate",
+  "/templates",
+  "/profile",
+  "/credits",
+  "/regulations",
+  "/chat",
+];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({

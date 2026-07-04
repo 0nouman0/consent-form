@@ -63,9 +63,9 @@ const STEP_SUBTITLES = [
 ];
 
 const inputCls =
-  "w-full px-4 py-3 rounded-xl border border-neutral-200 bg-neutral-50 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all";
-const labelCls = "block text-sm font-medium text-neutral-700 mb-1.5";
-const errorCls = "text-xs text-red-600 mt-1.5";
+  "w-full px-4 py-3 rounded-md border border-[color:var(--rule)] bg-[color:var(--paper)] text-[color:var(--ink)] placeholder:text-[color:var(--ink-muted)] text-sm outline-none focus:border-[color:var(--ink)] focus:ring-2 focus:ring-[color:rgba(23,20,16,0.08)] transition-all";
+const labelCls = "block text-sm font-medium mb-1.5 text-[color:var(--ink-soft)]";
+const errorCls = "text-xs mt-1.5 text-[color:var(--red)]";
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
@@ -95,12 +95,12 @@ function Toggle({ id, checked, onChange, label, description }: ToggleProps) {
           onChange={(e) => onChange(e.target.checked)}
           className="sr-only peer"
         />
-        <div className="w-12 h-6 rounded-full bg-neutral-200 peer-checked:bg-neutral-900 transition-colors" />
-        <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-6" />
+        <div className="w-12 h-6 rounded-full bg-[color:var(--rule)] peer-checked:bg-[color:var(--ink)] transition-colors" />
+        <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-[color:var(--sheet)] shadow transition-transform peer-checked:translate-x-6" />
       </div>
       <div>
-        <p className="text-sm font-medium text-neutral-800">{label}</p>
-        {description && <p className="text-xs text-neutral-500 mt-0.5">{description}</p>}
+        <p className="text-sm font-medium text-[color:var(--ink)]">{label}</p>
+        {description && <p className="text-xs mt-0.5 text-[color:var(--ink-muted)]">{description}</p>}
       </div>
     </label>
   );
@@ -137,10 +137,10 @@ function VoiceMicButton({ onResult }: { onResult: (text: string) => void }) {
       type="button"
       onClick={handleClick}
       title={listening ? "Listening…" : "Voice input"}
-      className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+      className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-all ${
         listening
-          ? "text-red-500 bg-red-50 animate-pulse"
-          : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+          ? "animate-pulse text-[color:var(--red)] bg-[color:rgba(190,61,42,0.08)]"
+          : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--paper)]"
       }`}
     >
       {listening
@@ -245,11 +245,20 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
   const isSubmitting = status === "loading" || status === "streaming";
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex min-h-[600px]">
+    <div
+      className="rounded-md overflow-hidden flex min-h-[600px]"
+      style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+    >
 
       {/* ── LEFT: Step navigator ── */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-neutral-100 bg-neutral-50 py-8 px-5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6 px-1">
+      <aside
+        className="hidden md:flex flex-col w-60 shrink-0 py-8 px-5"
+        style={{ borderRight: "1px solid var(--rule)", backgroundColor: "var(--paper)" }}
+      >
+        <p
+          className="font-mono text-[10px] uppercase tracking-[0.08em] font-semibold mb-6 px-1"
+          style={{ color: "var(--ink-muted)" }}
+        >
           Surgical Consent
         </p>
         <nav aria-label="Form steps">
@@ -263,22 +272,27 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                     type="button"
                     onClick={() => i < step && setStep(i)}
                     disabled={i > step}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-all text-sm ${
                       active
-                        ? "bg-neutral-900 text-white font-semibold"
+                        ? "font-semibold"
                         : done
-                        ? "text-neutral-600 hover:bg-neutral-200 cursor-pointer font-medium"
-                        : "text-neutral-400 cursor-default"
+                        ? "cursor-pointer font-medium hover:bg-[color:rgba(23,20,16,0.06)]"
+                        : "cursor-default"
                     }`}
+                    style={{
+                      backgroundColor: active ? "var(--ink)" : "transparent",
+                      color: active ? "var(--sheet)" : done ? "var(--ink-soft)" : "var(--ink-muted)",
+                    }}
                     aria-current={active ? "step" : undefined}
                   >
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold border transition-all ${
-                      active
-                        ? "bg-white text-neutral-900 border-transparent"
-                        : done
-                        ? "bg-neutral-900 text-white border-transparent"
-                        : "border-neutral-300 text-neutral-400"
-                    }`}>
+                    <span
+                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold border transition-all"
+                      style={{
+                        backgroundColor: active ? "var(--red)" : done ? "var(--ink)" : "transparent",
+                        color: active || done ? "var(--sheet)" : "var(--ink-muted)",
+                        borderColor: active || done ? "transparent" : "var(--rule)",
+                      }}
+                    >
                       {done ? "✓" : i + 1}
                     </span>
                     <span className="truncate">{title}</span>
@@ -291,7 +305,10 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
 
         {/* Progress bar at bottom of sidebar */}
         <div className="mt-auto pt-6">
-          <div className="flex justify-between text-[10px] text-neutral-400 mb-2">
+          <div
+            className="flex justify-between text-[10px] font-mono uppercase tracking-[0.06em] mb-2"
+            style={{ color: "var(--ink-muted)" }}
+          >
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
@@ -301,11 +318,12 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
             aria-valuemin={1}
             aria-valuemax={TOTAL_STEPS}
             aria-label={`Step ${step + 1} of ${TOTAL_STEPS}`}
-            className="h-1.5 bg-neutral-200 rounded-full overflow-hidden"
+            className="h-1.5 rounded-md overflow-hidden"
+            style={{ backgroundColor: "var(--rule)" }}
           >
             <div
-              className="h-full bg-neutral-900 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-md transition-all duration-300"
+              style={{ width: `${progress}%`, backgroundColor: "var(--red)" }}
             />
           </div>
         </div>
@@ -314,13 +332,13 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
       {/* ── RIGHT: Step content ── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile progress bar */}
-        <div className="md:hidden h-1 bg-neutral-100">
-          <div className="h-full bg-neutral-900 transition-all duration-300" style={{ width: `${progress}%` }} />
+        <div className="md:hidden h-1" style={{ backgroundColor: "var(--rule)" }}>
+          <div className="h-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: "var(--red)" }} />
         </div>
 
         {/* Mobile step label */}
         <div className="md:hidden px-6 pt-4 pb-0">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.06em]" style={{ color: "var(--ink-muted)" }}>
             Step {step + 1} of {TOTAL_STEPS}
           </p>
         </div>
@@ -335,8 +353,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           className="mb-6 focus:outline-none"
           aria-live="polite"
         >
-          <h2 className="text-xl font-bold text-neutral-900">{STEP_TITLES[step]}</h2>
-          <p className="text-sm text-neutral-500 mt-1">{STEP_SUBTITLES[step]}</p>
+          <h2 className="font-serif text-xl font-semibold" style={{ color: "var(--ink)" }}>{STEP_TITLES[step]}</h2>
+          <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>{STEP_SUBTITLES[step]}</p>
         </div>
 
         {/* Step 0: Patient Basics */}
@@ -403,7 +421,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           <fieldset>
             <legend className="sr-only">Patient competency</legend>
             <div className="space-y-6">
-              <div className="p-5 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="p-5 rounded-md" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
                 <Toggle
                   id="patient.patientCompetent"
                   checked={patientCompetent}
@@ -466,7 +484,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
               <div>
                 <label htmlFor="patient.aadhaarLast4" className={labelCls}>
-                  Aadhaar Last 4 Digits <span className="text-neutral-400 font-normal">(optional)</span>
+                  Aadhaar Last 4 Digits <span className="font-normal" style={{ color: "var(--ink-muted)" }}>(optional)</span>
                 </label>
                 <input
                   id="patient.aadhaarLast4"
@@ -480,7 +498,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
               <div>
                 <label htmlFor="patient.insuranceProvider" className={labelCls}>
-                  Insurance Provider <span className="text-neutral-400 font-normal">(optional)</span>
+                  Insurance Provider <span className="font-normal" style={{ color: "var(--ink-muted)" }}>(optional)</span>
                 </label>
                 <input
                   id="patient.insuranceProvider"
@@ -491,7 +509,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
               <div>
                 <label htmlFor="patient.insurancePolicyNo" className={labelCls}>
-                  Insurance Policy Number <span className="text-neutral-400 font-normal">(optional)</span>
+                  Insurance Policy Number <span className="font-normal" style={{ color: "var(--ink-muted)" }}>(optional)</span>
                 </label>
                 <input
                   id="patient.insurancePolicyNo"
@@ -553,26 +571,30 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                   />
                   {showProcSuggestions && (
                     <div
-                      className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg z-50 overflow-hidden"
-                      style={{ border: "1px solid rgba(0,0,0,0.1)" }}
+                      className="absolute left-0 right-0 top-full mt-1 rounded-md z-50 overflow-hidden"
+                      style={{
+                        backgroundColor: "var(--sheet)",
+                        border: "1px solid var(--rule)",
+                        boxShadow: "0 4px 16px rgba(23,20,16,0.10)",
+                      }}
                     >
                       {procSuggestions.map((s) => (
                         <button
                           key={s.name}
                           type="button"
                           onMouseDown={() => selectProcedure(s)}
-                          className="w-full text-left px-4 py-3 text-sm hover:bg-neutral-50 transition-colors border-b last:border-b-0"
-                          style={{ borderColor: "rgba(0,0,0,0.06)", color: "#0b0f1a" }}
+                          className="w-full text-left px-4 py-3 text-sm transition-colors border-b last:border-b-0 hover:bg-[color:var(--paper)]"
+                          style={{ borderColor: "var(--rule-soft)", color: "var(--ink)" }}
                         >
                           <span className="font-medium">{s.name}</span>
-                          <p className="text-xs text-neutral-400 mt-0.5 truncate">{s.risks.slice(0, 80)}…</p>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ink-muted)" }}>{s.risks.slice(0, 80)}…</p>
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
                 {showProcSuggestions && (
-                  <p className="text-[11px] text-neutral-400 mt-1.5">Select to auto-fill risks below</p>
+                  <p className="text-[11px] mt-1.5" style={{ color: "var(--ink-muted)" }}>Select to auto-fill risks below</p>
                 )}
                 <FieldError id="err-procedureName" message={getError("clinical.procedureName")} />
               </div>
@@ -625,11 +647,11 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                     return (
                       <label
                         key={opt.value}
-                        className={`relative cursor-pointer rounded-xl border-2 p-3 transition-all ${
-                          checked
-                            ? "border-neutral-900 bg-neutral-900 text-white"
-                            : "border-neutral-200 bg-neutral-50 hover:border-neutral-300"
-                        }`}
+                        className="relative cursor-pointer rounded-md p-3 transition-all"
+                        style={{
+                          border: checked ? "1.5px solid var(--ink)" : "1.5px solid var(--rule)",
+                          backgroundColor: checked ? "rgba(23,20,16,0.03)" : "var(--paper)",
+                        }}
                       >
                         <input
                           type="radio"
@@ -637,10 +659,10 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                           value={opt.value}
                           {...register("languageLevel")}
                         />
-                        <p className={`text-xs font-semibold ${checked ? "text-white" : "text-neutral-800"}`}>
+                        <p className="text-xs font-semibold" style={{ color: "var(--ink)" }}>
                           {opt.label}
                         </p>
-                        <p className={`text-xs mt-0.5 ${checked ? "text-neutral-300" : "text-neutral-500"}`}>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           {opt.desc}
                         </p>
                       </label>
@@ -675,7 +697,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
               <div>
                 <label htmlFor="clinical.alternatives" className={labelCls}>
-                  Alternatives <span className="text-neutral-400 font-normal">(optional)</span>
+                  Alternatives <span className="font-normal" style={{ color: "var(--ink-muted)" }}>(optional)</span>
                 </label>
                 <textarea
                   id="clinical.alternatives"
@@ -687,7 +709,7 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
               <div>
                 <label htmlFor="clinical.additionalNotes" className={labelCls}>
-                  Additional Notes <span className="text-neutral-400 font-normal">(optional)</span>
+                  Additional Notes <span className="font-normal" style={{ color: "var(--ink-muted)" }}>(optional)</span>
                 </label>
                 <textarea
                   id="clinical.additionalNotes"
@@ -699,8 +721,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
 
               <div className="pt-2">
-                <p className="text-sm font-semibold text-neutral-700 mb-3">Optional Consent Clauses</p>
-                <div className="space-y-3 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+                <p className="text-sm font-semibold mb-3" style={{ color: "var(--ink-soft)" }}>Optional Consent Clauses</p>
+                <div className="space-y-3 p-4 rounded-md" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
                   {[
                     { key: "clauses.anaesthesia" as const, field: "anaesthesia", label: "Anaesthesia Clause", desc: "Patient consents to anaesthesia as required" },
                     { key: "clauses.bloodTransfusion" as const, field: "bloodTransfusion", label: "Blood Transfusion Clause", desc: "Patient consents to blood transfusion if necessary" },
@@ -720,8 +742,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
 
               <div className="pt-2">
-                <p className="text-sm font-semibold text-neutral-700 mb-3">Document Blocks</p>
-                <div className="space-y-3 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+                <p className="text-sm font-semibold mb-3" style={{ color: "var(--ink-soft)" }}>Document Blocks</p>
+                <div className="space-y-3 p-4 rounded-md" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
                   <Toggle
                     id="includeWitnessBlock"
                     checked={includeWitnessBlock}
@@ -748,15 +770,19 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
             {!profileComplete && (
               <div
                 role="alert"
-                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 flex gap-3 items-start"
+                className="mb-5 rounded-md px-5 py-4 flex gap-3 items-start"
+                style={{
+                  backgroundColor: "rgba(190,61,42,0.06)",
+                  border: "1px solid rgba(190,61,42,0.25)",
+                }}
               >
-                <span className="text-red-500 text-xl leading-none mt-0.5">&#9888;</span>
-                <div className="text-sm text-red-800 leading-relaxed">
+                <span className="text-xl leading-none mt-0.5" style={{ color: "var(--red)" }}>&#9888;</span>
+                <div className="text-sm leading-relaxed" style={{ color: "var(--ink)" }}>
                   <p className="font-semibold mb-0.5">Clinician profile incomplete</p>
                   <p>
                     Your doctor name, registration number, hospital name and address are pulled
                     from your profile and are required on every consent form.{" "}
-                    <Link href="/profile" className="font-semibold underline hover:opacity-80">
+                    <Link href="/profile" className="font-semibold underline hover:opacity-80" style={{ color: "var(--red)" }}>
                       Complete your profile →
                     </Link>
                   </p>
@@ -764,19 +790,23 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
               </div>
             )}
             {profileComplete && (
-              <div className="mb-5 rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4 flex items-start justify-between gap-3">
-                <div className="text-sm text-neutral-700 leading-relaxed">
-                  <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">
+              <div
+                className="mb-5 rounded-md px-5 py-4 flex items-start justify-between gap-3"
+                style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
+              >
+                <div className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
                     Clinician (from your profile)
                   </p>
-                  <p className="font-semibold">{watch("clinical.doctorName")}{" "}
-                    <span className="font-normal text-neutral-500">· Reg. {watch("clinical.doctorRegistrationNo")}</span>
+                  <p className="font-semibold" style={{ color: "var(--ink)" }}>{watch("clinical.doctorName")}{" "}
+                    <span className="font-normal" style={{ color: "var(--ink-muted)" }}>· Reg. {watch("clinical.doctorRegistrationNo")}</span>
                   </p>
-                  <p className="text-neutral-500">{watch("clinical.hospitalName")}</p>
+                  <p style={{ color: "var(--ink-muted)" }}>{watch("clinical.hospitalName")}</p>
                 </div>
                 <Link
                   href="/profile"
-                  className="shrink-0 text-xs font-semibold text-neutral-500 hover:text-neutral-800 underline transition-colors"
+                  className="shrink-0 text-xs font-semibold underline transition-colors hover:opacity-70"
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   Edit
                 </Link>
@@ -788,12 +818,16 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
       </div>
 
       {/* Navigation */}
-      <div className="px-8 py-4 border-t border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50 mt-auto">
+      <div
+        className="px-8 py-4 flex items-center justify-between gap-3 mt-auto"
+        style={{ borderTop: "1px solid var(--rule)", backgroundColor: "var(--paper)" }}
+      >
         <button
           type="button"
           onClick={goBack}
           disabled={step === 0}
-          className="rounded-xl border border-neutral-200 bg-white px-6 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="rounded-md px-6 py-2.5 text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:bg-[color:var(--paper)]"
+          style={{ border: "1px solid var(--rule)", backgroundColor: "var(--sheet)", color: "var(--ink-soft)" }}
         >
           Back
         </button>
@@ -802,7 +836,8 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
           <button
             type="button"
             onClick={goNext}
-            className="rounded-xl bg-neutral-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-neutral-800 transition-all"
+            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all hover:opacity-90"
+            style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             Next
           </button>
@@ -812,11 +847,15 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
             disabled={isSubmitting || !profileComplete}
             title={!profileComplete ? "Complete your clinician profile first" : undefined}
             onClick={form.handleSubmit(onSubmit)}
-            className="rounded-xl bg-neutral-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90"
+            style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             {isSubmitting ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span
+                  className="w-4 h-4 border-2 rounded-full animate-spin"
+                  style={{ borderColor: "rgba(252,251,247,0.3)", borderTopColor: "var(--sheet)" }}
+                />
                 Generating…
               </>
             ) : (

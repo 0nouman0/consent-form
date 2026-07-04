@@ -2,28 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── DESIGN TOKENS ─── */
+/* ─── DESIGN TOKENS ───
+   Editorial paper-and-ink system — same palette as the landing page,
+   now shared by every authenticated screen (app shell, login, dashboard,
+   generate, history, chat, profile, etc.) via these CSS variables. */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 5.9% 10%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 5.9% 10%;
-  --accent-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  /* Raw editorial palette (use directly for one-off hex needs) */
+  --paper: #F4F1E9;
+  --sheet: #FCFBF7;
+  --ink: #171410;
+  --ink-muted: #7A7466;
+  --ink-soft: #4A463C;
+  --rule: rgba(23, 20, 16, 0.15);
+  --rule-soft: rgba(23, 20, 16, 0.08);
+  --red: #BE3D2A;
 
-  --font-display: var(--font-syne, 'Syne', sans-serif);
+  /* shadcn-style HSL tokens — retargeted to the editorial palette so
+     every component already using hsl(var(--x)) retheme for free */
+  --background: 44 33% 94%;         /* PAPER */
+  --foreground: 34 18% 8%;          /* INK */
+  --primary: 34 18% 8%;             /* INK */
+  --primary-foreground: 48 45% 98%; /* SHEET */
+  --secondary: 48 45% 98%;          /* SHEET */
+  --secondary-foreground: 34 18% 8%;
+  --muted: 44 20% 90%;
+  --muted-foreground: 42 9% 44%;    /* MUTED */
+  --accent: 8 64% 45%;              /* RED */
+  --accent-foreground: 48 45% 98%;
+  --border: 40 12% 85%;
+  --ring: 34 18% 8%;
+  --radius: 0.375rem;
+
+  --font-display: var(--font-bricolage, 'Bricolage Grotesque', sans-serif);
   --font-body:    var(--font-dm, 'DM Sans', sans-serif);
 
-  --shadow-card:       0 1px 3px rgba(0,0,0,0.08);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.12);
-  --shadow-dashboard:  0 4px 24px rgba(0,0,0,0.08);
+  --shadow-card:       0 1px 2px rgba(23,20,16,0.06);
+  --shadow-card-hover: 0 8px 24px rgba(23,20,16,0.10);
+  --shadow-dashboard:  0 4px 24px rgba(23,20,16,0.06);
   --shadow-btn: none;
 }
 
@@ -52,30 +67,30 @@
 
 @layer components {
   .card {
-    background-color: hsl(var(--background));
+    background-color: hsl(var(--secondary));
     border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     box-shadow: var(--shadow-card);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .card:hover { box-shadow: var(--shadow-card-hover); }
 
   .glass {
-    background: rgba(255,255,255,0.85);
-    border: 1px solid rgba(0,0,0,0.07);
+    background: rgba(252,251,247,0.85);
+    border: 1px solid rgba(23,20,16,0.07);
     backdrop-filter: blur(16px);
   }
   .glass-dark {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid rgba(0,0,0,0.07);
+    background: rgba(252,251,247,0.95);
+    border: 1px solid rgba(23,20,16,0.07);
   }
 
   .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     padding: 0.6rem 1.5rem;
-    border-radius: 9999px;
-    background: #111118;
-    color: #fff;
+    border-radius: 0.375rem;
+    background: var(--ink);
+    color: var(--sheet);
     font-family: var(--font-body);
     font-size: 0.875rem; font-weight: 500;
     border: none;
@@ -86,7 +101,7 @@
   .btn-secondary {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     padding: 0.6rem 1.5rem;
-    border-radius: 9999px;
+    border-radius: 0.375rem;
     background: transparent;
     color: hsl(var(--foreground));
     font-family: var(--font-body);
@@ -99,7 +114,7 @@
   .badge {
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    border-radius: 0.25rem;
     border: 1px solid hsl(var(--border));
     background: hsl(var(--muted));
     color: hsl(var(--muted-foreground));
@@ -122,15 +137,15 @@
 
   .dark-card {
     position: relative; overflow: hidden;
-    border-radius: 1.5rem;
-    background: #111118;
+    border-radius: 1rem;
+    background: var(--ink);
     border: none;
   }
 
   .glow-card {
     border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
-    background: hsl(var(--background));
+    border-radius: 0.75rem;
+    background: hsl(var(--secondary));
     transition: border-color 0.25s, box-shadow 0.25s;
   }
   .glow-card:hover {
@@ -154,7 +169,7 @@
   .nq-noise::after { display: none; }
 
   .app-input {
-    background: hsl(var(--background));
+    background: hsl(var(--secondary));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     padding: 0.5rem 0.75rem;
@@ -163,7 +178,7 @@
     transition: border-color 0.15s, box-shadow 0.15s;
     color: hsl(var(--foreground));
   }
-  .app-input:focus { border-color: rgba(0,0,0,0.3); box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
+  .app-input:focus { border-color: rgba(23,20,16,0.35); box-shadow: 0 0 0 2px rgba(23,20,16,0.06); }
   .app-input::placeholder { color: hsl(var(--muted-foreground)); }
 }
 

@@ -46,15 +46,14 @@ const STEP_SUBTITLES = [
   "Review the research consent form before generating.",
 ];
 
-const inputCls =
-  "w-full px-4 py-3 rounded-xl border border-neutral-200 bg-neutral-50 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all";
-const labelCls = "block text-sm font-medium text-neutral-700 mb-1.5";
-const errorCls = "text-xs text-red-600 mt-1.5";
+const inputCls = "app-input";
+const labelCls = "block text-sm font-medium mb-1.5";
+const errorCls = "text-xs mt-1.5";
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} role="alert" className={errorCls}>
+    <p id={id} role="alert" className={errorCls} style={{ color: "var(--red)" }}>
       {message}
     </p>
   );
@@ -79,12 +78,18 @@ function Toggle({ id, checked, onChange, label, description }: ToggleProps) {
           onChange={(e) => onChange(e.target.checked)}
           className="sr-only peer"
         />
-        <div className="w-12 h-6 rounded-full bg-neutral-200 peer-checked:bg-neutral-900 transition-colors" />
-        <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-6" />
+        <div
+          className="w-12 h-6 rounded-md transition-colors"
+          style={{ backgroundColor: checked ? "var(--ink)" : "var(--rule)" }}
+        />
+        <div
+          className="absolute top-1 left-1 w-4 h-4 rounded-md shadow transition-transform"
+          style={{ backgroundColor: "var(--sheet)", transform: checked ? "translateX(1.5rem)" : "translateX(0)" }}
+        />
       </div>
       <div>
-        <p className="text-sm font-medium text-neutral-800">{label}</p>
-        {description && <p className="text-xs text-neutral-500 mt-0.5">{description}</p>}
+        <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>{label}</p>
+        {description && <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>{description}</p>}
       </div>
     </label>
   );
@@ -152,11 +157,11 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
   const isSubmitting = status === "loading" || status === "streaming";
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex min-h-[600px]">
+    <div className="rounded-md overflow-hidden flex min-h-[600px]" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
 
       {/* ── LEFT: Step navigator ── */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-neutral-100 bg-neutral-50 py-8 px-5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6 px-1">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 py-8 px-5" style={{ borderRight: "1px solid var(--rule)", backgroundColor: "var(--paper)" }}>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.08em] mb-6 px-1" style={{ color: "var(--ink-muted)" }}>
           Research Consent
         </p>
         <nav aria-label="Form steps">
@@ -170,22 +175,23 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                     type="button"
                     onClick={() => i < step && setStep(i)}
                     disabled={i > step}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm ${
-                      active
-                        ? "bg-neutral-900 text-white font-semibold"
-                        : done
-                        ? "text-neutral-600 hover:bg-neutral-200 cursor-pointer font-medium"
-                        : "text-neutral-400 cursor-default"
-                    }`}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-all text-sm"
+                    style={{
+                      backgroundColor: active ? "var(--ink)" : "transparent",
+                      color: active ? "var(--sheet)" : done ? "var(--ink-soft)" : "var(--ink-muted)",
+                      fontWeight: active ? 600 : done ? 500 : 400,
+                      cursor: done ? "pointer" : active ? "default" : "default",
+                    }}
                     aria-current={active ? "step" : undefined}
                   >
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold border transition-all ${
-                      active
-                        ? "bg-white text-neutral-900 border-transparent"
-                        : done
-                        ? "bg-neutral-900 text-white border-transparent"
-                        : "border-neutral-300 text-neutral-400"
-                    }`}>
+                    <span
+                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold transition-all"
+                      style={{
+                        backgroundColor: active ? "var(--sheet)" : done ? "var(--ink)" : "transparent",
+                        color: active ? "var(--ink)" : done ? "var(--sheet)" : "var(--ink-muted)",
+                        border: active || done ? "1px solid transparent" : "1px solid var(--rule)",
+                      }}
+                    >
                       {done ? "✓" : i + 1}
                     </span>
                     <span className="truncate">{title}</span>
@@ -197,7 +203,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
         </nav>
 
         <div className="mt-auto pt-6">
-          <div className="flex justify-between text-[10px] text-neutral-400 mb-2">
+          <div className="flex justify-between font-mono text-[10px] mb-2" style={{ color: "var(--ink-muted)" }}>
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
@@ -207,11 +213,12 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             aria-valuemin={1}
             aria-valuemax={TOTAL_STEPS}
             aria-label={`Step ${step + 1} of ${TOTAL_STEPS}`}
-            className="h-1.5 bg-neutral-200 rounded-full overflow-hidden"
+            className="h-1.5 rounded-md overflow-hidden"
+            style={{ backgroundColor: "var(--rule)" }}
           >
             <div
-              className="h-full bg-neutral-900 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-md transition-all duration-300"
+              style={{ width: `${progress}%`, backgroundColor: "var(--red)" }}
             />
           </div>
         </div>
@@ -220,12 +227,12 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
       {/* ── RIGHT: Step content ── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile progress bar */}
-        <div className="md:hidden h-1 bg-neutral-100">
-          <div className="h-full bg-neutral-900 transition-all duration-300" style={{ width: `${progress}%` }} />
+        <div className="md:hidden h-1" style={{ backgroundColor: "var(--rule-soft)" }}>
+          <div className="h-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: "var(--red)" }} />
         </div>
 
         <div className="md:hidden px-6 pt-4 pb-0">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
             Step {step + 1} of {TOTAL_STEPS}
           </p>
         </div>
@@ -240,8 +247,8 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
           className="mb-6 focus:outline-none"
           aria-live="polite"
         >
-          <h2 className="text-xl font-bold text-neutral-900">{STEP_TITLES[step]}</h2>
-          <p className="text-sm text-neutral-500 mt-1">{STEP_SUBTITLES[step]}</p>
+          <h2 className="font-serif text-xl font-bold" style={{ color: "var(--ink)" }}>{STEP_TITLES[step]}</h2>
+          <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>{STEP_SUBTITLES[step]}</p>
         </div>
 
         {/* Step 0: Study Identity */}
@@ -250,7 +257,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             <legend className="sr-only">Study identity information</legend>
             <div className="space-y-4">
               <div>
-                <label htmlFor="study.studyTitle" className={labelCls}>
+                <label htmlFor="study.studyTitle" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Study Title <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -265,7 +272,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-studyTitle" message={getError("study.studyTitle")} />
               </div>
               <div>
-                <label htmlFor="study.principalInvestigator" className={labelCls}>
+                <label htmlFor="study.principalInvestigator" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Principal Investigator <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -280,7 +287,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-pi" message={getError("study.principalInvestigator")} />
               </div>
               <div>
-                <label htmlFor="study.department" className={labelCls}>
+                <label htmlFor="study.department" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Department <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -304,7 +311,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             <legend className="sr-only">Institution information</legend>
             <div className="space-y-4">
               <div>
-                <label htmlFor="study.institutionName" className={labelCls}>
+                <label htmlFor="study.institutionName" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Institution / Hospital Name <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -319,7 +326,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-institutionName" message={getError("study.institutionName")} />
               </div>
               <div>
-                <label htmlFor="study.institutionAddress" className={labelCls}>
+                <label htmlFor="study.institutionAddress" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Institution Address <span aria-hidden="true">*</span>
                 </label>
                 <textarea
@@ -335,7 +342,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-institutionAddress" message={getError("study.institutionAddress")} />
               </div>
               <div>
-                <label htmlFor="study.contactMobile" className={labelCls}>
+                <label htmlFor="study.contactMobile" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Contact Mobile <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -360,7 +367,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             <legend className="sr-only">Study details</legend>
             <div className="space-y-4">
               <div>
-                <label htmlFor="study.studyPurpose" className={labelCls}>
+                <label htmlFor="study.studyPurpose" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Study Purpose <span aria-hidden="true">*</span>
                 </label>
                 <textarea
@@ -376,7 +383,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-studyPurpose" message={getError("study.studyPurpose")} />
               </div>
               <div>
-                <label htmlFor="study.dataToCollect" className={labelCls}>
+                <label htmlFor="study.dataToCollect" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Data / Tasks Involved <span aria-hidden="true">*</span>
                 </label>
                 <textarea
@@ -392,7 +399,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-dataToCollect" message={getError("study.dataToCollect")} />
               </div>
               <div>
-                <label htmlFor="study.timeRequired" className={labelCls}>
+                <label htmlFor="study.timeRequired" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Time Required
                 </label>
                 <input
@@ -412,7 +419,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             <legend className="sr-only">Risks, benefits, and language</legend>
             <div className="space-y-4">
               <div>
-                <label htmlFor="study.risks" className={labelCls}>
+                <label htmlFor="study.risks" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Risks
                 </label>
                 <textarea
@@ -424,7 +431,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 />
               </div>
               <div>
-                <label htmlFor="study.benefits" className={labelCls}>
+                <label htmlFor="study.benefits" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Benefits
                 </label>
                 <textarea
@@ -436,7 +443,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 />
               </div>
               <div>
-                <label htmlFor="study.monetaryBenefits" className={labelCls}>
+                <label htmlFor="study.monetaryBenefits" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Monetary Benefits
                 </label>
                 <textarea
@@ -448,7 +455,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 />
               </div>
               <div>
-                <label htmlFor="study.counselingLanguage" className={labelCls}>
+                <label htmlFor="study.counselingLanguage" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Counseling Language <span aria-hidden="true">*</span>
                 </label>
                 <select
@@ -472,7 +479,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             <legend className="sr-only">Participant details and document settings</legend>
             <div className="space-y-4">
               <div>
-                <label htmlFor="participant.participantName" className={labelCls}>
+                <label htmlFor="participant.participantName" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Participant Name <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -487,7 +494,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 <FieldError id="err-participantName" message={getError("participant.participantName")} />
               </div>
               <div>
-                <label htmlFor="participant.participantId" className={labelCls}>
+                <label htmlFor="participant.participantId" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                   Participant ID / Roll Number <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -503,7 +510,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="participant.age" className={labelCls}>
+                  <label htmlFor="participant.age" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                     Age <span aria-hidden="true">*</span>
                   </label>
                   <input
@@ -518,7 +525,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                   <FieldError id="err-participantAge" message={getError("participant.age")} />
                 </div>
                 <div>
-                  <label htmlFor="participant.sex" className={labelCls}>
+                  <label htmlFor="participant.sex" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                     Sex <span aria-hidden="true">*</span>
                   </label>
                   <select
@@ -534,7 +541,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 </div>
               </div>
 
-              <div className="pt-2 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="pt-2 p-4 rounded-md" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
                 <Toggle
                   id="participant.isCompetent"
                   checked={isCompetent}
@@ -547,7 +554,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
               {!isCompetent && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="participant.guardianName" className={labelCls}>
+                    <label htmlFor="participant.guardianName" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                       Guardian / Parent Name
                     </label>
                     <input
@@ -558,7 +565,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                     />
                   </div>
                   <div>
-                    <label htmlFor="participant.guardianRelationship" className={labelCls}>
+                    <label htmlFor="participant.guardianRelationship" className={labelCls} style={{ color: "var(--ink-soft)" }}>
                       Relationship to Participant
                     </label>
                     <input
@@ -572,8 +579,8 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
               )}
 
               <div className="pt-2">
-                <p className="text-sm font-semibold text-neutral-700 mb-3">Document Blocks</p>
-                <div className="space-y-3 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+                <p className="text-sm font-semibold mb-3" style={{ color: "var(--ink-soft)" }}>Document Blocks</p>
+                <div className="space-y-3 p-4 rounded-md" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
                   <Toggle
                     id="includeWitnessBlock"
                     checked={includeWitnessBlock}
@@ -603,12 +610,13 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
       </div>
 
       {/* Navigation */}
-      <div className="px-8 py-4 border-t border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50 mt-auto">
+      <div className="px-8 py-4 flex items-center justify-between gap-3 mt-auto" style={{ borderTop: "1px solid var(--rule)", backgroundColor: "var(--paper)" }}>
         <button
           type="button"
           onClick={goBack}
           disabled={step === 0}
-          className="rounded-xl border border-neutral-200 bg-white px-6 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="rounded-md px-6 py-2.5 text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:bg-[var(--paper)]"
+          style={{ border: "1px solid var(--rule)", backgroundColor: "var(--sheet)", color: "var(--ink-soft)" }}
         >
           Back
         </button>
@@ -617,7 +625,8 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
           <button
             type="button"
             onClick={goNext}
-            className="rounded-xl bg-neutral-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-neutral-800 transition-all"
+            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all hover:opacity-90"
+            style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             Next
           </button>
@@ -626,11 +635,12 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
             type="button"
             disabled={isSubmitting}
             onClick={form.handleSubmit(onSubmit)}
-            className="rounded-xl bg-neutral-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="rounded-md px-6 py-2.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:opacity-90 flex items-center gap-2"
+            style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             {isSubmitting ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(252,251,247,0.3)", borderTopColor: "var(--sheet)" }} />
                 Generating…
               </>
             ) : (

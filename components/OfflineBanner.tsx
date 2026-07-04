@@ -27,8 +27,8 @@ export default function OfflineBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -48, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white"
-          style={{ backgroundColor: "#dc2626" }}
+          className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
+          style={{ backgroundColor: "var(--red)", color: "var(--sheet)" }}
           role="alert"
           aria-live="assertive"
         >
