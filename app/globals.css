@@ -169,6 +169,68 @@
   .app-input::placeholder { color: hsl(var(--muted-foreground)); }
 }
 
+/* ═══ LANDING — EDITORIAL SYSTEM ═══ */
+.landing ::selection {
+  background: #BE3D2A;
+  color: #F4F1E9;
+}
+
+/* Scroll reveal — hidden state only applies once JS is confirmed live
+   (.js-anim set on mount), so content can never be stranded invisible. */
+.js-anim .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.js-anim .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Animated rule-underline for editorial links */
+.link-rule {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: 2px;
+}
+.link-rule:hover { background-size: 100% 1px; }
+
+/* Ticker (slow, continuous) */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 40s linear infinite;
+}
+
+/* Clause row wipe */
+.clause-row {
+  position: relative;
+  isolation: isolate;
+}
+.clause-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #171410;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+}
+.clause-row:hover::before { transform: scaleY(1); }
+
 /* ─── DOT GRID ─── */
 .dot-grid {
   background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px);

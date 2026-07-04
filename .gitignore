@@ -26,3 +26,6 @@ out/
 
 # TypeScript
 *.tsbuildinfo
+
+# Generated/reference documents
+*.pdf

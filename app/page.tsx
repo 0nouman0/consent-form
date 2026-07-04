@@ -1,1238 +1,730 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import Link from "next/link";
-import * as THREE from "three";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import {
-  ShieldCheck,
-  ArrowRight,
-  ArrowUpRight,
-  Stethoscope,
-  Lightning,
-  Star,
-  MagnifyingGlass,
-  Sparkle,
-  CheckCircle,
-  Brain,
-  Eye,
-  Drop,
-  Syringe,
-  Scissors,
-  Flask,
-  Heart,
-  DeviceMobile,
-  Baby,
-  FirstAidKit,
-  Tooth,
-  Bone,
-} from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
 
-gsap.registerPlugin(ScrollTrigger);
+/* ═══════════════════════════════════════════════════════════
+   CONSENTGEN — LANDING
+   Editorial paper-and-ink system. Typography does the work.
+   Palette: paper / ink / one stamp red. No gradients. No glass.
+═══════════════════════════════════════════════════════════ */
 
-/* ─── PALETTE ─── */
-const WHITE    = "#FFFFFF";
-const PAGE_BG  = "#F5F5F5";
-const DARK_PANEL = "#FFFFFF";
-const INK      = "#0A0A0B";
-const BODY_TXT = "#6B6B78";
-const MUTED    = "#9B9BA8";
-const BORDER   = "#E8E8EA";
-const PILL_BG  = "#F0F0F2";
-const DARK_BTN = "#111118";
+const PAPER = "#F4F1E9";
+const SHEET = "#FCFBF7";
+const INK = "#171410";
+const MUTED = "#7A7466";
+const RULE = "rgba(23,20,16,0.15)";
+const RULE_SOFT = "rgba(23,20,16,0.08)";
+const RED = "#BE3D2A";
+
+const serif = { fontFamily: "'Instrument Serif', serif" } as const;
 
 /* ─── DATA ─── */
-const COMPLIANCE_LAWS = [
-  { code: "IMC 2002",    name: "Indian Medical Council Regulations" },
-  { code: "BNS §§24-30", name: "Bharatiya Nyaya Sanhita" },
-  { code: "MoRTH 2025",  name: "Ministry of Road Transport" },
-  { code: "CPA 2019",    name: "Consumer Protection Act" },
-  { code: "Aadhaar Act", name: "Aadhaar Act 2016" },
-  { code: "DPDP 2023",   name: "Digital Personal Data Protection" },
+
+const FRAMEWORKS = [
+  { code: "IMC 2002", name: "Indian Medical Council (Professional Conduct) Regulations", ref: "Cl. 7.16 / 7.17" },
+  { code: "BNS 2023", name: "Bharatiya Nyaya Sanhita — consent capacity & validity", ref: "§§ 24–30" },
+  { code: "MoRTH 2025", name: "Cashless Treatment of Road Accident Victims Scheme", ref: "S.O. 2489(E)" },
+  { code: "CPA 2019", name: "Consumer Protection Act — medical negligence provisions", ref: "Ch. VI" },
+  { code: "AADHAAR 2016", name: "Aadhaar Act — mandatory data masking for private entities", ref: "§ 29" },
+  { code: "DPDP 2023", name: "Digital Personal Data Protection Act — health data consent", ref: "§§ 4–9" },
 ];
 
-const ORG_LOGOS = [
-  { code: "IMC",   name: "Indian Medical Council",      color: "#22C55E", bg: "#F0FDF4" },
-  { code: "BNS",   name: "Bharatiya Nyaya Sanhita",     color: "#8B5CF6", bg: "#F5F3FF" },
-  { code: "MoRTH", name: "Min. of Road Transport",      color: "#F59E0B", bg: "#FFFBEB" },
-  { code: "CPA",   name: "Consumer Protection Act",     color: "#EF4444", bg: "#FEF2F2" },
-  { code: "UIDAI", name: "Aadhaar / UIDAI",             color: "#3B82F6", bg: "#EFF6FF" },
-  { code: "MeitY", name: "DPDP Act 2023",               color: "#06B6D4", bg: "#ECFEFF" },
+const CLAUSES = [
+  { n: "01", title: "Authorization", basis: "Treating without consent is assault in law" },
+  { n: "02", title: "Disclosure & Comprehension", basis: "IMC Regulation 3.1 — patient's own language" },
+  { n: "03", title: "Risks & Complications", basis: "Informed consent element 5" },
+  { n: "04", title: "Alternatives to Treatment", basis: "Informed consent element 4" },
+  { n: "05", title: "Anaesthesia & Blood Transfusion", basis: "Express consent required — Rules 3 & 4" },
+  { n: "06", title: "Disposal of Tissues", basis: "Pathological examination requires consent" },
+  { n: "07", title: "Photography / Academic Use", basis: "IMC Ethics — identity confidentiality" },
+  { n: "08", title: "Voluntariness & Right to Withdraw", basis: "BNS § 27 — fear vitiates consent" },
+  { n: "09", title: "Capacity Validation", basis: "BNS §§ 24–26 — age, soundness, sobriety" },
+  { n: "10", title: "Information Receipt", basis: "Duty to provide all relevant information" },
+  { n: "11", title: "Signatures with Date & Time", basis: "Missing timestamps lose negligence cases" },
 ];
 
-const STATS = [
-  { value: "10+", label: "Consent Types",    sub: "Surgical to Psychiatric" },
-  { value: "30s", label: "Generation Time",  sub: "Down from 30 minutes" },
-  { value: "98%", label: "Compliance Score", sub: "Across all frameworks" },
-  { value: "6+",  label: "Legal Frameworks", sub: "IMC · BNS · MoRTH · more" },
-];
-
-const FEATURES = [
+const SECTIONS = [
   {
-    num: "01", tag: "AI Generation",
-    title: "Draft in seconds,\nnot hours.",
-    body: "Groq-powered language models trained on medico-legal best practices generate a complete, clause-correct consent form from patient details and procedure type — in under 30 seconds.",
-    metric: { value: "30×", label: "Faster than manual drafting" },
+    num: "§ 01",
+    tag: "Drafting",
+    title: ["Thirty seconds,", "clause by clause."],
+    body:
+      "Enter the patient, the procedure, and the counseling language. The engine drafts a complete consent form — every mandatory clause present, every signature block timestamped, the procedure named exactly as you typed it. Blanket consent is void in Indian law; ConsentGen never writes it.",
+    metric: { value: "30 s", label: "average generation, down from 30 minutes of manual drafting" },
   },
   {
-    num: "02", tag: "India Compliance",
-    title: "Every clause has\na legal basis.",
-    body: "Forms are built on the 7 elements of informed consent and validated against IMC 2002, Bharatiya Nyaya Sanhita §§24-30, and MoRTH 2025 — not just generic templates.",
-    metric: { value: "100%", label: "Guideline coverage" },
+    num: "§ 02",
+    tag: "Verification",
+    title: ["Nothing signed", "before it's checked."],
+    body:
+      "A live clause register audits the draft as it streams in — authorization, risk disclosure, alternatives, withdrawal rights, capacity. Anything missing is flagged before the form ever reaches a patient. The checklist follows the same eleven clauses courts look for.",
+    metric: { value: "11", label: "mandatory clauses verified on every single form" },
   },
   {
-    num: "03", tag: "Clause Verification",
-    title: "No critical clause\ngets missed.",
-    body: "A real-time clause checklist flags missing or incomplete sections before you sign off. Witness block, risk disclosure, alternative treatments — all verified automatically.",
-    metric: { value: "0", label: "Missed clauses" },
+    num: "§ 03",
+    tag: "Language",
+    title: ["Counseled in Hindi,", "filed in English."],
+    body:
+      "Indian courts require proof the patient understood. ConsentGen generates the full form twice — once in English for the record, once in any of twelve Indian languages for the patient — with the counseling language stated on the face of the document.",
+    metric: { value: "12", label: "Indian languages, generated as complete paired documents" },
   },
-];
-
-const MARQUEE_ITEMS = [
-  { icon: <Scissors   className="w-3.5 h-3.5" />, name: "Surgical" },
-  { icon: <Syringe    className="w-3.5 h-3.5" />, name: "Anaesthesia" },
-  { icon: <FirstAidKit className="w-3.5 h-3.5" />, name: "Emergency" },
-  { icon: <Brain      className="w-3.5 h-3.5" />, name: "Psychiatric" },
-  { icon: <Flask      className="w-3.5 h-3.5" />, name: "Research" },
-  { icon: <Eye        className="w-3.5 h-3.5" />, name: "Ophthalmic" },
-  { icon: <Heart      className="w-3.5 h-3.5" />, name: "Cardiac" },
-  { icon: <DeviceMobile className="w-3.5 h-3.5" />, name: "Telemedicine" },
-  { icon: <Baby       className="w-3.5 h-3.5" />, name: "Obstetric" },
-  { icon: <MagnifyingGlass className="w-3.5 h-3.5" />, name: "Diagnostic" },
-  { icon: <Drop       className="w-3.5 h-3.5" />, name: "Blood Transfusion" },
-  { icon: <Tooth      className="w-3.5 h-3.5" />, name: "Dental" },
-  { icon: <Bone       className="w-3.5 h-3.5" />, name: "Orthopaedic" },
-  { icon: <Stethoscope className="w-3.5 h-3.5" />, name: "Paediatric" },
-];
-
-const TESTIMONIALS = [
-  { quote: "ConsentGen completely changed how I manage patient documentation. The AI-generated forms are accurate, compliant, and save me at least 30 minutes every day.", name: "Dr. Rajesh Kumar",  role: "Senior Surgeon, AIIMS Delhi", initials: "RK" },
-  { quote: "The medico-legal alignment gave our hospital legal confidence we've never had before. We've standardised all consent forms with ConsentGen.",                    name: "Dr. Priya Mehta",  role: "Medical Superintendent",      initials: "PM" },
-  { quote: "Real-time clause verification is a game changer. I never worry about missing a critical medico-legal requirement before a procedure.",                          name: "Dr. Arjun Nair",   role: "Anaesthesiologist",            initials: "AN" },
 ];
 
 const STEPS = [
-  { n: "01", title: "Enter patient details", body: "Patient name, age, diagnosis, procedure type, and attending doctor — in a clean guided form." },
-  { n: "02", title: "Select consent type",   body: "Choose from 10+ procedure-specific templates. Each type loads the relevant clause set automatically." },
-  { n: "03", title: "Generate & export",     body: "AI drafts a compliant form. Review, verify clauses, then download as PDF or print for hospital records." },
+  {
+    n: "01",
+    title: "Set your practice once",
+    body: "Your name, registration number, and hospital live in your profile. Every form inherits them — you never type them again.",
+  },
+  {
+    n: "02",
+    title: "Describe the procedure",
+    body: "A guided six-step record: patient, competency, identifiers, procedure, risks. Autocomplete fills known risks for 40+ common procedures.",
+  },
+  {
+    n: "03",
+    title: "Generate, verify, sign",
+    body: "The form streams in, clauses are checked live, and you export to PDF, Word, or print — filed to history with a permanent consent ID.",
+  },
 ];
 
-/* ═══════════════════════════════════════════
-   DNA HELIX CANVAS (Three.js)
-═══════════════════════════════════════════ */
-function DNAHelixCanvas() {
-  const mountRef = useRef<HTMLDivElement>(null);
+const STATS = [
+  { value: "10", suffix: "types", label: "Surgical, obstetric, psychiatric, telemedicine, research & more" },
+  { value: "12", suffix: "languages", label: "Bilingual output with counseling language on record" },
+  { value: "6", suffix: "frameworks", label: "IMC, BNS, MoRTH, CPA, Aadhaar Act, DPDP" },
+  { value: "40", suffix: "+ procedures", label: "Pre-mapped risk libraries with autocomplete" },
+];
 
+/* ─── PRIMITIVES ─── */
+
+function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = mountRef.current;
+    const el = ref.current;
     if (!el) return;
 
-    const w = el.clientWidth || 500;
-    const h = el.clientHeight || 700;
+    // Already in (or above) the viewport — show immediately.
+    const show = () => el.classList.add("is-visible");
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+      show();
+      return;
+    }
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    el.appendChild(renderer.domElement);
+    if (typeof IntersectionObserver === "undefined") {
+      show();
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          show();
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
+    );
+    obs.observe(el);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 100);
-    camera.position.z = 5.5;
-
-    const group = new THREE.Group();
-    const N = 120;
-    const R = 1.1;
-    const HEIGHT = 9;
-    const TURNS = 4;
-
-    const sphGeo = new THREE.SphereGeometry(0.05, 8, 8);
-    const mat1 = new THREE.MeshBasicMaterial({ color: 0x7C3AED }); // deep violet
-    const mat2 = new THREE.MeshBasicMaterial({ color: 0x0EA5E9 }); // ocean blue
-
-    for (let i = 0; i <= N; i++) {
-      const t = i / N;
-      const angle = t * TURNS * Math.PI * 2;
-      const y = (t - 0.5) * HEIGHT;
-
-      // Strand 1
-      const m1 = new THREE.Mesh(sphGeo, mat1);
-      m1.position.set(Math.cos(angle) * R, y, Math.sin(angle) * R);
-      group.add(m1);
-
-      // Strand 2 (opposite side)
-      const m2 = new THREE.Mesh(sphGeo, mat2);
-      m2.position.set(Math.cos(angle + Math.PI) * R, y, Math.sin(angle + Math.PI) * R);
-      group.add(m2);
-
-      // Base pair rungs
-      if (i % 5 === 0) {
-        const p1 = new THREE.Vector3(Math.cos(angle) * R, y, Math.sin(angle) * R);
-        const p2 = new THREE.Vector3(Math.cos(angle + Math.PI) * R, y, Math.sin(angle + Math.PI) * R);
-        const len = p1.distanceTo(p2);
-        const rungGeo = new THREE.CylinderGeometry(0.012, 0.012, len, 4);
-        const rungMat = new THREE.MeshBasicMaterial({ color: 0xaaaacc, transparent: true, opacity: 0.45 });
-        const rung = new THREE.Mesh(rungGeo, rungMat);
-        rung.position.copy(p1).lerp(p2, 0.5);
-        const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
-        rung.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-        group.add(rung);
+    // Scroll fallback for environments where IO never fires.
+    const onScroll = () => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+        show();
+        window.removeEventListener("scroll", onScroll);
       }
-    }
-
-    scene.add(group);
-
-    // Ambient glow particles
-    const particleGeo = new THREE.BufferGeometry();
-    const positions: number[] = [];
-    for (let i = 0; i < 80; i++) {
-      positions.push(
-        (Math.random() - 0.5) * 8,
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 4
-      );
-    }
-    particleGeo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0x7C3AED, size: 0.05, transparent: true, opacity: 0.25 });
-    scene.add(new THREE.Points(particleGeo, particleMat));
-
-    let animId: number;
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-      group.rotation.y += 0.004;
-      renderer.render(scene, camera);
     };
-    animate();
-
-    const onResize = () => {
-      const w2 = el.clientWidth;
-      const h2 = el.clientHeight;
-      if (!w2 || !h2) return;
-      camera.aspect = w2 / h2;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w2, h2);
-    };
-    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", onResize);
-      renderer.dispose();
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+      obs.disconnect();
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
-
-  return <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />;
-}
-
-/* ═══════════════════════════════════════════
-   CONSENT FLOW ANIMATION (3-phase illustration)
-═══════════════════════════════════════════ */
-function ConsentFlowAnimation() {
-  const [phase, setPhase] = useState(0);
-  const [typedName, setTypedName] = useState("");
-  const [progress, setProgress] = useState(0);
-  const [checks, setChecks] = useState([false, false, false, false]);
-
-  useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    let typerInterval: ReturnType<typeof setInterval> | null = null;
-    let progInterval: ReturnType<typeof setInterval> | null = null;
-
-    const runCycle = () => {
-      setPhase(0);
-      setTypedName("");
-      setProgress(0);
-      setChecks([false, false, false, false]);
-
-      const fullName = "Rajesh Kumar";
-      let i = 0;
-      typerInterval = setInterval(() => {
-        i++;
-        setTypedName(fullName.slice(0, i));
-        if (i >= fullName.length && typerInterval) clearInterval(typerInterval);
-      }, 90);
-
-      timers.push(setTimeout(() => {
-        setPhase(1);
-        let p = 0;
-        progInterval = setInterval(() => {
-          p += 3;
-          setProgress(Math.min(p, 100));
-          if (p >= 100 && progInterval) clearInterval(progInterval);
-        }, 40);
-      }, 2200));
-
-      timers.push(setTimeout(() => {
-        setPhase(2);
-        [600, 1100, 1600, 2100].forEach((d, idx) => {
-          timers.push(setTimeout(() => {
-            setChecks(prev => { const n = [...prev]; n[idx] = true; return n; });
-          }, d));
-        });
-      }, 5400));
-    };
-
-    runCycle();
-    const cycle = setInterval(runCycle, 10500);
-    return () => {
-      clearInterval(cycle);
-      if (typerInterval) clearInterval(typerInterval);
-      if (progInterval) clearInterval(progInterval);
-      timers.forEach(clearTimeout);
-    };
-  }, []);
-
-  const PHASES = ["Fill Details", "AI Generating", "Form Ready"];
-
   return (
-    <div className="float-card absolute inset-0 flex flex-col items-center justify-center"
-      style={{ padding: "60px 40px 60px" }}>
-
-      {/* Phase indicator pills */}
-      <div className="flex items-center gap-2 mb-4">
-        {PHASES.map((label, i) => (
-          <div key={label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-dm transition-all duration-500"
-            style={{
-              fontSize: 9,
-              background: i === phase ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.15)",
-              color: i === phase ? INK : "rgba(255,255,255,0.6)",
-              fontWeight: i === phase ? 600 : 400,
-            }}>
-            <div className="w-1.5 h-1.5 rounded-full transition-all duration-500"
-              style={{ background: i === phase ? "#166534" : "rgba(255,255,255,0.3)" }} />
-            {label}
-          </div>
-        ))}
-      </div>
-
-      {/* Card */}
-      <div className="w-full max-w-[320px] rounded-2xl overflow-hidden"
-        style={{
-          background: "rgba(255,255,255,0.98)",
-          backdropFilter: "blur(20px)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)",
-        }}>
-
-        {/* Mac chrome */}
-        <div className="flex items-center gap-2 px-5 py-3.5"
-          style={{ borderBottom: `1px solid ${BORDER}`, background: "rgba(248,248,250,0.8)" }}>
-          {["#FF5F57", "#FEBC2E", "#28C840"].map(c => (
-            <div key={c} className="w-3 h-3 rounded-full" style={{ background: c }} />
-          ))}
-          <span className="ml-auto font-dm text-[10px] font-medium" style={{ color: MUTED }}>ConsentGen</span>
-        </div>
-
-        {/* Phase 0 — Fill Details */}
-        {phase === 0 && (
-          <div className="p-5">
-            <p className="font-bricolage font-bold text-xs mb-3" style={{ color: INK }}>Patient Details</p>
-            <div className="space-y-2.5">
-              {[
-                { label: "Patient Name", value: typedName, typing: true },
-                { label: "Procedure", value: "Surgical", typing: false },
-                { label: "Consent Type", value: "Pre-operative", typing: false },
-              ].map(field => (
-                <div key={field.label}>
-                  <div className="font-dm mb-1" style={{ fontSize: 9, color: MUTED }}>{field.label}</div>
-                  <div className="flex items-center h-8 px-3 rounded-lg"
-                    style={{ border: `1px solid ${field.typing ? "#166534" : BORDER}`, fontSize: 12, color: field.value ? INK : MUTED, fontFamily: "var(--font-dm)" }}>
-                    {field.value}
-                    {field.typing && <span className="animate-pulse ml-px text-[#166534]">|</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="mt-4 w-full h-9 rounded-lg flex items-center justify-center gap-1.5 text-white font-dm font-medium"
-              style={{ background: DARK_BTN, fontSize: 12 }}>
-              <Sparkle className="w-3 h-3" /> Generate Consent
-            </button>
-          </div>
-        )}
-
-        {/* Phase 1 — AI Generating */}
-        {phase === 1 && (
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#4CAF50" }} />
-              <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>AI Generating…</p>
-              <span className="ml-auto font-dm font-semibold" style={{ fontSize: 10, color: "#166534" }}>{progress}%</span>
-            </div>
-            <div className="space-y-2 mb-4">
-              {[
-                "Applying IMC 2002 guidelines",
-                "Verifying BNS §§24-30",
-                "Checking MoRTH 2025",
-                "Finalizing all clauses",
-              ].map((msg, i) => {
-                const done = progress > (i + 1) * 25;
-                return (
-                  <div key={msg} className="flex items-center gap-2 transition-all duration-300">
-                    <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
-                      style={{ background: done ? "#166534" : BORDER }}>
-                      {done && <span className="text-white" style={{ fontSize: 8 }}>✓</span>}
-                    </div>
-                    <span className="font-dm transition-colors duration-300"
-                      style={{ fontSize: 10, color: done ? INK : MUTED }}>{msg}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
-              <div className="h-full rounded-full transition-all duration-100"
-                style={{ width: `${progress}%`, background: "linear-gradient(90deg, #166534, #4CAF50)" }} />
-            </div>
-          </div>
-        )}
-
-        {/* Phase 2 — Form Ready */}
-        {phase === 2 && (
-          <div className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="font-bricolage font-bold text-xs" style={{ color: INK }}>Consent Form Ready</p>
-              <span className="font-dm font-semibold px-2 py-0.5 rounded-full"
-                style={{ fontSize: 9, background: "#DCFCE7", color: "#166534" }}>IMC ✓</span>
-            </div>
-            <div className="space-y-1.5 mb-3">
-              {[95, 100, 78, 100, 82].map((w, i) => (
-                <div key={i} className="h-1 rounded-full" style={{ width: `${w}%`, background: "#EBEBEB" }} />
-              ))}
-            </div>
-            <div className="pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
-              <p className="font-dm uppercase tracking-wider mb-2" style={{ fontSize: 8, color: MUTED }}>Clause Verification</p>
-              <div className="space-y-1.5">
-                {["Risks & benefits disclosed", "Alternatives listed", "Signature block present", "Witness section ready"].map((clause, i) => (
-                  <div key={clause} className="flex items-center gap-2">
-                    <div className="w-3.5 h-3.5 rounded-md shrink-0 flex items-center justify-center transition-all duration-300"
-                      style={{ background: checks[i] ? "#166534" : BORDER }}>
-                      {checks[i] && <CheckCircle className="w-2.5 h-2.5 text-white" weight="fill" />}
-                    </div>
-                    <span className="font-dm transition-colors duration-300"
-                      style={{ fontSize: 10, color: checks[i] ? INK : MUTED }}>{clause}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <div className="flex-1 h-8 rounded-lg flex items-center justify-center font-dm font-medium"
-                style={{ border: `1px solid ${BORDER}`, fontSize: 12, color: INK }}>PDF</div>
-              <div className="flex-1 h-8 rounded-lg flex items-center justify-center font-dm font-medium text-white"
-                style={{ background: DARK_BTN, fontSize: 12 }}>Print</div>
-            </div>
-          </div>
-        )}
-      </div>
+    <div ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   HERO SECTION
-═══════════════════════════════════════════ */
-function HeroSection() {
+function MonoLabel({ children, red = false }: { children: ReactNode; red?: boolean }) {
+  return (
+    <span
+      className="font-mono text-[11px] uppercase tracking-[0.18em]"
+      style={{ color: red ? RED : MUTED }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function InkButton({ href, children, invert = false }: { href: string; children: ReactNode; invert?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className="group inline-flex items-center gap-3 px-6 py-3.5 font-mono text-[12px] uppercase tracking-[0.16em] transition-colors duration-300"
+      style={{
+        backgroundColor: invert ? PAPER : INK,
+        color: invert ? INK : PAPER,
+        borderRadius: "2px",
+      }}
+    >
+      {children}
+      <span aria-hidden className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+        →
+      </span>
+    </Link>
+  );
+}
+
+function GhostButton({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-3 px-6 py-3.5 font-mono text-[12px] uppercase tracking-[0.16em] transition-colors duration-300 hover:bg-[#171410] hover:text-[#F4F1E9]"
+      style={{ color: INK, border: `1px solid ${RULE}`, borderRadius: "2px" }}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/* ─── DOCUMENT SPECIMEN (hero artifact) ─── */
+
+function Specimen() {
+  return (
+    <div className="relative select-none" aria-hidden>
+      {/* Sheet behind */
+      }
+      <div
+        className="absolute inset-0 translate-x-3 translate-y-3 rotate-[1.2deg]"
+        style={{ backgroundColor: SHEET, border: `1px solid ${RULE_SOFT}` }}
+      />
+      {/* Main sheet */}
+      <div
+        className="relative p-7 sm:p-9"
+        style={{ backgroundColor: SHEET, border: `1px solid ${RULE}`, boxShadow: "0 24px 48px -24px rgba(23,20,16,0.25)" }}
+      >
+        {/* Doc header */}
+        <div className="flex items-baseline justify-between pb-4 mb-5" style={{ borderBottom: `1px solid ${INK}` }}>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: INK }}>
+            Form CG-01
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+            Consent ID · SRPX-4407
+          </span>
+        </div>
+
+        <p className="text-center text-[13px] uppercase tracking-[0.14em] font-semibold mb-1" style={{ color: INK }}>
+          Standard Informed Consent
+        </p>
+        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] mb-6" style={{ color: MUTED }}>
+          Surgical procedure · Bilingual — English / हिन्दी
+        </p>
+
+        {/* Fields */}
+        {[
+          ["Patient", "Anita Deshmukh"],
+          ["Age / Sex", "42 · Female"],
+          ["Procedure", "Laparoscopic Cholecystectomy"],
+          ["Counseled in", "Hindi"],
+        ].map(([k, v]) => (
+          <div key={k} className="flex items-baseline gap-3 py-2" style={{ borderBottom: `1px solid ${RULE_SOFT}` }}>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] w-24 shrink-0" style={{ color: MUTED }}>
+              {k}
+            </span>
+            <span className="text-[15px] italic" style={{ ...serif, color: INK }}>
+              {v}
+            </span>
+          </div>
+        ))}
+
+        {/* Clause excerpt */}
+        <p className="mt-6 mb-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+          Cl. 08 — Voluntariness
+        </p>
+        <p className="text-[12.5px] leading-[1.75]" style={{ color: "#4A463C", textAlign: "justify" }}>
+          I confirm this consent is given freely, without coercion, and that I retain the right to withdraw
+          it at any time before the procedure begins, per BNS § 27. The procedure named above is the only
+          procedure authorised by this document.
+        </p>
+
+        {/* Signature row */}
+        <div className="mt-7 grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-[22px] italic leading-none mb-1.5 pl-1" style={{ ...serif, color: INK }}>
+              A. Deshmukh
+            </p>
+            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1.5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+                Patient · Date & Time
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-end">
+            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1.5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+                Physician · Reg. No.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stamp */}
+        <div
+          className="absolute -right-3 top-36 rotate-[8deg] px-3.5 py-2.5 text-center"
+          style={{ border: `2px solid ${RED}`, borderRadius: "3px", backgroundColor: "rgba(252,251,247,0.92)" }}
+        >
+          <p className="font-mono text-[9px] uppercase tracking-[0.22em] leading-tight" style={{ color: RED }}>
+            Verified
+          </p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] leading-tight mt-0.5" style={{ color: RED }}>
+            IMC 2002
+          </p>
+          <div className="my-1" style={{ borderTop: `1px solid ${RED}` }} />
+          <p className="font-mono text-[8px] uppercase tracking-[0.18em] leading-tight" style={{ color: RED }}>
+            11/11 clauses
+          </p>
+        </div>
+      </div>
+
+      {/* Caption */}
+      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+        Fig. 01 — Generated in 28.4 seconds. Streamed, verified, filed.
+      </p>
+    </div>
+  );
+}
+
+/* ─── PAGE ─── */
+
+export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Enable reveal animations only once JS is confirmed running.
+  useEffect(() => {
+    rootRef.current?.classList.add("js-anim");
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => setIsLoggedIn(!!user));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setIsLoggedIn(!!(s?.user)));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) =>
+      setIsLoggedIn(!!session?.user)
+    );
     return () => subscription.unsubscribe();
   }, []);
 
-  useGSAP(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.from(".hero-nav",    { opacity: 0, y: -20, duration: 0.5 })
-      .from(".split-word",  { opacity: 0, y: 50,  stagger: 0.06, duration: 0.65 }, "-=0.2")
-      .from(".hero-sub",    { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
-      .from(".hero-cta",    { opacity: 0, y: 20,  duration: 0.4 }, "-=0.2")
-      .from(".hero-marquee",{ opacity: 0, y: 20,  duration: 0.4 }, "-=0.1")
-      .from(".right-panel", { opacity: 0, x: 30,  duration: 0.7, ease: "power2.out" }, "-=0.4")
-      .from(".float-card",  { opacity: 0, y: -20, duration: 0.5 }, "-=0.3");
-  }, []);
+  const primaryHref = isLoggedIn ? "/generate" : "/login?redirect=/generate";
 
   return (
-    <section className="flex min-h-screen" style={{ background: PAGE_BG }}>
+    <div ref={rootRef} className="landing min-h-screen font-body" style={{ backgroundColor: PAPER, color: INK }}>
 
-      {/* ── LEFT PANEL ── */}
-      <div
-        className="flex flex-col"
-        style={{ width: "55%", background: WHITE, borderRadius: "0 0 24px 0" }}
-      >
-        {/* NAV */}
-        <nav className="hero-nav flex items-center justify-between px-8 py-5 flex-shrink-0">
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-            style={{ border: `1px solid ${BORDER}`, background: PILL_BG }}
-          >
-            <ShieldCheck className="w-4 h-4" style={{ color: INK }} />
-            <span className="font-bricolage font-semibold text-sm" style={{ color: INK }}>ConsentGen</span>
-          </div>
+      {/* ══ TICKER ══ */}
+      <div className="overflow-hidden py-2" style={{ backgroundColor: INK }}>
+        <div className="ticker-track">
+          {[0, 1].map((i) => (
+            <div key={i} className="flex shrink-0 items-center">
+              {FRAMEWORKS.map((f) => (
+                <span key={`${i}-${f.code}`} className="flex items-center font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: PAPER }}>
+                  <span className="px-6">{f.code}</span>
+                  <span style={{ color: RED }}>✳</span>
+                </span>
+              ))}
+              <span className="flex items-center font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: PAPER }}>
+                <span className="px-6">Compliant by construction</span>
+                <span style={{ color: RED }}>✳</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            <a
-              href="#"
-              className="px-4 py-1.5 rounded-full text-sm font-medium"
-              style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: INK }}
-            >
-              <span className="mr-1">•</span> Home
-            </a>
-            {["Features", "How It Works"].map(item => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-                className="px-4 py-1.5 rounded-full text-sm transition-colors"
-                style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: BODY_TXT }}
-              >
-                {item}
+      {/* ══ NAV ══ */}
+      <header className="sticky top-0 z-50" style={{ backgroundColor: `${PAPER}F2`, backdropFilter: "blur(8px)", borderBottom: `1px solid ${RULE}` }}>
+        <nav className="mx-auto flex max-w-[1320px] items-center justify-between px-5 sm:px-8 h-[68px]">
+          <Link href="/" className="flex items-baseline gap-1">
+            <span className="text-[22px] tracking-tight" style={{ ...serif, color: INK }}>
+              ConsentGen
+            </span>
+            <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            {[
+              ["The form", "#anatomy"],
+              ["Method", "#method"],
+              ["Process", "#process"],
+            ].map(([label, href]) => (
+              <a key={href} href={href} className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                {label}
               </a>
             ))}
-            {isLoggedIn === false && (
-              <Link
-                href="/login"
-                className="px-4 py-1.5 rounded-full text-sm"
-                style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: BODY_TXT }}
-              >
-                Sign In
-              </Link>
-            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {isLoggedIn === null && (
-              <div className="w-8 h-8 rounded-full animate-pulse" style={{ background: PILL_BG }} />
-            )}
-            {isLoggedIn === false && (
-              <Link
-                href="/generate"
-                className="px-5 py-2 rounded-full text-sm font-semibold text-white"
-                style={{ background: DARK_BTN }}
-              >
-                Get Started
-              </Link>
-            )}
-            {isLoggedIn === true && (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/dashboard"
-                  className="px-4 py-1.5 rounded-full text-sm font-medium"
-                  style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: INK }}
-                >
+          <div className="flex items-center gap-5">
+            {isLoggedIn === true ? (
+              <>
+                <Link href="/dashboard" className="link-rule hidden sm:inline font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
                   Dashboard
                 </Link>
                 <UserMenu compact />
-              </div>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="link-rule hidden sm:inline font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                  Sign in
+                </Link>
+                <Link
+                  href={primaryHref}
+                  className="px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: INK, color: PAPER, borderRadius: "2px" }}
+                >
+                  Start
+                </Link>
+              </>
             )}
           </div>
         </nav>
+      </header>
 
-        {/* HERO CONTENT */}
-        <div className="flex-1 flex flex-col justify-center px-10 sm:px-14 pb-6">
-          {/* Headline */}
-          <h1
-            className="font-bricolage font-extrabold leading-[0.9] tracking-[-0.03em] mb-6"
-            style={{ fontSize: "clamp(52px, 7vw, 96px)", color: INK }}
-          >
-            {["Generate", "Compliant", "Consent"].map((word, i) => (
-              <span key={i} className="split-word block">{word}</span>
-            ))}
-            <span className="split-word block">Forms.</span>
-          </h1>
-
-          {/* Subtext */}
-          <p className="hero-sub font-dm text-base leading-relaxed max-w-xs mb-8" style={{ color: BODY_TXT }}>
-            Indian doctors generate IMC 2002 compliant consent forms in under 30 seconds using AI.
-          </p>
-
-          {/* CTA */}
-          <div className="hero-cta flex items-center gap-4 mb-10">
-            <Link
-              href="/generate"
-              className="px-8 py-3.5 rounded-full font-dm font-medium text-sm tracking-[0.08em] uppercase text-white"
-              style={{ background: DARK_BTN }}
-            >
-              Generate Now
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="px-6 py-3.5 rounded-full font-dm font-medium text-sm"
-              style={{ border: `1px solid ${BORDER}`, color: BODY_TXT }}
-            >
-              How it works
-            </Link>
-          </div>
-        </div>
-
-        {/* CONSENT TYPE MARQUEE */}
-        <div className="hero-marquee overflow-hidden pb-8 px-10 sm:px-14">
-          <p className="font-dm text-xs uppercase tracking-[0.12em] mb-3" style={{ color: MUTED }}>
-            Consent Types Available
-          </p>
-          <div className="overflow-hidden relative">
-            <div
-              className="marquee-track flex gap-3"
-              style={{ width: "max-content" }}
-            >
-              {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
-                  style={{ border: `1px solid ${BORDER}`, background: PILL_BG, color: BODY_TXT }}
-                >
-                  <span style={{ color: INK }}>{item.icon}</span>
-                  <span className="font-dm text-xs whitespace-nowrap">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── RIGHT PANEL ── */}
-      <div
-        className="right-panel relative flex-1 overflow-hidden"
-        style={{ background: DARK_PANEL, borderRadius: "0 0 0 24px" }}
-      >
-        {/* DNA Helix fills the panel */}
-        <DNAHelixCanvas />
-
-        {/* Subtle vignette for depth */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at center, transparent 50%, rgba(240,240,245,0.6) 100%)",
-          }}
-        />
-
-        {/* Animated consent flow illustration */}
-        <ConsentFlowAnimation />
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   INFO STRIP (below hero — 3 cards)
-═══════════════════════════════════════════ */
-function InfoStrip() {
-  return (
-    <div
-      className="grid grid-cols-1 md:grid-cols-3 max-w-7xl mx-auto"
-      style={{ padding: "0 40px", gap: 24, marginTop: 40, marginBottom: 40 }}
-    >
-      {[
-        {
-          icon: <ShieldCheck className="w-5 h-5" style={{ color: "#6B7FD4" }} />,
-          title: "IMC 2002 Compliant",
-          body: "Every form built on Indian Medical Council Regulation standards.",
-        },
-        {
-          icon: <Lightning className="w-5 h-5" style={{ color: "#E89860" }} />,
-          title: "AI in 30 Seconds",
-          body: "Groq-powered drafting from patient details to final consent.",
-        },
-        {
-          icon: <Stethoscope className="w-5 h-5" style={{ color: "#EAA8C0" }} />,
-          title: "10+ Consent Types",
-          body: "Surgical, anaesthesia, psychiatric, emergency and more.",
-        },
-      ].map((card, i) => (
-        <div
-          key={i}
-          className="rounded-2xl p-6"
-          style={{
-            background: WHITE,
-            border: `1px solid ${BORDER}`,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-          }}
-        >
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
-            style={{ background: PILL_BG }}
-          >
-            {card.icon}
-          </div>
-          <p className="font-bricolage font-semibold text-sm mb-2" style={{ color: INK }}>{card.title}</p>
-          <p className="font-dm text-sm leading-relaxed" style={{ color: BODY_TXT }}>{card.body}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   STATS SECTION
-═══════════════════════════════════════════ */
-function StatsSection() {
-  useGSAP(() => {
-    gsap.from(".stat-cell", {
-      opacity: 0, y: 40, stagger: 0.1, duration: 0.7, ease: "power3.out",
-      scrollTrigger: { trigger: ".stats-section", start: "top 75%" },
-    });
-    gsap.from(".org-card", {
-      opacity: 0, scale: 0.85, stagger: 0.07, duration: 0.5, ease: "back.out(1.5)",
-      scrollTrigger: { trigger: ".org-grid", start: "top 80%" },
-    });
-  }, []);
-
-  return (
-    <section className="stats-section" style={{ background: WHITE, padding: "80px 40px" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-
-        {/* Mission text */}
-        <div className="mb-16">
-          <h2 className="font-bricolage font-bold leading-tight tracking-tight"
-            style={{ fontSize: "clamp(28px, 4vw, 52px)", maxWidth: 760 }}>
-            <span style={{ color: INK }}>Our mission is to simplify medico-legal documentation</span>
-            <span style={{ color: "#D0D0D8" }}>{" "}for every Indian doctor, every time.</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-
-          {/* Left: 2×2 stat grid */}
-          <div className="grid grid-cols-2 gap-0">
-            {STATS.map((stat, i) => (
-              <div key={stat.label} className="stat-cell"
-                style={{
-                  padding: "36px 32px",
-                  borderBottom: i < 2 ? `1px solid ${BORDER}` : "none",
-                  borderRight: i % 2 === 0 ? `1px solid ${BORDER}` : "none",
-                }}>
-                <div className="font-bricolage font-bold"
-                  style={{ fontSize: "clamp(44px, 5vw, 64px)", color: INK, lineHeight: 1, marginBottom: 6 }}>
-                  {stat.value}
-                </div>
-                <div className="w-8 h-0.5 mb-3" style={{ background: BORDER }} />
-                <div className="font-dm text-sm font-medium mb-1" style={{ color: INK }}>{stat.label}</div>
-                <div className="font-dm text-xs" style={{ color: MUTED }}>{stat.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Right: Legal framework org logos */}
-          <div>
-            <p className="font-bricolage font-bold text-lg mb-1" style={{ color: INK }}>
-              Legal Frameworks Covered
-            </p>
-            <p className="font-dm text-sm mb-8" style={{ color: BODY_TXT }}>
-              Every form is validated against these Indian medico-legal authorities.
-            </p>
-            <div className="org-grid grid grid-cols-3 gap-4">
-              {ORG_LOGOS.map(org => (
-                <div
-                  key={org.code}
-                  className="org-card flex flex-col items-center gap-3 p-4 rounded-2xl"
-                  style={{ border: `1px solid ${BORDER}`, background: PAGE_BG }}
-                >
-                  <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center font-bricolage font-extrabold text-sm"
-                    style={{
-                      background: org.bg,
-                      color: org.color,
-                      border: `2px solid ${org.color}30`,
-                    }}
-                  >
-                    {org.code}
-                  </div>
-                  <span className="font-dm text-center leading-tight" style={{ fontSize: 10, color: BODY_TXT }}>
-                    {org.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   FEATURES SECTION
-═══════════════════════════════════════════ */
-function FeaturesSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    gsap.from(".features-header", {
-      opacity: 0, y: 30, duration: 0.7, ease: "power3.out",
-      scrollTrigger: { trigger: ".features-header", start: "top 80%" },
-    });
-    gsap.utils.toArray<HTMLElement>(".feature-row").forEach((row, i) => {
-      const text = row.querySelector(".feature-text");
-      const visual = row.querySelector(".feature-visual");
-      gsap.from([text, visual], {
-        opacity: 0,
-        x: (j: number) => (i % 2 === 0 ? (j === 0 ? -40 : 40) : (j === 0 ? 40 : -40)),
-        duration: 0.8, stagger: 0.1, ease: "power3.out",
-        scrollTrigger: { trigger: row, start: "top 75%" },
-      });
-    });
-  }, { scope: sectionRef });
-
-  const featureColors = ["#C0AEE8", "#EAA8C0", "#E89860"];
-
-  return (
-    <section id="features" ref={sectionRef} style={{ background: PAGE_BG, padding: "80px 0 0" }}>
-      <div className="features-header" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px 48px" }}>
-        <div className="flex items-center gap-2 mb-4">
-          <Lightning className="w-3.5 h-3.5" style={{ color: INK }} />
-          <span className="font-dm text-xs font-semibold tracking-[0.1em] uppercase" style={{ color: INK }}>
-            Features
-          </span>
-        </div>
-        <h2
-          className="font-bricolage font-extrabold"
-          style={{ margin: 0, fontSize: "clamp(32px, 4.5vw, 54px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: INK }}
-        >
-          Everything a doctor needs
-          <br />
-          <span style={{ color: MUTED }}>before the procedure.</span>
-        </h2>
-      </div>
-
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        {FEATURES.map((feat, i) => {
-          const isEven = i % 2 === 0;
-          return (
-            <div
-              key={feat.num}
-              className="feature-row grid grid-cols-1 md:grid-cols-2"
-              style={{ borderTop: `1px solid ${BORDER}` }}
-            >
-              <div
-                className="feature-text"
-                style={{
-                  padding: "56px 48px",
-                  borderRight: isEven ? `1px solid ${BORDER}` : "none",
-                  borderLeft: isEven ? "none" : `1px solid ${BORDER}`,
-                  order: isEven ? 0 : 1,
-                  background: WHITE,
-                }}
+      {/* ══ HERO ══ */}
+      <section className="mx-auto max-w-[1320px] px-5 sm:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pt-16 sm:pt-24 pb-20">
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            <Reveal>
+              <MonoLabel red>For registered medical practitioners · India</MonoLabel>
+            </Reveal>
+            <Reveal delay={80}>
+              <h1
+                className="mt-6 text-[13.5vw] sm:text-[76px] lg:text-[88px] leading-[0.98] tracking-[-0.01em]"
+                style={{ ...serif, color: INK }}
               >
-                <div className="flex items-baseline gap-3 mb-6">
-                  <span
-                    className="font-bricolage font-extrabold"
-                    style={{ fontSize: 80, color: `${featureColors[i]}30`, lineHeight: 1, letterSpacing: "-0.04em" }}
-                  >
-                    {feat.num}
+                Consent, drafted
+                <br />
+                to the letter
+                <br />
+                <em>of the law.</em>
+              </h1>
+            </Reveal>
+            <Reveal delay={160}>
+              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.7]" style={{ color: MUTED }}>
+                ConsentGen turns patient details into complete, medico-legally sound informed
+                consent — every clause present, every signature timestamped, in English and
+                eleven Indian languages. Thirty seconds, not thirty minutes.
+              </p>
+            </Reveal>
+            <Reveal delay={240}>
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <InkButton href={primaryHref}>Generate a form</InkButton>
+                <GhostButton href="#anatomy">Read the anatomy</GhostButton>
+              </div>
+            </Reveal>
+            <Reveal delay={320}>
+              <div className="mt-14 flex flex-wrap gap-x-10 gap-y-3">
+                {["Est. 30 s / form", "10 consent types", "12 languages"].map((t) => (
+                  <span key={t} className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+                    {t}
                   </span>
-                  <span
-                    className="font-dm text-xs font-semibold tracking-[0.08em] uppercase"
-                    style={{ color: featureColors[i] }}
-                  >
-                    {feat.tag}
-                  </span>
-                </div>
-                <h3
-                  className="font-bricolage font-extrabold"
-                  style={{
-                    margin: "0 0 16px", whiteSpace: "pre-line",
-                    fontSize: "clamp(28px, 3.5vw, 42px)",
-                    lineHeight: 1.15, letterSpacing: "-0.02em", color: INK,
-                  }}
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          <div className="lg:col-span-5 flex items-center">
+            <Reveal delay={200} className="w-full max-w-[440px] mx-auto lg:mx-0">
+              <Specimen />
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FRAMEWORK INDEX ══ */}
+      <section style={{ borderTop: `1px solid ${RULE}` }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-14">
+          <Reveal>
+            <div className="flex items-baseline justify-between mb-8">
+              <MonoLabel>Index of frameworks</MonoLabel>
+              <MonoLabel>06 instruments</MonoLabel>
+            </div>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ borderTop: `1px solid ${RULE}` }}>
+            {FRAMEWORKS.map((f, i) => (
+              <Reveal key={f.code} delay={i * 60}>
+                <div
+                  className="py-5 pr-6 h-full"
+                  style={{ borderBottom: `1px solid ${RULE}` }}
                 >
-                  {feat.title}
-                </h3>
-                <p className="font-dm text-sm leading-relaxed mb-8" style={{ color: BODY_TXT, maxWidth: 400 }}>
-                  {feat.body}
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="font-mono text-[12px] font-bold uppercase tracking-[0.12em]" style={{ color: INK }}>
+                      {f.code}
+                    </span>
+                    <span className="font-mono text-[10px] tracking-[0.1em]" style={{ color: RED }}>
+                      {f.ref}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[13px] leading-snug" style={{ color: MUTED }}>
+                    {f.name}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ CLAUSE ANATOMY ══ */}
+      <section id="anatomy" style={{ borderTop: `1px solid ${RULE}` }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-28 grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28">
+              <Reveal>
+                <MonoLabel red>The form, dissected</MonoLabel>
+                <h2 className="mt-5 text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+                  Anatomy of a<br />
+                  <em>defensible</em> consent.
+                </h2>
+                <p className="mt-6 max-w-[38ch] text-[15px] leading-[1.7]" style={{ color: MUTED }}>
+                  Eleven clauses decide whether a consent form protects you in court. ConsentGen
+                  writes all of them, every time — and shows you the register while it works.
                 </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-bricolage font-extrabold" style={{ fontSize: 40, color: INK }}>
-                    {feat.metric.value}
-                  </span>
-                  <span className="font-dm text-sm" style={{ color: MUTED }}>{feat.metric.label}</span>
-                </div>
-              </div>
+              </Reveal>
+            </div>
+          </div>
 
-              <div
-                className="feature-visual"
-                style={{
-                  padding: "56px 48px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  order: isEven ? 1 : 0,
-                  background: PILL_BG,
-                }}
-              >
-                <div
-                  className="rounded-2xl w-full"
-                  style={{
-                    background: WHITE,
-                    border: `1px solid ${BORDER}`,
-                    padding: 32, minHeight: 200,
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-2 h-2 rounded-full" style={{ background: featureColors[i] }} />
-                    <span className="font-dm text-xs font-semibold" style={{ color: INK }}>{feat.tag} Active</span>
+          <div className="lg:col-span-8">
+            <div style={{ borderTop: `1px solid ${INK}` }}>
+              {CLAUSES.map((c, i) => (
+                <Reveal key={c.n} delay={Math.min(i * 40, 240)}>
+                  <div
+                    className="clause-row group grid grid-cols-[3.5rem_1fr] sm:grid-cols-[4.5rem_1fr_auto] items-baseline gap-x-4 px-3 sm:px-5 py-4 cursor-default"
+                    style={{ borderBottom: `1px solid ${RULE}` }}
+                  >
+                    <span className="font-mono text-[11px] tracking-[0.12em] transition-colors duration-300 group-hover:text-[#BE3D2A]" style={{ color: MUTED }}>
+                      Cl. {c.n}
+                    </span>
+                    <span className="text-[19px] sm:text-[22px] leading-tight transition-colors duration-300 group-hover:text-[#F4F1E9]" style={{ ...serif, color: INK }}>
+                      {c.title}
+                    </span>
+                    <span className="hidden sm:block font-mono text-[10px] uppercase tracking-[0.1em] text-right max-w-[240px] transition-colors duration-300 group-hover:text-[#F4F1E9]/60" style={{ color: MUTED }}>
+                      {c.basis}
+                    </span>
                   </div>
-                  <div className="flex flex-col gap-2.5">
-                    {[92, 75, 100, 63, 84].map((w, j) => (
-                      <div key={j} style={{ height: 7, borderRadius: 4, background: BORDER, overflow: "hidden" }}>
-                        <div
-                          style={{
-                            height: "100%", borderRadius: 4, width: `${w}%`,
-                            background: `linear-gradient(90deg, ${featureColors[i]}, ${featureColors[i]}80)`,
-                          }}
-                        />
-                      </div>
-                    ))}
+                </Reveal>
+              ))}
+            </div>
+            <Reveal delay={200}>
+              <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+                Register audited live during generation — missing clauses are flagged before signature.
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ METHOD — §01–03 ══ */}
+      <section id="method" style={{ borderTop: `1px solid ${RULE}` }}>
+        {SECTIONS.map((s, idx) => (
+          <div key={s.num} style={idx > 0 ? { borderTop: `1px solid ${RULE}` } : undefined}>
+            <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-10">
+              <div className="lg:col-span-2">
+                <Reveal>
+                  <span className="font-mono text-[13px] tracking-[0.1em]" style={{ color: RED }}>{s.num}</span>
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+                    {s.tag}
+                  </p>
+                </Reveal>
+              </div>
+              <div className={`lg:col-span-6 ${idx % 2 === 1 ? "lg:order-3" : ""}`}>
+                <Reveal delay={60}>
+                  <h3 className="text-[36px] sm:text-[48px] leading-[1.04] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+                    {s.title[0]}
+                    <br />
+                    <em>{s.title[1]}</em>
+                  </h3>
+                  <p className="mt-6 max-w-[52ch] text-[15.5px] leading-[1.75]" style={{ color: MUTED }}>
+                    {s.body}
+                  </p>
+                </Reveal>
+              </div>
+              <div className={`lg:col-span-4 flex lg:justify-end ${idx % 2 === 1 ? "lg:order-2 lg:justify-start" : ""}`}>
+                <Reveal delay={140}>
+                  <div className="lg:text-right">
+                    <p className="text-[84px] sm:text-[104px] leading-none tracking-[-0.02em]" style={{ ...serif, color: INK }}>
+                      {s.metric.value}
+                    </p>
+                    <p className="mt-3 max-w-[26ch] font-mono text-[10px] uppercase tracking-[0.14em] leading-[1.8] lg:ml-auto" style={{ color: MUTED }}>
+                      {s.metric.label}
+                    </p>
                   </div>
-                  <div className="flex items-baseline gap-2 mt-6">
-                    <span className="font-bricolage font-bold text-3xl" style={{ color: INK }}>{feat.metric.value}</span>
-                    <span className="font-dm text-xs" style={{ color: MUTED }}>{feat.metric.label}</span>
-                  </div>
-                </div>
+                </Reveal>
               </div>
             </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
+          </div>
+        ))}
+      </section>
 
-/* ═══════════════════════════════════════════
-   HOW IT WORKS SECTION
-═══════════════════════════════════════════ */
-function HowItWorksSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    gsap.from(".step-cell", {
-      opacity: 0, y: 30, stagger: 0.15, duration: 0.7, ease: "power3.out",
-      scrollTrigger: { trigger: ".steps-grid", start: "top 75%" },
-    });
-  }, { scope: sectionRef });
-
-  return (
-    <section id="how-it-works" ref={sectionRef} style={{ background: PAGE_BG, padding: "80px 0" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-        <div style={{ marginBottom: 56 }}>
-          <h2
-            className="font-bricolage font-extrabold"
-            style={{ margin: 0, fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 1.15, letterSpacing: "-0.02em", color: INK }}
-          >
-            Three steps to a{" "}
-            <span style={{ color: MUTED }}>compliant consent form.</span>
-          </h2>
+      {/* ══ PROCESS ══ */}
+      <section id="process" style={{ borderTop: `1px solid ${RULE}`, backgroundColor: SHEET }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-28">
+          <Reveal>
+            <div className="flex items-baseline justify-between mb-12">
+              <h2 className="text-[42px] sm:text-[52px] leading-[1.02] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+                Three steps. <em>No template hunting.</em>
+              </h2>
+              <MonoLabel>Procedure</MonoLabel>
+            </div>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3" style={{ borderTop: `1px solid ${INK}` }}>
+            {STEPS.map((st, i) => (
+              <Reveal key={st.n} delay={i * 100}>
+                <div
+                  className="py-10 md:pr-10 h-full"
+                  style={{
+                    borderBottom: `1px solid ${RULE}`,
+                    ...(i > 0 ? {} : {}),
+                  }}
+                >
+                  <span className="text-[64px] leading-none" style={{ ...serif, color: "rgba(23,20,16,0.18)" }}>
+                    {st.n}
+                  </span>
+                  <h3 className="mt-5 text-[22px]" style={{ ...serif, color: INK }}>
+                    {st.title}
+                  </h3>
+                  <p className="mt-3 max-w-[36ch] text-[14px] leading-[1.7]" style={{ color: MUTED }}>
+                    {st.body}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div className="steps-grid grid grid-cols-1 md:grid-cols-3">
-          {STEPS.map((step, i) => (
-            <div
-              key={step.n}
-              className="step-cell"
-              style={{
-                borderTop: `1px solid ${BORDER}`,
-                borderRight: i < 2 ? `1px solid ${BORDER}` : "none",
-                padding: "36px 36px 40px",
-                background: WHITE,
-              }}
-            >
-              <div
-                className="font-bricolage font-extrabold"
-                style={{ fontSize: 80, color: "#C0C0CC", lineHeight: 1, letterSpacing: "-0.04em", marginBottom: 20 }}
-              >
-                {step.n}
-              </div>
-              <h3
-                className="font-bricolage font-bold"
-                style={{ fontSize: 20, color: INK, marginBottom: 10, lineHeight: 1.3 }}
-              >
-                {step.title}
-              </h3>
-              <p className="font-dm text-sm leading-relaxed" style={{ color: BODY_TXT }}>
-                {step.body}
+      {/* ══ PULL QUOTE ══ */}
+      <section style={{ borderTop: `1px solid ${RULE}` }}>
+        <div className="mx-auto max-w-[980px] px-5 sm:px-8 py-24 sm:py-32 text-center">
+          <Reveal>
+            <span className="text-[28px]" style={{ color: RED }}>✳</span>
+            <blockquote className="mt-8 text-[30px] sm:text-[44px] leading-[1.25] tracking-[-0.01em]" style={{ ...serif, color: INK }}>
+              “The forms are accurate, compliant, and save me thirty minutes a day.
+              The clause register means <em>nothing critical is ever missed</em> before
+              a procedure.”
+            </blockquote>
+            <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+              Dr. Rajesh Kumar — Senior Surgeon, New Delhi
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══ STATS ══ */}
+      <section style={{ borderTop: `1px solid ${RULE}` }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4">
+            {STATS.map((st, i) => (
+              <Reveal key={st.suffix} delay={i * 80}>
+                <div
+                  className="py-12 sm:py-16 pr-6"
+                  style={{ borderLeft: i % 2 === 1 ? `1px solid ${RULE}` : undefined, paddingLeft: i % 2 === 1 ? "1.5rem" : undefined }}
+                >
+                  <p className="leading-none">
+                    <span className="text-[64px] sm:text-[80px] tracking-[-0.02em]" style={{ ...serif, color: INK }}>
+                      {st.value}
+                    </span>
+                    <span className="ml-2 text-[18px] italic" style={{ ...serif, color: RED }}>
+                      {st.suffix}
+                    </span>
+                  </p>
+                  <p className="mt-4 max-w-[24ch] font-mono text-[10px] uppercase tracking-[0.14em] leading-[1.8]" style={{ color: MUTED }}>
+                    {st.label}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FINAL CTA ══ */}
+      <section style={{ backgroundColor: INK }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-24 sm:py-32">
+          <Reveal>
+            <MonoLabel red>Begin</MonoLabel>
+            <h2 className="mt-6 text-[12vw] sm:text-[72px] lg:text-[92px] leading-[1.0] tracking-[-0.01em]" style={{ ...serif, color: PAPER }}>
+              Stop drafting.
+              <br />
+              <em>Start generating.</em>
+            </h2>
+            <div className="mt-12 flex flex-wrap items-center gap-6">
+              <InkButton href={primaryHref} invert>
+                Generate your first form
+              </InkButton>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(244,241,233,0.5)" }}>
+                1 credit = 1 form · No card required to start
+              </span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══ FOOTER ══ */}
+      <footer style={{ backgroundColor: INK, borderTop: `1px solid rgba(244,241,233,0.15)` }}>
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 pt-14">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-14">
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-[20px]" style={{ ...serif, color: PAPER }}>
+                ConsentGen<span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+              </p>
+              <p className="mt-3 max-w-[28ch] text-[12.5px] leading-[1.7]" style={{ color: "rgba(244,241,233,0.45)" }}>
+                Medico-legal consent documentation for Indian clinical practice.
               </p>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   TESTIMONIALS SECTION
-═══════════════════════════════════════════ */
-function TestimonialsSection() {
-  const [active, setActive] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const t = setInterval(() => setActive(a => (a + 1) % TESTIMONIALS.length), 5000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      gsap.fromTo(
-        containerRef.current,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-      );
-    }
-  }, [active]);
-
-  const t = TESTIMONIALS[active];
-
-  return (
-    <section style={{ background: WHITE, padding: "100px 40px", position: "relative", overflow: "hidden" }}>
-      <div
-        className="font-bricolage"
-        style={{
-          position: "absolute", top: 20, left: 48, fontSize: 200,
-          color: `${BORDER}`,
-          lineHeight: 1, userSelect: "none", pointerEvents: "none",
-        }}
-      >
-        &ldquo;
-      </div>
-
-      <div style={{ maxWidth: 800, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="font-dm text-xs font-semibold tracking-[0.1em] uppercase mb-10" style={{ color: MUTED }}>
-          Testimonials
-        </div>
-
-        <div className="flex gap-2 mb-8">
-          {[0, 1, 2].map(i => (
-            <Star key={i} className="w-4 h-4" style={{ color: "#E89860" }} weight="fill" />
-          ))}
-        </div>
-
-        <div ref={containerRef}>
-          <blockquote
-            className="font-bricolage font-bold"
-            style={{
-              margin: "0 0 40px",
-              fontSize: "clamp(20px, 3vw, 34px)",
-              color: INK,
-              lineHeight: 1.35, letterSpacing: "-0.01em",
-              maxWidth: 720,
-            }}
-          >
-            &ldquo;{t.quote}&rdquo;
-          </blockquote>
-          <div className="flex items-center gap-4">
-            <div
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-sm"
-              style={{ background: "linear-gradient(135deg, #6B7FD4, #8B6FC4)" }}
-            >
-              {t.initials}
-            </div>
-            <div>
-              <div className="font-bricolage font-bold text-sm" style={{ color: INK }}>{t.name}</div>
-              <div className="font-dm text-xs" style={{ color: MUTED }}>{t.role}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-2 mt-9">
-          {TESTIMONIALS.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              style={{
-                height: 6, borderRadius: 999,
-                width: i === active ? 24 : 6,
-                background: i === active ? INK : BORDER,
-                border: "none", cursor: "pointer",
-                transition: "all 0.3s ease",
-                padding: 0,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   CTA SECTION
-═══════════════════════════════════════════ */
-function CTASection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    gsap.from(".cta-block", {
-      opacity: 0, scale: 0.95, duration: 0.8, ease: "power3.out",
-      scrollTrigger: { trigger: ".cta-block", start: "top 80%" },
-    });
-  }, { scope: sectionRef });
-
-  return (
-    <section ref={sectionRef} style={{ background: PAGE_BG, padding: "80px 40px" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div
-          className="cta-block relative overflow-hidden rounded-3xl"
-          style={{ padding: "80px 64px", textAlign: "center", background: INK }}
-        >
-          <div
-            className="font-bricolage"
-            style={{
-              position: "absolute", inset: 0,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "clamp(80px, 14vw, 200px)", fontWeight: 800,
-              color: "rgba(255,255,255,0.03)", lineHeight: 1,
-              pointerEvents: "none", userSelect: "none", whiteSpace: "nowrap", overflow: "hidden",
-            }}
-          >
-            ConsentGen
-          </div>
-
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <ShieldCheck className="w-4 h-4" style={{ color: MUTED }} />
-              <span className="font-dm text-xs font-semibold tracking-[0.1em] uppercase" style={{ color: MUTED }}>
-                Ready to streamline
-              </span>
-            </div>
-            <h2
-              className="font-bricolage font-extrabold"
-              style={{
-                margin: "0 0 16px",
-                fontSize: "clamp(32px, 5vw, 60px)",
-                lineHeight: 1.1, letterSpacing: "-0.025em",
-                color: WHITE, fontWeight: 800,
-              }}
-            >
-              Generate your first{" "}
-              <span style={{ color: "#C4D5CF" }}>consent form for free.</span>
-            </h2>
-            <p className="font-dm text-base" style={{ color: MUTED, maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.6 }}>
-              Join hundreds of Indian doctors who trust ConsentGen for their medico-legal documentation.
-            </p>
-            <div className="flex gap-3 justify-center flex-wrap">
-              <Link
-                href="/generate"
-                className="inline-flex items-center gap-2 rounded-full font-dm font-semibold text-sm"
-                style={{ background: WHITE, color: INK, padding: "14px 32px" }}
-              >
-                Start Generating
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full font-dm font-semibold text-sm"
-                style={{
-                  background: "transparent", color: WHITE,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  padding: "14px 28px",
-                }}
-              >
-                View Dashboard
-              </Link>
-            </div>
-
-            <div className="flex gap-12 justify-center mt-14 flex-wrap">
-              {[
-                { value: "10+", label: "Consent Types" },
-                { value: "30s", label: "Generation Time" },
-                { value: "100%", label: "IMC Compliant" },
-              ].map(({ value, label }) => (
-                <div key={label} style={{ textAlign: "center" }}>
-                  <div className="font-bricolage font-extrabold text-3xl mb-1" style={{ color: WHITE }}>{value}</div>
-                  <div className="font-dm text-xs" style={{ color: MUTED }}>{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   PAGE FOOTER (compact)
-═══════════════════════════════════════════ */
-function PageFooter() {
-  return (
-    <footer style={{ background: WHITE, borderTop: `1px solid ${BORDER}`, padding: "32px 40px" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: INK }}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <span className="font-bricolage font-bold text-sm" style={{ color: INK }}>ConsentGen</span>
-              <span className="font-dm text-xs ml-2" style={{ color: MUTED }}>AI-powered medico-legal consent forms for Indian doctors</span>
-            </div>
-          </div>
-
-          {/* Nav links */}
-          <div className="flex flex-wrap items-center gap-6">
             {[
-              { label: "Generate", href: "/generate" },
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "History", href: "/history" },
-              { label: "Sign In", href: "/login" },
-            ].map(({ label, href }) => (
-              <Link key={label} href={href} className="font-dm text-sm transition-colors" style={{ color: BODY_TXT }}>
-                {label}
-              </Link>
+              { h: "Product", links: [["Generate", "/generate"], ["Templates", "/templates"], ["History", "/history"], ["Chat", "/chat"]] },
+              { h: "Reference", links: [["Regulations", "/regulations"], ["The form", "#anatomy"], ["Method", "#method"]] },
+              { h: "Account", links: [["Sign in", "/login"], ["Dashboard", "/dashboard"], ["Credits", "/credits"]] },
+            ].map((col) => (
+              <div key={col.h}>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: "rgba(244,241,233,0.4)" }}>
+                  {col.h}
+                </p>
+                <ul className="space-y-2.5">
+                  {col.links.map(([label, href]) => (
+                    <li key={label}>
+                      <Link href={href} className="link-rule text-[13.5px]" style={{ color: "rgba(244,241,233,0.75)" }}>
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
 
-          {/* Compliance badges */}
-          <div className="flex flex-wrap gap-2">
-            {["IMC 2002", "BNS", "DPDP"].map(b => (
-              <span
-                key={b}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-dm"
-                style={{ border: `1px solid ${BORDER}`, color: MUTED, background: PILL_BG }}
-              >
-                <ShieldCheck className="w-3 h-3" style={{ color: INK }} />
-                {b}
-              </span>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-3 py-5" style={{ borderTop: "1px solid rgba(244,241,233,0.15)" }}>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(244,241,233,0.4)" }}>
+              © {new Date().getFullYear()} ConsentGen — Not a substitute for legal counsel
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(244,241,233,0.4)" }}>
+              Made for Indian practice ✳ IMC · BNS · MoRTH
+            </span>
+          </div>
+
+          {/* Giant clipped wordmark */}
+          <div className="overflow-hidden -mb-2" aria-hidden>
+            <p
+              className="text-center whitespace-nowrap text-[19vw] leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"
+              style={{ ...serif, color: "rgba(244,241,233,0.09)" }}
+            >
+              ConsentGen
+            </p>
           </div>
         </div>
-
-        {/* Bottom bar */}
-        <div
-          className="flex items-center justify-between flex-wrap gap-2 mt-6 pt-5"
-          style={{ borderTop: `1px solid ${BORDER}` }}
-        >
-          <p className="font-dm text-xs" style={{ color: MUTED }}>
-            © 2025 ConsentGen. Built for Indian Medical Practice.
-          </p>
-          <p className="font-dm text-xs" style={{ color: MUTED }}>
-            IMC 2002 · BNS §§24-30 · MoRTH 2025 · CPA 2019 · Aadhaar Act · DPDP 2023
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   PAGE ROOT
-═══════════════════════════════════════════ */
-export default function Home() {
-  return (
-    <div style={{ background: PAGE_BG }}>
-      <HeroSection />
-      <InfoStrip />
-      <StatsSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <TestimonialsSection />
-      <CTASection />
-      <PageFooter />
+      </footer>
     </div>
   );
 }
