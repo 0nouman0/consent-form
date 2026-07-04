@@ -106,18 +106,44 @@ function markdownToPdfContent(markdown: string): PdfContent[] {
   return content;
 }
 
+function buildPdfTable(data: [string, string][]): any {
+  return {
+    style: "tableStyle",
+    margin: [0, 4, 0, 12],
+    table: {
+      widths: [130, "*"],
+      body: data.map(([label, value]) => [
+        { text: label, style: "tableHeaderCell" },
+        { text: value, style: "tableBodyCell" }
+      ])
+    },
+    layout: {
+      hLineWidth: () => 0.5,
+      vLineWidth: () => 0.5,
+      hLineColor: () => "#e5e7eb",
+      vLineColor: () => "#e5e7eb",
+      paddingLeft: () => 8,
+      paddingRight: () => 8,
+      paddingTop: () => 6,
+      paddingBottom: () => 6
+    }
+  };
+}
+
 export async function downloadConsentPDF({
   markdown,
   consentId,
   hospitalName,
   timestamp,
   isResearch = false,
+  formData,
 }: {
   markdown: string;
   consentId: string;
   hospitalName: string;
   timestamp: string;
   isResearch?: boolean;
+  formData?: any;
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfMake = (await import("pdfmake/build/pdfmake" as any)).default;
@@ -132,6 +158,65 @@ export async function downloadConsentPDF({
   const formTitle = isResearch
     ? "INFORMED CONSENT FORM FOR RESEARCH PARTICIPATION"
     : "INFORMED CONSENT FORM";
+
+  const tablesContent: any[] = [];
+  if (formData) {
+    if (!isResearch) {
+      const patientData: [string, string][] = [
+        ["Patient Name", formData.patient?.patientName || "—"],
+        ["Age / Sex", `${formData.patient?.age || "—"} / ${formData.patient?.sex || "—"}`],
+        ["Hospital OPD/IPD No.", formData.patient?.hospitalOpdIpdNo || "—"],
+        ["Aadhaar (last 4)", formData.patient?.aadhaarLast4 ? `XXXX-XXXX-${formData.patient.aadhaarLast4}` : "—"],
+      ];
+      if (formData.patient?.insuranceProvider) {
+        patientData.push(["Insurance Provider", formData.patient.insuranceProvider]);
+        patientData.push(["Insurance Policy No.", formData.patient.insurancePolicyNo || "—"]);
+      }
+      if (!formData.patient?.patientCompetent && formData.patient?.guardianName) {
+        patientData.push(["Guardian Name", formData.patient.guardianName]);
+        patientData.push(["Guardian Relationship", formData.patient.guardianRelationship || "—"]);
+      }
+
+      const clinicalData: [string, string][] = [
+        ["Physician", `${formData.clinical?.doctorName || "—"} (Reg. ${formData.clinical?.doctorRegistrationNo || "—"})`],
+        ["Procedure", formData.clinical?.procedureName || "—"],
+        ["Scheduled Date", formData.clinical?.procedureDate || "—"],
+        ["Counseling Language", formData.clinical?.counselingLanguage || "—"],
+      ];
+
+      tablesContent.push(
+        { text: "PATIENT INFORMATION", style: "sectionTitle" },
+        buildPdfTable(patientData),
+        { text: "CLINICAL DETAILS", style: "sectionTitle" },
+        buildPdfTable(clinicalData)
+      );
+    } else {
+      const studyData: [string, string][] = [
+        ["Study Title", formData.study?.studyTitle || "—"],
+        ["Principal Investigator", formData.study?.principalInvestigator || "—"],
+        ["Department", formData.study?.department || "—"],
+        ["Contact", formData.study?.contactMobile || "—"],
+        ["Counseling Language", formData.study?.counselingLanguage || "—"],
+      ];
+
+      const participantData: [string, string][] = [
+        ["Participant Name", formData.participant?.participantName || "—"],
+        ["Participant ID", formData.participant?.participantId || "—"],
+        ["Age / Sex", `${formData.participant?.age || "—"} / ${formData.participant?.sex || "—"}`],
+      ];
+      if (!formData.participant?.isCompetent && formData.participant?.guardianName) {
+        participantData.push(["Guardian Name", formData.participant.guardianName]);
+        participantData.push(["Guardian Relationship", formData.participant.guardianRelationship || "—"]);
+      }
+
+      tablesContent.push(
+        { text: "STUDY INFORMATION", style: "sectionTitle" },
+        buildPdfTable(studyData),
+        { text: "PARTICIPANT INFORMATION", style: "sectionTitle" },
+        buildPdfTable(participantData)
+      );
+    }
+  }
 
   const docDefinition = {
     pageSize: "A4",
@@ -210,6 +295,24 @@ export async function downloadConsentPDF({
         margin: [0, 0, 0, 16],
       },
 
+      ...tablesContent,
+
+      // Divider before clauses
+      {
+        canvas: [
+          {
+            type: "line",
+            x1: 0,
+            y1: 0,
+            x2: 495,
+            y2: 0,
+            lineWidth: 0.5,
+            lineColor: "#cccccc",
+          },
+        ],
+        margin: [0, 12, 0, 12],
+      },
+
       // AI-generated content
       ...markdownToPdfContent(markdown),
 
@@ -251,6 +354,23 @@ export async function downloadConsentPDF({
       paragraph: { fontSize: 10, color: "#222222", lineHeight: 1.65 },
       listItem: { fontSize: 10, color: "#222222", lineHeight: 1.5 },
       footer: { fontSize: 7, color: "#aaaaaa" },
+      sectionTitle: {
+        fontSize: 9,
+        bold: true,
+        color: "#555555",
+        characterSpacing: 0.5,
+        margin: [0, 8, 0, 4]
+      },
+      tableHeaderCell: {
+        fontSize: 8,
+        bold: true,
+        color: "#555555",
+        fillColor: "#f9fafb"
+      },
+      tableBodyCell: {
+        fontSize: 9,
+        color: "#222222"
+      }
     },
 
     defaultStyle: {

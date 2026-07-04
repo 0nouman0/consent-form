@@ -37,7 +37,7 @@ const TOTAL_STEPS = 7;
 const STEP_FIELDS: Array<Array<string>> = [
   ["patient.patientName", "patient.age", "patient.sex"],
   ["patient.patientCompetent", "patient.guardianName", "patient.guardianRelationship"],
-  ["patient.hospitalOpdIpdNo"],
+  ["patient.hospitalOpdIpdNo", "patient.aadhaarLast4"],
   ["clinical.doctorName", "clinical.doctorRegistrationNo", "clinical.hospitalName", "clinical.hospitalAddress"],
   ["clinical.consentType", "clinical.procedureName", "clinical.procedureDate", "clinical.counselingLanguage", "languageLevel"],
   ["clinical.specificRisks"],

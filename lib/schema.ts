@@ -7,8 +7,11 @@ const patientSchema = z.object({
   hospitalOpdIpdNo: z.string().min(1, "OPD/IPD number is required"),
   aadhaarLast4: z
     .string()
-    .length(4, "Enter exactly 4 digits")
-    .regex(/^\d{4}$/, "Must be 4 digits only"),
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || (val.length === 4 && /^\d{4}$/.test(val)), {
+      message: "Must be exactly 4 digits",
+    }),
   insuranceProvider: z.string().default(""),
   insurancePolicyNo: z.string().default(""),
   patientCompetent: z.boolean().default(true),

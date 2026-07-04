@@ -17,6 +17,19 @@ import { saveConsentToHistory } from "@/lib/history";
 import { downloadConsentPDF } from "@/lib/pdf";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
+const CONSENT_TYPE_LABELS: Record<string, string> = {
+  surgical: "SURGICAL",
+  anaesthesia: "ANAESTHESIA",
+  diagnostic: "DIAGNOSTIC",
+  blood_transfusion: "BLOOD TRANSFUSION",
+  research: "RESEARCH",
+  telemedicine: "TELEMEDICINE",
+  minor_procedure: "MINOR PROCEDURE",
+  obstetric: "OBSTETRIC",
+  psychiatric: "PSYCHIATRIC",
+  road_accident_emergency: "ROAD ACCIDENT / EMERGENCY",
+};
+
 interface ConsentDocumentProps {
   markdown: string;
   consentId: string;
@@ -68,6 +81,7 @@ export default function ConsentDocument({
         hospitalName,
         timestamp,
         isResearch: !!isResearch,
+        formData,
       });
     } finally {
       setDownloadingPdf(false);
@@ -83,6 +97,7 @@ export default function ConsentDocument({
         hospitalName,
         timestamp,
         isResearch: !!isResearch,
+        formData,
       });
     } finally {
       setDownloadingDocx(false);
@@ -198,13 +213,6 @@ export default function ConsentDocument({
         {isComplete && (
           <div className="flex items-center gap-2">
             <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              {copied ? "Copied!" : "Copy"}
-            </button>
-            <button
               onClick={handleDownloadDOCX}
               disabled={downloadingDocx}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 text-neutral-600 text-sm font-semibold rounded-xl hover:border-nq-purple hover:text-nq-purple transition-all disabled:opacity-50"
@@ -285,24 +293,177 @@ export default function ConsentDocument({
 
       <motion.div
         id="consent-document-body"
-        className="consent-document nq-card p-8 sm:p-12"
+        className="consent-document bg-white border border-neutral-200 shadow-md p-8 sm:p-12 font-serif text-neutral-900"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        {/* Document Header */}
-        <div className="text-center border-b border-nq-border pb-4 mb-6">
-          <p className="text-sm font-bold uppercase tracking-widest mb-2 text-nq-purple">
-            {isResearch ? "Research Consent Form" : "Standard Informed Consent Form"}
-          </p>
-          <h1 className="text-2xl font-black text-nq-text tracking-tight">{hospitalName}</h1>
-          <div className="mt-3 text-sm font-medium text-nq-text-muted space-y-1">
-            <p>
-              Consent ID: <span className="font-mono">{consentId}</span>
+        {formData ? (
+          <>
+            {/* Header */}
+            <div className="flex justify-between items-start mb-6 pb-5 border-b border-neutral-200">
+              <div>
+                <p className="text-lg font-bold leading-tight text-left">
+                  {isResearch
+                    ? (formData as ResearchConsentFormSchema).study?.institutionName || hospitalName
+                    : (formData as ConsentFormSchema).clinical?.hospitalName || hospitalName}
+                </p>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs text-left">
+                  {isResearch
+                    ? (formData as ResearchConsentFormSchema).study?.institutionAddress
+                    : (formData as ConsentFormSchema).clinical?.hospitalAddress}
+                </p>
+              </div>
+              <div className="text-right text-xs text-neutral-500 space-y-0.5">
+                <p className="text-left sm:text-right">Consent ID: <span className="font-semibold text-neutral-700 font-mono">{consentId}</span></p>
+                <p className="text-left sm:text-right">Date: <span className="font-semibold text-neutral-700">{timestamp}</span></p>
+              </div>
+            </div>
+
+            {/* Title bar */}
+            <div className="bg-neutral-100 rounded-md py-2.5 px-4 mb-6 text-center">
+              <p className="text-sm font-bold tracking-widest uppercase text-neutral-900">
+                {isResearch
+                  ? "INFORMED CONSENT FOR RESEARCH PARTICIPATION"
+                  : `INFORMED CONSENT FORM — ${(CONSENT_TYPE_LABELS[(formData as ConsentFormSchema).clinical?.consentType ?? "surgical"] ?? "SURGICAL")} PROCEDURE`}
+              </p>
+            </div>
+
+            {/* Tables for Clinical/Surgical */}
+            {!isResearch ? (
+              <>
+                {/* Patient info table */}
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                    Patient Information
+                  </h3>
+                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                    <tbody>
+                      {[
+                        ["Patient Name", (formData as ConsentFormSchema).patient?.patientName || "—"],
+                        ["Age / Sex", `${(formData as ConsentFormSchema).patient?.age || "—"} / ${(formData as ConsentFormSchema).patient?.sex || "—"}`],
+                        ["Hospital OPD/IPD No.", (formData as ConsentFormSchema).patient?.hospitalOpdIpdNo || "—"],
+                        ["Aadhaar (last 4)", (formData as ConsentFormSchema).patient?.aadhaarLast4 ? `****\u00A0****\u00A0****\u00A0${(formData as ConsentFormSchema).patient.aadhaarLast4}` : "—"],
+                        ...((formData as ConsentFormSchema).patient?.insuranceProvider
+                          ? [
+                              ["Insurance Provider", (formData as ConsentFormSchema).patient.insuranceProvider],
+                              ["Insurance Policy No.", (formData as ConsentFormSchema).patient.insurancePolicyNo || "—"],
+                            ]
+                          : []),
+                        ...(!(formData as ConsentFormSchema).patient?.patientCompetent && (formData as ConsentFormSchema).patient?.guardianName
+                          ? [
+                              ["Guardian Name", (formData as ConsentFormSchema).patient.guardianName],
+                              ["Guardian Relationship", (formData as ConsentFormSchema).patient.guardianRelationship || "—"],
+                            ]
+                          : []),
+                      ].map(([label, value], i) => (
+                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                            {label}
+                          </td>
+                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Clinical info table */}
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                    Clinical Details
+                  </h3>
+                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                    <tbody>
+                      {[
+                        ["Physician", `${(formData as ConsentFormSchema).clinical?.doctorName || "—"} (Reg. ${(formData as ConsentFormSchema).clinical?.doctorRegistrationNo || "—"})`],
+                        ["Procedure", (formData as ConsentFormSchema).clinical?.procedureName || "—"],
+                        ["Scheduled Date", (formData as ConsentFormSchema).clinical?.procedureDate || "—"],
+                        ["Counseling Language", (formData as ConsentFormSchema).clinical?.counselingLanguage || "—"],
+                      ].map(([label, value], i) => (
+                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                            {label}
+                          </td>
+                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Study info table */}
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                    Study Information
+                  </h3>
+                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                    <tbody>
+                      {[
+                        ["Study Title", (formData as ResearchConsentFormSchema).study?.studyTitle || "—"],
+                        ["Principal Investigator", (formData as ResearchConsentFormSchema).study?.principalInvestigator || "—"],
+                        ["Department", (formData as ResearchConsentFormSchema).study?.department || "—"],
+                        ["Contact", (formData as ResearchConsentFormSchema).study?.contactMobile || "—"],
+                        ["Counseling Language", (formData as ResearchConsentFormSchema).study?.counselingLanguage || "—"],
+                      ].map(([label, value], i) => (
+                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                            {label}
+                          </td>
+                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Participant info table */}
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 text-left">
+                    Participant Information
+                  </h3>
+                  <table className="w-full text-sm border border-neutral-200 rounded-md overflow-hidden">
+                    <tbody>
+                      {[
+                        ["Participant Name", (formData as ResearchConsentFormSchema).participant?.participantName || "—"],
+                        ["Participant ID", (formData as ResearchConsentFormSchema).participant?.participantId || "—"],
+                        ["Age / Sex", `${(formData as ResearchConsentFormSchema).participant?.age || "—"} / ${(formData as ResearchConsentFormSchema).participant?.sex || "—"}`],
+                        ...(!(formData as ResearchConsentFormSchema).participant?.isCompetent && (formData as ResearchConsentFormSchema).participant?.guardianName
+                          ? [
+                              ["Guardian Name", (formData as ResearchConsentFormSchema).participant.guardianName],
+                              ["Guardian Relationship", (formData as ResearchConsentFormSchema).participant.guardianRelationship || "—"],
+                            ]
+                          : []),
+                      ].map(([label, value], i) => (
+                        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                          <td className="py-1.5 px-3 text-xs font-semibold text-neutral-500 w-44 border-r border-neutral-200 text-left">
+                            {label}
+                          </td>
+                          <td className="py-1.5 px-3 text-sm text-left">{value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="text-center border-b border-nq-border pb-4 mb-6">
+            <p className="text-sm font-bold uppercase tracking-widest mb-2 text-nq-purple">
+              {isResearch ? "Research Consent Form" : "Standard Informed Consent Form"}
             </p>
-            <p>Generated: {timestamp}</p>
+            <h1 className="text-2xl font-black text-nq-text tracking-tight text-left">{hospitalName}</h1>
+            <div className="mt-3 text-sm font-medium text-nq-text-muted space-y-1">
+              <p className="text-left">
+                Consent ID: <span className="font-mono">{consentId}</span>
+              </p>
+              <p className="text-left">Generated: {timestamp}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {isComplete && (
           <p className="text-xs font-semibold text-nq-purple/70 mb-4 text-center">
@@ -310,7 +471,7 @@ export default function ConsentDocument({
           </p>
         )}
 
-        <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-nq-text prose-p:font-medium">
+        <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-nq-text prose-p:font-medium text-left">
           <ReactMarkdown components={components}>{activeMarkdown}</ReactMarkdown>
         </div>
 
