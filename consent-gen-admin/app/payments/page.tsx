@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
+import { withTimeout } from "@/lib/fetchWithTimeout";
 import { MagnifyingGlass, Funnel, CheckCircle, XCircle, Clock, Receipt, Eye } from "@phosphor-icons/react";
 
 export default function PaymentsList() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [txs, setTxs] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -17,26 +20,28 @@ export default function PaymentsList() {
   const supabase = createClient();
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchPayments() {
-      try {
-        const { data, error } = await supabase
+  const fetchPayments = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await withTimeout(
+        supabase
           .from("transactions")
           .select("*, profiles(doctor_name, hospital_name, doctor_registration_no, billing_address, hospital_address)")
-          .order("created_at", { ascending: false });
-
-        if (data) {
-          setTxs(data);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error("Error loading payments list:", err);
-        setLoading(false);
-      }
+          .order("created_at", { ascending: false })
+      );
+      if (data) setTxs(data);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error loading payments list:", err);
+      setError(err?.message || "Failed to connect to the database.");
+      setLoading(false);
     }
-
-    fetchPayments();
   }, [supabase]);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
 
   // Filters
   const filteredTxs = txs.filter((tx) => {
@@ -53,6 +58,24 @@ export default function PaymentsList() {
   const totalPaidRevenue = filteredTxs
     .filter(tx => tx.status === "paid")
     .reduce((sum, tx) => sum + (tx.amount || 0), 0) / 100;
+
+  if (loading || error) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Header title="Billing & Payments Audit" />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <NetworkErrorBanner message={error!} onRetry={fetchPayments} />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

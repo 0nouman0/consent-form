@@ -1,40 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
+import { withTimeout } from "@/lib/fetchWithTimeout";
 import { MagnifyingGlass, Funnel, CheckCircle, XCircle, ArrowSquareOut } from "@phosphor-icons/react";
 
 export default function UsersList() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'active', 'deactivated'
 
   const supabase = createClient();
 
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .order("doctor_name", { ascending: true });
-
-        if (data) {
-          setUsers(data);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error("Error loading users list:", err);
-        setLoading(false);
-      }
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await withTimeout(
+        supabase.from("profiles").select("*").order("doctor_name", { ascending: true })
+      );
+      if (data) setUsers(data);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error loading users list:", err);
+      setError(err?.message || "Failed to connect to the database.");
+      setLoading(false);
     }
-
-    fetchUsers();
   }, [supabase]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // Filter logic
   const filteredUsers = users.filter((user) => {
@@ -49,6 +51,24 @@ export default function UsersList() {
     }
     return nameMatch;
   });
+
+  if (loading || error) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Header title="Doctors & Accounts" />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <NetworkErrorBanner message={error!} onRetry={fetchUsers} />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

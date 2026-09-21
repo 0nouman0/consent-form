@@ -61,7 +61,7 @@ function markdownToDocxParagraphs(markdown: string): Paragraph[] {
         new Paragraph({
           text: trimmed.slice(4),
           heading: HeadingLevel.HEADING_3,
-          spacing: { before: 200, after: 80 },
+          spacing: { before: 80, after: 30 },
         })
       );
     } else if (trimmed.startsWith("## ")) {
@@ -69,7 +69,7 @@ function markdownToDocxParagraphs(markdown: string): Paragraph[] {
         new Paragraph({
           text: trimmed.slice(3),
           heading: HeadingLevel.HEADING_2,
-          spacing: { before: 280, after: 100 },
+          spacing: { before: 120, after: 40 },
         })
       );
     } else if (trimmed.startsWith("# ")) {
@@ -77,7 +77,7 @@ function markdownToDocxParagraphs(markdown: string): Paragraph[] {
         new Paragraph({
           text: trimmed.slice(2),
           heading: HeadingLevel.HEADING_1,
-          spacing: { before: 360, after: 120 },
+          spacing: { before: 160, after: 60 },
         })
       );
     } else if (/^-{3,}$/.test(trimmed) || /^_{3,}$/.test(trimmed)) {
@@ -104,7 +104,7 @@ function markdownToDocxParagraphs(markdown: string): Paragraph[] {
           new Paragraph({
             children: parseBoldRuns(lines[i].trim().slice(2)),
             bullet: { level: 0 },
-            spacing: { before: 40, after: 40 },
+            spacing: { before: 20, after: 20 },
           })
         );
         i++;
@@ -130,7 +130,7 @@ function markdownToDocxParagraphs(markdown: string): Paragraph[] {
       paragraphs.push(
         new Paragraph({
           children: parseBoldRuns(trimmed),
-          spacing: { before: 0, after: 80 },
+          spacing: { before: 0, after: 40 },
         })
       );
     }
@@ -266,12 +266,12 @@ export async function downloadConsentDOCX({
         new TextRun({
           text: formTitle,
           bold: true,
-          size: 28,
+          size: 24,
           color: "0b0f1a",
           font: "Times New Roman",
         }),
       ],
-      spacing: { after: 100 },
+      spacing: { after: 60 },
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -279,12 +279,12 @@ export async function downloadConsentDOCX({
         new TextRun({
           text: hospitalName || "Medical Institution",
           bold: true,
-          size: 24,
+          size: 22,
           font: "Times New Roman",
           color: "333333",
         }),
       ],
-      spacing: { after: 120 },
+      spacing: { after: 60 },
     }),
     metaTable,
     new Paragraph({
@@ -423,29 +423,29 @@ export async function downloadConsentDOCX({
           id: "Normal",
           name: "Normal",
           basedOn: "Normal",
-          run: { font: "Times New Roman", size: 22, color: "222222" },
-          paragraph: { spacing: { line: 360 } },
+          run: { font: "Times New Roman", size: 20, color: "222222" },
+          paragraph: { spacing: { line: 240, lineRule: "auto" } },
         },
         {
           id: "Heading1",
           name: "Heading 1",
           basedOn: "Normal",
-          run: { font: "Times New Roman", size: 26, bold: true, color: "0b0f1a" },
-          paragraph: { spacing: { before: 360, after: 120 } },
+          run: { font: "Times New Roman", size: 24, bold: true, color: "0b0f1a" },
+          paragraph: { spacing: { before: 160, after: 60 } },
         },
         {
           id: "Heading2",
           name: "Heading 2",
           basedOn: "Normal",
-          run: { font: "Times New Roman", size: 24, bold: true, color: "1a1a2e" },
-          paragraph: { spacing: { before: 280, after: 80 } },
+          run: { font: "Times New Roman", size: 22, bold: true, color: "1a1a2e" },
+          paragraph: { spacing: { before: 120, after: 40 } },
         },
         {
           id: "Heading3",
           name: "Heading 3",
           basedOn: "Normal",
-          run: { font: "Times New Roman", size: 22, bold: true, color: "333333" },
-          paragraph: { spacing: { before: 200, after: 60 } },
+          run: { font: "Times New Roman", size: 20, bold: true, color: "333333" },
+          paragraph: { spacing: { before: 80, after: 30 } },
         },
       ],
     },
@@ -454,7 +454,7 @@ export async function downloadConsentDOCX({
         properties: {
           page: {
             size: { width: 11906, height: 16838 },
-            margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
+            margin: { top: 720, right: 900, bottom: 720, left: 900 },
           },
         },
         headers: {

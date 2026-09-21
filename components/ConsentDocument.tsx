@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import {
@@ -55,23 +55,230 @@ export default function ConsentDocument({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
+  const [englishMarkdown, setEnglishMarkdown] = useState("");
+  const [otherMarkdown, setOtherMarkdown] = useState("");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isResearch = formData && "study" in formData;
   const counselingLanguage = isResearch
     ? (formData as ResearchConsentFormSchema).study.counselingLanguage
     : (formData as ConsentFormSchema)?.clinical.counselingLanguage;
 
-  const hasMultipleLanguages = markdown.includes("__LANG_SEPARATOR__");
-  const parts = markdown.split("__LANG_SEPARATOR__");
-  const englishMarkdown = parts[0] || "";
-  const otherMarkdown = parts[1] || "";
+  const stripFooterDisclaimer = (md: string): string => {
+    if (!md) return "";
+    const lines = md.split("\n");
+    const filtered = lines.filter((line) => {
+      const lower = line.toLowerCase().trim();
+      if (lower.includes("this form is legally binding per imc")) return false;
+      if (lower.includes("aadhaar data is masked per the aadhaar act")) return false;
+      if (lower.includes("blanket consent is void in india")) return false;
+      if (lower.includes("generation timestamp:")) return false;
+      if (lower.includes("icmr national ethical guidelines")) return false;
+      if (lower.startsWith("consent id:") && (lower.includes("srpx") || lower.includes("auto-generated"))) return false;
+      return true;
+    });
+    return filtered.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  };
+
+  useEffect(() => {
+    if (!markdown) return;
+    const parts = markdown.split("__LANG_SEPARATOR__");
+    setEnglishMarkdown(stripFooterDisclaimer(parts[0] || ""));
+    setOtherMarkdown(stripFooterDisclaimer(parts[1] || ""));
+  }, [markdown]);
 
   const activeMarkdown =
-    activeTab === "english" || !hasMultipleLanguages
+    activeTab === "english" || !otherMarkdown
       ? englishMarkdown.trim()
       : otherMarkdown.trim();
 
   const timestamp = nowIST();
+
+  const syncTranslation = async (englishText: string, targetLang?: string) => {
+    const lang = targetLang || counselingLanguage;
+    if (!lang || lang === "English" || !englishText.trim()) return;
+
+    setIsSyncing(true);
+
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: englishText, targetLanguage: lang }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.translatedText) {
+          setOtherMarkdown(stripFooterDisclaimer(data.translatedText));
+        }
+      }
+    } catch (e) {
+      console.error("Translation sync error:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const extractMarkdownFromContainer = (): string => {
+    const container = document.getElementById("consent-markdown-body-text");
+    if (!container) return activeMarkdown;
+
+    const lines: string[] = [];
+    container.childNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        const tag = el.tagName.toLowerCase();
+        const text = el.innerText.trim();
+        if (!text) return;
+
+        if (tag === "h1") lines.push(`# ${text}`);
+        else if (tag === "h2") lines.push(`## ${text}`);
+        else if (tag === "h3") lines.push(`### ${text}`);
+        else if (tag === "p") lines.push(text);
+        else if (tag === "ul") {
+          el.querySelectorAll("li").forEach((li) => {
+            lines.push(`- ${li.innerText.trim()}`);
+          });
+        } else if (tag === "ol") {
+          let idx = 1;
+          el.querySelectorAll("li").forEach((li) => {
+            lines.push(`${idx++}. ${li.innerText.trim()}`);
+          });
+        } else {
+          lines.push(text);
+        }
+      }
+    });
+
+    return lines.join("\n\n");
+  };
+
+  const handleInput = () => {
+    const updatedMd = extractMarkdownFromContainer();
+    if (!updatedMd) return;
+
+    if (activeTab === "english") {
+      setEnglishMarkdown(updatedMd);
+
+      if (counselingLanguage && counselingLanguage !== "English") {
+        if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+        setIsSyncing(true);
+
+        syncTimerRef.current = setTimeout(() => {
+          syncTranslation(updatedMd, counselingLanguage);
+        }, 250);
+      }
+    } else {
+      setOtherMarkdown(updatedMd);
+    }
+  };
+
+  const handleBlur = () => {
+    const updatedMd = extractMarkdownFromContainer();
+    if (!updatedMd) return;
+
+    if (activeTab === "english") {
+      setEnglishMarkdown(updatedMd);
+      if (counselingLanguage && counselingLanguage !== "English") {
+        syncTranslation(updatedMd, counselingLanguage);
+      }
+    } else {
+      setOtherMarkdown(updatedMd);
+    }
+  };
+
+  const handlePrint = () => {
+    const element = document.getElementById("consent-document-body");
+    if (!element) {
+      window.print();
+      return;
+    }
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.visibility = "hidden";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) {
+      window.print();
+      return;
+    }
+
+    const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
+      .map((s) => s.outerHTML)
+      .join("\n");
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Consent Form - ${consentId}</title>
+          ${styles}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 12mm 15mm;
+            }
+            body {
+              background: #ffffff !important;
+              color: #000000 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              font-size: 9.5pt !important;
+              line-height: 1.45 !important;
+            }
+            #consent-document-body {
+              background: #ffffff !important;
+              color: #000000 !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              width: 100% !important;
+            }
+            h1 { font-size: 13pt !important; margin: 6pt 0 3pt !important; padding-bottom: 2pt !important; }
+            h2 { font-size: 11pt !important; margin: 5pt 0 2pt !important; }
+            h3 { font-size: 10pt !important; margin: 4pt 0 2pt !important; }
+            p  { font-size: 9.5pt !important; line-height: 1.4 !important; margin: 0 0 4pt !important; }
+            ul, ol { font-size: 9.5pt !important; margin: 0 0 4pt 14pt !important; padding: 0 !important; }
+            li { margin: 0 0 2pt !important; line-height: 1.4 !important; }
+            hr { margin: 6pt 0 !important; border-color: #e5e7eb !important; }
+            table { font-size: 9pt !important; width: 100% !important; border-collapse: collapse !important; margin-bottom: 6pt !important; }
+            td, th { padding: 3pt 5pt !important; border: 1px solid #e5e7eb !important; }
+            .print-hide { display: none !important; }
+            [contenteditable] { outline: none !important; }
+          </style>
+        </head>
+        <body>
+          <div id="consent-document-body">
+            ${element.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    }, 300);
+  };
 
   const handleDownloadPDF = async () => {
     setDownloadingPdf(true);
@@ -133,6 +340,10 @@ export default function ConsentDocument({
         ? new Date().toISOString().split("T")[0]
         : (formData as ConsentFormSchema).clinical.procedureDate;
 
+      const combinedMarkdown = otherMarkdown
+        ? `${englishMarkdown}\n\n__LANG_SEPARATOR__\n\n${otherMarkdown}`
+        : englishMarkdown;
+
       await saveConsentToHistory({
         consent_id: consentId,
         hospital_name: h_name || null,
@@ -140,7 +351,7 @@ export default function ConsentDocument({
         procedure_name: proc_name || null,
         consent_type: c_type || null,
         procedure_date: proc_date || null,
-        markdown,
+        markdown: combinedMarkdown,
         form_data: formData as ConsentFormSchema,
       });
       setSaved(true);
@@ -156,69 +367,124 @@ export default function ConsentDocument({
   const components = {
     h1: ({ children }: { children?: React.ReactNode }) => (
       <h1
-        className="font-serif text-2xl font-semibold mt-8 mb-4 pb-2 tracking-tight"
-        style={{ borderBottom: "1px solid var(--rule)", color: "var(--ink)" }}
+        contentEditable={isComplete}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        className="font-serif text-2xl font-bold mt-8 mb-6 pb-3 text-center tracking-tight border-b border-[var(--rule)] focus:outline focus:outline-2 rounded transition-all"
+        style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
       >
         {children}
       </h1>
     ),
     h2: ({ children }: { children?: React.ReactNode }) => (
-      <h2 className="font-serif text-xl font-semibold mt-6 mb-3 tracking-tight" style={{ color: "var(--ink)" }}>
+      <h2
+        contentEditable={isComplete}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        className="font-sans text-base font-bold uppercase tracking-wider mt-8 mb-4 pb-1.5 border-l-4 border-amber-600 pl-3 focus:outline focus:outline-2 rounded transition-all flex items-center gap-2"
+        style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
+      >
         {children}
       </h2>
     ),
     h3: ({ children }: { children?: React.ReactNode }) => (
-      <h3 className="font-serif text-lg font-semibold mt-4 mb-2 tracking-tight" style={{ color: "var(--ink)" }}>
+      <h3
+        contentEditable={isComplete}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        className="font-sans text-sm font-semibold tracking-wide mt-5 mb-2 focus:outline focus:outline-2 rounded transition-all"
+        style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
+      >
         {children}
       </h3>
     ),
-    p: ({ children }: { children?: React.ReactNode }) =>
-      isComplete ? (
-        <p
-          contentEditable
-          suppressContentEditableWarning
-          className="leading-[1.8] mb-3 focus:outline focus:outline-2 rounded transition-all"
-          style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
-        >
-          {children}
-        </p>
-      ) : (
-        <p className="leading-[1.8] mb-3" style={{ color: "var(--ink)" }}>{children}</p>
-      ),
+    p: ({ children }: { children?: React.ReactNode }) => (
+      <p
+        contentEditable={isComplete}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        className="leading-[1.75] mb-4 text-justify sm:text-left focus:outline focus:outline-2 rounded transition-all text-sm font-normal"
+        style={{ color: "var(--ink)", outlineColor: "rgba(190,61,42,0.4)" }}
+      >
+        {children}
+      </p>
+    ),
+    li: ({ children }: { children?: React.ReactNode }) => (
+      <li
+        contentEditable={isComplete}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        className="leading-[1.65] text-sm mb-1.5 focus:outline focus:outline-2 rounded transition-all"
+        style={{ outlineColor: "rgba(190,61,42,0.4)" }}
+      >
+        {children}
+      </li>
+    ),
     ul: ({ children }: { children?: React.ReactNode }) => (
-      <ul className="ml-5 list-disc mb-3 font-medium" style={{ color: "var(--ink)" }}>{children}</ul>
+      <ul className="ml-6 list-disc mb-4 space-y-1 text-sm font-normal" style={{ color: "var(--ink)" }}>{children}</ul>
     ),
     ol: ({ children }: { children?: React.ReactNode }) => (
-      <ol className="ml-5 list-decimal mb-3 font-medium" style={{ color: "var(--ink)" }}>{children}</ol>
+      <ol className="ml-6 list-decimal mb-4 space-y-1 text-sm font-normal" style={{ color: "var(--ink)" }}>{children}</ol>
     ),
     strong: ({ children }: { children?: React.ReactNode }) => (
-      <strong className="font-bold" style={{ color: "var(--ink)" }}>{children}</strong>
+      <strong className="font-bold text-[var(--ink)]">{children}</strong>
     ),
-    hr: () => <hr className="my-6" style={{ borderColor: "var(--rule)" }} />,
+    hr: () => <hr className="my-6 border-t border-[var(--rule)]" />,
   };
 
   return (
     <div>
       {/* Print: show only the consent document body */}
       <style dangerouslySetInnerHTML={{ __html: `
+        @page {
+          size: A4 portrait;
+          margin: 12mm 15mm;
+        }
         @media print {
-          body * { visibility: hidden; }
-          #consent-document-body, #consent-document-body * { visibility: visible; }
-          #consent-document-body {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
             margin: 0 !important;
-            padding: 24px !important;
+            padding: 0 !important;
+            background: white !important;
+            color: black !important;
+            font-size: 9.5pt !important;
+          }
+          .print-hide, nav, header, sidebar {
+            display: none !important;
+          }
+          #consent-document-body {
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
             border: none !important;
             box-shadow: none !important;
-            background: var(--sheet) !important;
+            background: white !important;
+            color: black !important;
           }
+          #consent-document-body h1 { font-size: 13pt !important; margin: 4pt 0 3pt !important; padding-bottom: 2pt !important; }
+          #consent-document-body h2 { font-size: 11pt !important; margin: 4pt 0 2pt !important; }
+          #consent-document-body h3 { font-size: 10pt !important; margin: 3pt 0 1pt !important; }
+          #consent-document-body p  { font-size: 9.5pt !important; line-height: 1.4 !important; margin: 0 0 3pt !important; }
+          #consent-document-body ul,
+          #consent-document-body ol  { font-size: 9.5pt !important; margin: 0 0 3pt 14pt !important; padding: 0 !important; }
+          #consent-document-body li  { margin: 0 0 1pt !important; line-height: 1.4 !important; }
+          #consent-document-body hr  { margin: 4pt 0 !important; }
+          #consent-document-body table { font-size: 9pt !important; width: 100% !important; border-collapse: collapse !important; }
+          #consent-document-body td, #consent-document-body th { padding: 2pt 4pt !important; }
           #consent-document-body [contenteditable]:focus { outline: none !important; }
-          .print-hide { display: none !important; }
         }
       ` }} />
+
+
       {saveError && (
         <div
           className="mb-3 px-4 py-3 rounded-md text-sm font-medium"
@@ -254,7 +520,7 @@ export default function ConsentDocument({
               {copied ? "Copied!" : "Copy"}
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={handlePrint}
               title="Print consent form"
               className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)]"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
@@ -314,44 +580,46 @@ export default function ConsentDocument({
         )}
       </div>
 
-      {/* Language Tabs */}
+      {/* Language Tabs & Sync Status */}
       {counselingLanguage && counselingLanguage !== "English" && (
-        <div className="flex mb-4" style={{ borderBottom: "1px solid var(--rule)" }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab("english")}
-            className="px-4 py-2.5 text-sm font-semibold border-b-2 transition-all"
-            style={
-              activeTab === "english"
-                ? { borderColor: "var(--ink)", color: "var(--ink)" }
-                : { borderColor: "transparent", color: "var(--ink-muted)" }
-            }
-          >
-            English Form
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (otherMarkdown.trim()) setActiveTab("other");
-            }}
-            disabled={!otherMarkdown.trim()}
-            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              !otherMarkdown.trim() ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            style={
-              otherMarkdown.trim() && activeTab === "other"
-                ? { borderColor: "var(--ink)", color: "var(--ink)" }
-                : { borderColor: "transparent", color: "var(--ink-muted)" }
-            }
-          >
-            {counselingLanguage} Form
-            {!otherMarkdown.trim() && (
-              <span
-                className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin"
-                style={{ borderColor: "var(--ink-muted)", borderTopColor: "transparent" }}
-              />
-            )}
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4" style={{ borderBottom: "1px solid var(--rule)" }}>
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setActiveTab("english")}
+              className="px-4 py-2.5 text-sm font-semibold border-b-2 transition-all"
+              style={
+                activeTab === "english"
+                  ? { borderColor: "var(--ink)", color: "var(--ink)" }
+                  : { borderColor: "transparent", color: "var(--ink-muted)" }
+              }
+            >
+              English Form
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (otherMarkdown.trim()) setActiveTab("other");
+              }}
+              disabled={!otherMarkdown.trim()}
+              className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
+                !otherMarkdown.trim() ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              style={
+                otherMarkdown.trim() && activeTab === "other"
+                  ? { borderColor: "var(--ink)", color: "var(--ink)" }
+                  : { borderColor: "transparent", color: "var(--ink-muted)" }
+              }
+            >
+              {counselingLanguage} Form
+              {isSyncing && (
+                <span
+                  className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin"
+                  style={{ borderColor: "var(--ink-muted)", borderTopColor: "transparent" }}
+                />
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -548,7 +816,7 @@ export default function ConsentDocument({
           </p>
         )}
 
-        <div className="prose prose-sm sm:prose-base max-w-none prose-p:font-medium text-left" style={{ color: "var(--ink)" }}>
+        <div id="consent-markdown-body-text" className="prose prose-sm sm:prose-base max-w-none prose-p:font-medium text-left" style={{ color: "var(--ink)" }}>
           <ReactMarkdown components={components}>{activeMarkdown}</ReactMarkdown>
         </div>
 

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
+import { withTimeout } from "@/lib/fetchWithTimeout";
 import {
   Users,
   Coins,
@@ -28,6 +30,7 @@ import {
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCredits: 0,
@@ -42,31 +45,31 @@ export default function Dashboard() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      try {
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
         // Fetch profiles metrics
-        const { data: profiles, error: pErr } = await supabase
-          .from("profiles")
-          .select("id, credits, is_active");
+        const { data: profiles } = await withTimeout(
+          supabase.from("profiles").select("id, credits, is_active")
+        );
 
         const totalUsers = profiles?.length || 0;
         const totalCredits = profiles?.reduce((sum, p) => sum + (p.credits || 0), 0) || 0;
 
         // Fetch audit logs
-        const { data: audits, error: aErr } = await supabase
-          .from("generation_audit")
-          .select("*")
-          .order("created_at", { ascending: false });
+        const { data: audits } = await withTimeout(
+          supabase.from("generation_audit").select("*").order("created_at", { ascending: false })
+        );
 
         const totalGenerations = audits?.length || 0;
         const successGenerations = audits?.filter(a => a.status === "success").length || 0;
         const failedGenerations = audits?.filter(a => a.status === "failed" || a.status === "credit_failed").length || 0;
 
         // Fetch transactions
-        const { data: txs, error: tErr } = await supabase
-          .from("transactions")
-          .select("amount, status");
+        const { data: txs } = await withTimeout(
+          supabase.from("transactions").select("amount, status")
+        );
 
         const paidTxs = txs?.filter(t => t.status === "paid") || [];
         const paidTransactions = paidTxs.length;
@@ -112,24 +115,30 @@ export default function Dashboard() {
 
         setChartData(formattedChartData);
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading dashboard stats:", err);
+        setError(err?.message || "Failed to connect to the database.");
         setLoading(false);
       }
-    }
-
-    fetchDashboardData();
   }, [supabase]);
 
-  if (loading) {
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  if (loading || error) {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           <Header title="Operations Dashboard" />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-          </div>
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <NetworkErrorBanner message={error!} onRetry={fetchDashboardData} />
+          )}
         </div>
       </div>
     );

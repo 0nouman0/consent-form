@@ -48,7 +48,7 @@ Keep your answers concise, professional, structured, and directly useful to a do
 
     const completion = await groq.chat.completions.create({
       messages: [systemPrompt, ...messages],
-      model: "llama-3.1-8b-instant", // Fast and capable model
+      model: "openai/gpt-oss-20b", // Fast and capable model
       temperature: 0.5,
       max_tokens: 1024,
       top_p: 1,

@@ -166,14 +166,7 @@ Include a Doctor's Declaration section stating:
 - All questions were answered to the best of their ability
 - Fields: Doctor Signature, Registration No. ${clinical.doctorRegistrationNo}, Date, exact Time
 
-════════════════════════════════
-DOCUMENT FOOTER (include at the end):
-════════════════════════════════
-- Consent ID: ${consentId}
-- "This form is legally binding per IMC (Professional Conduct, Etiquette and Ethics) Regulations 2002"
-- "Aadhaar data is masked per the Aadhaar Act 2016. Private entities may not store full Aadhaar numbers."
-- "This consent applies to the named procedure only. Blanket consent is void in India."
-- Generation timestamp: ${nowIST()} IST`;
+Do NOT include any document footer, disclaimers, or timestamp block at the bottom of the form. The form MUST end cleanly after the signature blocks.`;
 }
 
 export function buildResearchSystemPrompt(): string {
@@ -281,10 +274,5 @@ LANGUAGE INSTRUCTION:
 Write in clear, standard research language. Explain terms clearly.
 ${bilingualInstruction}
 
-════════════════════════════════
-DOCUMENT FOOTER (include at the end):
-════════════════════════════════
-- Consent ID: ${consentId}
-- "This research consent form is drafted in compliance with ICMR National Ethical Guidelines (2018)."
-- Generation timestamp: ${nowIST()} IST`;
+Do NOT include any document footer, disclaimers, or timestamp block at the bottom of the form. The form MUST end cleanly after the signature blocks.`;
 }

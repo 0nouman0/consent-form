@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
         sub_type: isResearch ? "research" : input.clinical.consentType,
         patient_name_enc: patientNameEnc,
         hospital_name: isResearch ? input.study.institutionName : input.clinical.hospitalName,
-        model_used: "llama-3.3-70b-versatile",
+        model_used: "openai/gpt-oss-120b",
         ip_address: clientIp,
         user_agent: userAgent,
         status: "in_progress",
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
     });
 
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
