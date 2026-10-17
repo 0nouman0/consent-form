@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Layout,
+  SquaresFour,
   Users,
   FileText,
   CreditCard,
@@ -13,14 +13,13 @@ import {
   SignOut,
   Sun,
   Moon,
-  Coins
 } from "@phosphor-icons/react";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: Layout },
-  { href: "/users", label: "Users", icon: Users },
-  { href: "/generations", label: "Generations", icon: FileText },
-  { href: "/payments", label: "Payments", icon: CreditCard },
+  { href: "/", label: "Dashboard", icon: SquaresFour },
+  { href: "/users", label: "Doctors & Accounts", icon: Users },
+  { href: "/generations", label: "Generations Audit", icon: FileText },
+  { href: "/payments", label: "Billing & Payments", icon: CreditCard },
   { href: "/audit-log", label: "Admin Logs", icon: ShieldCheck },
 ];
 
@@ -36,22 +35,53 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 shrink-0 flex flex-col glass-card border-y-0 border-l-0 border-r border-card-border h-screen sticky top-0">
+    <aside
+      className="w-64 shrink-0 flex flex-col h-screen sticky top-0 font-body select-none transition-colors duration-150"
+      style={{
+        background: "var(--sheet)",
+        borderRight: "1px solid var(--rule)",
+      }}
+    >
       {/* Brand Header */}
-      <div className="p-6 flex items-center gap-3 border-b border-card-border">
-        <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/30">
-          <Coins className="w-5 h-5 text-amber-500 animate-pulse" weight="fill" />
-        </div>
-        <div>
-          <h2 className="font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5">
-            Luffy <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-amber-500/15 text-amber-500 rounded-md">Ops</span>
-          </h2>
-          <p className="text-[10px] text-muted leading-none mt-1">ConsentGen Monitor</p>
-        </div>
+      <div
+        className="h-16 px-5 flex items-center justify-between shrink-0"
+        style={{ borderBottom: "1px solid var(--rule)" }}
+      >
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div
+            className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+            style={{ backgroundColor: "var(--badge-dark-bg)" }}
+          >
+            <ShieldCheck weight="bold" className="w-4 h-4" style={{ color: "var(--badge-dark-text)" }} />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-serif font-semibold text-sm tracking-tight" style={{ color: "var(--ink)" }}>
+                ConsentGen
+              </span>
+              <span
+                className="text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
+                style={{
+                  backgroundColor: "var(--badge-light-bg)",
+                  color: "var(--ink)",
+                  border: "1px solid var(--rule)",
+                }}
+              >
+                Ops
+              </span>
+            </div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] leading-none mt-0.5" style={{ color: "var(--ink-muted)" }}>
+              Luffy Monitor
+            </p>
+          </div>
+        </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+          Navigation
+        </p>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -60,42 +90,85 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 ${
-                isActive
-                  ? "bg-amber-500/10 text-amber-500 font-semibold border border-amber-500/20"
-                  : "text-muted hover:text-foreground hover:bg-muted-bg border border-transparent"
-              }`}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all"
+              style={{
+                backgroundColor: isActive ? "var(--nav-active-bg)" : "transparent",
+                color: isActive ? "var(--nav-active-text)" : "var(--ink-muted)",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = "var(--nav-hover-bg)";
+                  e.currentTarget.style.color = "var(--ink)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "var(--ink-muted)";
+                }
+              }}
             >
-              <Icon className="w-5 h-5 shrink-0" weight={isActive ? "fill" : "regular"} />
-              <span>{item.label}</span>
+              <Icon
+                className="w-4 h-4 shrink-0"
+                weight={isActive ? "fill" : "duotone"}
+                style={{ color: isActive ? "var(--nav-active-text)" : "currentColor" }}
+              />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* Footer / Controls */}
-      <div className="p-4 border-t border-card-border space-y-2">
-        {/* Theme Toggle */}
+      <div className="p-3 space-y-2" style={{ borderTop: "1px solid var(--rule)" }}>
+        {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold text-muted hover:text-foreground hover:bg-muted-bg transition-all border border-card-border bg-transparent"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all cursor-pointer hover:opacity-90"
+          style={{
+            backgroundColor: "var(--header-pill-bg)",
+            border: "1px solid var(--header-pill-border)",
+            color: "var(--ink)",
+          }}
         >
           <span className="flex items-center gap-2">
             {theme === "dark" ? (
-              <><Moon className="w-4 h-4 text-amber-400" weight="fill" /> Dark Mode</>
+              <>
+                <Moon className="w-3.5 h-3.5 text-amber-300" weight="fill" />
+                <span>Dark Mode</span>
+              </>
             ) : (
-              <><Sun className="w-4 h-4 text-amber-500" weight="fill" /> Light Mode</>
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-600" weight="fill" />
+                <span>Light Mode</span>
+              </>
             )}
           </span>
-          <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-muted-bg text-muted border border-card-border">Toggle</span>
+          <span
+            className="text-[9px] font-mono uppercase font-bold px-1.5 py-0.5 rounded transition-colors"
+            style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--ink-muted)" }}
+          >
+            Toggle
+          </span>
         </button>
 
         {/* Logout Button */}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all border border-red-500/10 bg-transparent"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all cursor-pointer"
+          style={{
+            backgroundColor: "transparent",
+            color: "var(--red)",
+            border: "1px solid var(--status-fail-border)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--status-fail-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
         >
-          <SignOut className="w-4 h-4" weight="bold" />
+          <SignOut className="w-3.5 h-3.5" weight="bold" />
           <span>Sign Out</span>
         </button>
       </div>

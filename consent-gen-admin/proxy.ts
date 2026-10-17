@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -38,38 +38,47 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
   const isLoginPage = request.nextUrl.pathname.startsWith("/login");
   const isApi = request.nextUrl.pathname.startsWith("/api");
 
-  // Protect all non-login pages
-  if (!user && !isLoginPage && !isApi) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (user) {
-    // Verify admin role
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    const isAdmin = profile?.role === "admin";
-
-    if (!isAdmin && !isLoginPage && !isApi) {
-      // Sign out and redirect to login if not admin
-      await supabase.auth.signOut();
+    // Protect all non-login pages
+    if (!user && !isLoginPage && !isApi) {
       const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("error", "unauthorized_admin");
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    if (isAdmin && isLoginPage) {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (user) {
+      // Verify admin role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      const isAdmin = profile?.role === "admin";
+
+      if (!isAdmin && !isLoginPage && !isApi) {
+        // Sign out and redirect to login if not admin
+        await supabase.auth.signOut();
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set("error", "unauthorized_admin");
+        return NextResponse.redirect(loginUrl);
+      }
+
+      if (isAdmin && isLoginPage) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+  } catch (err) {
+    console.error("Proxy auth error:", err);
+    if (!isLoginPage && !isApi) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
     }
   }
 

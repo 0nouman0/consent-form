@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node dev.mjs",
     "build": "next build",
+    "build:admin": "npm --prefix consent-gen-admin run build",
+    "build:all": "next build && npm --prefix consent-gen-admin run build",
     "start": "next start",
     "lint": "tsc --noEmit"
   },
@@ -43,6 +45,7 @@
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^10.0.6",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.9",
     "postcss": "^8.4.38",

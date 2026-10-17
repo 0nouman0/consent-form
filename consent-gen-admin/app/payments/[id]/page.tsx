@@ -42,12 +42,18 @@ export default function PaymentDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
         <Sidebar />
-        <div className="flex-1 flex flex-col h-screen">
+        <div className="flex-1 flex flex-col min-w-0">
           <Header title="Payment Log Details" />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+          <div className="flex-1 flex flex-col items-center justify-center gap-3">
+            <div
+              className="w-8 h-8 border-2 rounded-full animate-spin"
+              style={{ borderColor: "var(--rule)", borderTopColor: "var(--ink)" }}
+            />
+            <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+              Loading Transaction Details...
+            </p>
           </div>
         </div>
       </div>
@@ -55,114 +61,132 @@ export default function PaymentDetail() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-y-auto h-screen">
-        <Header title={`Transaction: ${tx.order_id}`} />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
+        <Header title={`Transaction: ${tx.order_id}`} subtitle="Payment Audit & Receipt Breakdown" />
 
-        <main className="p-6 space-y-6 max-w-5xl w-full mx-auto">
+        <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-5xl w-full mx-auto pb-16">
           {/* Back Action */}
           <div className="no-print">
             <button
               onClick={() => router.push("/payments")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-foreground transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all hover:opacity-75 cursor-pointer"
+              style={{ color: "var(--ink)" }}
             >
               <ArrowLeft className="w-4 h-4" /> Back to Payments Ledger
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Metadata Audit Card */}
-            <div className="md:col-span-1 space-y-6 no-print">
-              <div className="glass-card rounded-2xl p-5 space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Transaction Audit</h3>
-                
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted">Payment Status</span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      tx.status === "paid"
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : tx.status === "created"
-                        ? "bg-blue-500/10 text-blue-500"
-                        : "bg-red-500/10 text-red-500"
-                    }`}>
-                      {tx.status === "paid" && <CheckCircle weight="fill" />}
-                      {tx.status === "created" && <Clock weight="fill" />}
-                      {tx.status === "failed" && <XCircle weight="fill" />}
+            <div className="md:col-span-1 space-y-4 no-print">
+              <div
+                className="rounded-md p-5 space-y-4"
+                style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+              >
+                <h3 className="font-serif text-base font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                  Transaction Audit
+                </h3>
+
+                <div>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                    Payment Status
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                      style={{
+                        backgroundColor:
+                          tx.status === "paid"
+                            ? "rgba(13, 148, 136, 0.1)"
+                            : tx.status === "created"
+                            ? "rgba(59, 130, 246, 0.1)"
+                            : "rgba(190, 61, 42, 0.1)",
+                        color:
+                          tx.status === "paid"
+                            ? "#0f766e"
+                            : tx.status === "created"
+                            ? "#1d4ed8"
+                            : "var(--red)",
+                        border: `1px solid ${
+                          tx.status === "paid"
+                            ? "rgba(13, 148, 136, 0.25)"
+                            : tx.status === "created"
+                            ? "rgba(59, 130, 246, 0.25)"
+                            : "rgba(190, 61, 42, 0.25)"
+                        }`,
+                      }}
+                    >
+                      {tx.status === "paid" && <CheckCircle weight="fill" className="w-3 h-3" />}
+                      {tx.status === "created" && <Clock weight="fill" className="w-3 h-3" />}
+                      {tx.status === "failed" && <XCircle weight="fill" className="w-3 h-3" />}
                       <span className="capitalize">{tx.status}</span>
                     </span>
                   </div>
                 </div>
 
-                <div className="border-t border-card-border pt-3 space-y-2 text-xs">
+                <div className="pt-3 space-y-2.5 text-xs" style={{ borderTop: "1px solid var(--rule)" }}>
                   <div>
-                    <span className="text-[10px] text-muted block">Database Record UUID</span>
-                    <span className="font-mono text-foreground select-all">{tx.id}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      Database Record UUID
+                    </span>
+                    <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.id}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted block">Credits Added</span>
-                    <span className="font-bold text-amber-500">+{tx.credits} Credits</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      Credits Added
+                    </span>
+                    <span className="font-mono font-bold" style={{ color: "#0f766e" }}>+{tx.credits} Credits</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted block">Paid Amount</span>
-                    <span className="font-bold text-foreground">₹{(tx.amount / 100).toFixed(2)}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      Paid Amount
+                    </span>
+                    <span className="font-serif font-bold text-base" style={{ color: "var(--ink)" }}>
+                      ₹{(tx.amount / 100).toFixed(2)}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted block">Transaction Timestamp</span>
-                    <span className="text-foreground">{new Date(tx.created_at).toLocaleString("en-IN")}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      Timestamp
+                    </span>
+                    <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>
+                      {new Date(tx.created_at).toLocaleString("en-IN")}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Razorpay API Metadata Details */}
-              <div className="glass-card rounded-2xl p-5 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted">API Payment Gateway Metadata</h3>
-                <div className="space-y-2.5 text-xs border-t border-card-border pt-3">
+              {/* Gateway Metadata */}
+              <div
+                className="rounded-md p-5 space-y-3"
+                style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+              >
+                <h3 className="font-serif text-sm font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                  Gateway Metadata
+                </h3>
+                <div className="space-y-2 text-xs pt-2" style={{ borderTop: "1px solid var(--rule-soft)" }}>
                   <div>
-                    <span className="text-[10px] text-muted block">Payment Method</span>
-                    <span className="font-semibold text-foreground capitalize">{tx.metadata?.method || "N/A"}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      Payment Method
+                    </span>
+                    <span className="font-medium capitalize" style={{ color: "var(--ink)" }}>{tx.metadata?.method || "N/A"}</span>
                   </div>
                   {tx.metadata?.email && (
                     <div>
-                      <span className="text-[10px] text-muted block">Gateway Billing Email</span>
-                      <span className="text-foreground select-all">{tx.metadata.email}</span>
-                    </div>
-                  )}
-                  {tx.metadata?.contact && (
-                    <div>
-                      <span className="text-[10px] text-muted block">Gateway Contact No.</span>
-                      <span className="text-foreground select-all">{tx.metadata.contact}</span>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                        Billing Email
+                      </span>
+                      <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.metadata.email}</span>
                     </div>
                   )}
                   {tx.metadata?.vpa && (
                     <div>
-                      <span className="text-[10px] text-muted block">UPI VPA Address</span>
-                      <span className="text-foreground font-mono select-all">{tx.metadata.vpa}</span>
-                    </div>
-                  )}
-                  {tx.metadata?.bank && (
-                    <div>
-                      <span className="text-[10px] text-muted block">Issuing Bank</span>
-                      <span className="text-foreground font-semibold">{tx.metadata.bank}</span>
-                    </div>
-                  )}
-                  {tx.metadata?.wallet && (
-                    <div>
-                      <span className="text-[10px] text-muted block">Mobile Wallet Provider</span>
-                      <span className="text-foreground font-semibold capitalize">{tx.metadata.wallet}</span>
-                    </div>
-                  )}
-                  {tx.metadata?.fee !== undefined && (
-                    <div>
-                      <span className="text-[10px] text-muted block">Gateway Processing Fee (Incl. Tax)</span>
-                      <span className="text-foreground">₹{(tx.metadata.fee / 100).toFixed(2)}</span>
-                    </div>
-                  )}
-                  {tx.metadata?.tax !== undefined && (
-                    <div>
-                      <span className="text-[10px] text-muted block">Gateway Service Tax (GST) portion</span>
-                      <span className="text-foreground">₹{(tx.metadata.tax / 100).toFixed(2)}</span>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                        UPI VPA
+                      </span>
+                      <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.metadata.vpa}</span>
                     </div>
                   )}
                 </div>
@@ -172,77 +196,71 @@ export default function PaymentDetail() {
             {/* Printable Invoice Page */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex justify-between items-center no-print">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider">Invoice Render</span>
+                <span className="font-mono text-xs uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                  Invoice Document
+                </span>
                 <button
                   onClick={() => window.print()}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 cursor-pointer"
+                  style={{
+                    backgroundColor: "var(--ink)",
+                    color: "var(--sheet)",
+                  }}
                 >
-                  <Printer className="w-4 h-4" /> Print Invoice
+                  <Printer className="w-3.5 h-3.5" /> Print Invoice
                 </button>
               </div>
 
-              {/* Invoice Layout */}
-              <div id="printable-invoice-modal" className="w-full bg-white rounded-3xl p-6 sm:p-8 border border-neutral-100 shadow-2xl text-neutral-800">
-                <div className="text-center border-b border-neutral-100 pb-5 mb-6">
-                  <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Payment Invoice</h2>
-                  <p className="text-xs text-neutral-400 mt-1 uppercase tracking-wider font-semibold">Consent Form Generator</p>
+              <div
+                className="rounded-md p-6 sm:p-8"
+                style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+              >
+                <div className="border-b pb-4 mb-5" style={{ borderColor: "var(--rule)" }}>
+                  <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                    Tax Invoice & Receipt
+                  </h2>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                    ConsentGen Medico-Legal Platform
+                  </p>
                 </div>
 
-                <div className="space-y-4 text-xs mb-8">
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Doctor Payer</span>
-                    <span className="font-bold text-neutral-800 text-right">
+                <div className="space-y-3.5 text-xs">
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Doctor Payer</span>
+                    <span className="font-bold font-serif" style={{ color: "var(--ink)" }}>
                       {tx.metadata?.billing_doctor_name || tx.profiles?.doctor_name || "Doctor"}
                     </span>
                   </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Registration No.</span>
-                    <span className="font-bold text-neutral-800 text-right font-mono">
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Registration No.</span>
+                    <span className="font-mono font-bold" style={{ color: "var(--ink)" }}>
                       {tx.metadata?.billing_doctor_registration_no || tx.profiles?.doctor_registration_no || "N/A"}
                     </span>
                   </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Hospital</span>
-                    <span className="font-bold text-neutral-800 text-right">
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Hospital</span>
+                    <span className="font-medium" style={{ color: "var(--ink)" }}>
                       {tx.metadata?.billing_hospital_name || tx.profiles?.hospital_name || "N/A"}
                     </span>
                   </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Billing Address</span>
-                    <span className="font-bold text-neutral-800 text-right" style={{ whiteSpace: "pre-line" }}>
-                      {tx.metadata?.billing_address || tx.profiles?.billing_address || tx.profiles?.hospital_address || "N/A"}
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Order ID</span>
+                    <span className="font-mono" style={{ color: "var(--ink)" }}>{tx.order_id}</span>
+                  </div>
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Payment ID</span>
+                    <span className="font-mono" style={{ color: "var(--ink)" }}>{tx.payment_id}</span>
+                  </div>
+                  <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>Credits Purchased</span>
+                    <span className="font-mono font-bold" style={{ color: "#0f766e" }}>+{tx.credits} Credits</span>
+                  </div>
+                  <div className="flex justify-between pt-3" style={{ borderTop: "2px solid var(--ink)" }}>
+                    <span className="font-serif font-bold text-sm" style={{ color: "var(--ink)" }}>Total Paid</span>
+                    <span className="font-serif font-bold text-lg" style={{ color: "var(--ink)" }}>
+                      ₹{(tx.amount / 100).toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Order ID</span>
-                    <span className="font-mono text-neutral-800 text-right">{tx.order_id}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Payment ID</span>
-                    <span className="font-mono text-neutral-800 text-right">{tx.payment_id || "Pending"}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Payment Date</span>
-                    <span className="font-bold text-neutral-800 text-right">
-                      {new Date(tx.created_at).toLocaleDateString("en-IN")} {new Date(tx.created_at).toLocaleTimeString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Payment Method</span>
-                    <span className="font-bold text-neutral-800 capitalize text-right">{tx.metadata?.method || "Razorpay"}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-neutral-100/50 pb-2">
-                    <span className="text-neutral-400">Credits Purchased</span>
-                    <span className="font-bold text-neutral-800 text-right text-green-600">+{tx.credits} Credits</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t-2 border-neutral-900">
-                    <span className="font-bold text-neutral-900 text-sm">Total Paid Amount</span>
-                    <span className="font-extrabold text-neutral-900 text-base">₹{(tx.amount / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <div className="bg-neutral-50 rounded-xl p-4 text-center border border-neutral-100">
-                  <p className="text-[10px] text-neutral-400">This is a system generated print receipt for ConsentGen.</p>
                 </div>
               </div>
             </div>

@@ -5,8 +5,6 @@ import { buildSystemPrompt, buildUserPrompt, buildResearchSystemPrompt, buildRes
 import { generateConsentId } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 
-export const runtime = "edge";
-
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   

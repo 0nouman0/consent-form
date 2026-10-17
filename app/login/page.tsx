@@ -33,18 +33,40 @@ function LoginContent() {
     setLoading(true);
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+
+        // Check if clinician profile has been completed
+        if (data.user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("doctor_name, doctor_registration_no")
+            .eq("id", data.user.id)
+            .single();
+
+          if (!profile || !profile.doctor_name || !profile.doctor_registration_no) {
+            router.push("/onboarding");
+            router.refresh();
+            return;
+          }
+        }
+
         router.push(redirect);
         router.refresh();
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+          options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=/onboarding` },
         });
         if (error) throw error;
-        setMessage("Account created! Check your email to confirm before signing in.");
+
+        if (data?.session) {
+          router.push("/onboarding");
+          router.refresh();
+        } else {
+          setMessage("Account created! Check your email to verify your address and complete your clinical registration.");
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed");

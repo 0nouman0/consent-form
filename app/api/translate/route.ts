@@ -1,8 +1,6 @@
 import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 
-export const runtime = "edge";
-
 export async function POST(req: NextRequest) {
   try {
     const { text, targetLanguage } = await req.json();

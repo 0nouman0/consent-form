@@ -1,22 +1,34 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
 import { withTimeout } from "@/lib/fetchWithTimeout";
-import { MagnifyingGlass, Funnel, CheckCircle, XCircle, ArrowSquareOut } from "@phosphor-icons/react";
+import {
+  MagnifyingGlass,
+  Funnel,
+  CheckCircle,
+  XCircle,
+  ArrowRight,
+  Users,
+  Coins,
+  ShieldCheck,
+} from "@phosphor-icons/react";
 
 export default function UsersList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'active', 'deactivated'
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -38,29 +50,50 @@ export default function UsersList() {
     fetchUsers();
   }, [fetchUsers]);
 
+  // Key user aggregates
+  const totalUsers = users.length;
+  const activeCount = users.filter((u) => u.is_active !== false).length;
+  const deactivatedCount = users.filter((u) => u.is_active === false).length;
+  const totalCredits = users.reduce((sum, u) => sum + (u.credits || 0), 0);
+
   // Filter logic
-  const filteredUsers = users.filter((user) => {
-    const nameMatch = (user.doctor_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      (user.hospital_name || "").toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (statusFilter === "active") {
-      return nameMatch && user.is_active !== false;
-    }
-    if (statusFilter === "deactivated") {
-      return nameMatch && user.is_active === false;
-    }
-    return nameMatch;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const q = searchTerm.toLowerCase();
+      const matchesSearch =
+        (user.doctor_name || "").toLowerCase().includes(q) ||
+        (user.hospital_name || "").toLowerCase().includes(q) ||
+        (user.doctor_registration_no || "").toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && user.is_active !== false) ||
+        (statusFilter === "deactivated" && user.is_active === false);
+
+      const matchesRole =
+        roleFilter === "all" ||
+        (roleFilter === "doctor" && (user.role === "doctor" || !user.role)) ||
+        (roleFilter === "admin" && user.role === "admin");
+
+      return matchesSearch && matchesStatus && matchesRole;
+    });
+  }, [users, searchTerm, statusFilter, roleFilter]);
 
   if (loading || error) {
     return (
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           <Header title="Doctors & Accounts" />
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-3">
+              <div
+                className="w-8 h-8 border-2 rounded-full animate-spin"
+                style={{ borderColor: "var(--rule)", borderTopColor: "var(--ink)" }}
+              />
+              <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                Loading Doctor Directory...
+              </p>
             </div>
           ) : (
             <NetworkErrorBanner message={error!} onRetry={fetchUsers} />
@@ -71,107 +104,290 @@ export default function UsersList() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen font-body transition-colors duration-150" style={{ backgroundColor: "var(--paper)" }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-y-auto h-screen">
-        <Header title="Doctors & Accounts" />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
+        <Header title="Doctors & Accounts" subtitle="Practitioner Management & KYC Directory" />
 
-        <main className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
+          {/* Top Page Banner */}
+          <div
+            className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
+                Registry
+              </p>
+              <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
+                Doctor <span style={{ color: "var(--red)" }}>accounts</span>
+              </h1>
+              <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>
+                Verify practitioner registration numbers, audit circulating credits, and manage account statuses.
+              </p>
+            </div>
+          </div>
+
+          {/* Top KPI Metrics Banner */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div
+              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                style={{ backgroundColor: "var(--badge-dark-bg)" }}
+              >
+                <Users weight="duotone" className="w-5 h-5" style={{ color: "var(--badge-dark-text)" }} />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  Registered Doctors
+                </p>
+                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                  {totalUsers}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
+              >
+                <CheckCircle weight="duotone" className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  Active Accounts
+                </p>
+                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5 text-emerald-500">
+                  {activeCount}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
+              >
+                <XCircle weight="duotone" className="w-5 h-5" style={{ color: "var(--red)" }} />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  Deactivated
+                </p>
+                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--red)" }}>
+                  {deactivatedCount}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
+              >
+                <Coins weight="duotone" className="w-5 h-5" style={{ color: "var(--ink)" }} />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  Circulating Credits
+                </p>
+                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                  {totalCredits}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div
+            className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between transition-colors"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
             {/* Search */}
-            <div className="relative w-full sm:max-w-xs">
-              <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+            <div className="relative w-full sm:max-w-md">
+              <MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               <input
                 type="text"
-                placeholder="Search by doctor or hospital..."
+                placeholder="Search by doctor, hospital, or reg no..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl text-xs bg-white/5 border border-card-border outline-none focus:border-amber-500 transition-all text-foreground"
+                className="w-full pl-10 pr-3 py-2 rounded-md text-xs outline-none transition-all"
+                style={{
+                  backgroundColor: "var(--input-bg)",
+                  border: "1px solid var(--input-border)",
+                  color: "var(--input-text)",
+                }}
               />
             </div>
 
-            {/* Filter Toggle */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Funnel className="w-4 h-4 text-muted" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="py-2.5 px-4 rounded-xl text-xs bg-white/5 border border-card-border outline-none text-foreground focus:border-amber-500"
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em]"
+                style={{ backgroundColor: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--input-text)" }}
               >
-                <option value="all" className="bg-background">All Statuses</option>
-                <option value="active" className="bg-background">Active Only</option>
-                <option value="deactivated" className="bg-background">Deactivated Only</option>
-              </select>
+                <Funnel className="w-3.5 h-3.5" style={{ color: "var(--ink-muted)" }} />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-transparent border-0 outline-none text-xs cursor-pointer font-sans"
+                  style={{ color: "var(--input-text)" }}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active Only</option>
+                  <option value="deactivated">Deactivated Only</option>
+                </select>
+              </div>
+
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em]"
+                style={{ backgroundColor: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--input-text)" }}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" style={{ color: "var(--ink-muted)" }} />
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="bg-transparent border-0 outline-none text-xs cursor-pointer font-sans"
+                  style={{ color: "var(--input-text)" }}
+                >
+                  <option value="all">All Roles</option>
+                  <option value="doctor">Doctors Only</option>
+                  <option value="admin">Admins Only</option>
+                </select>
+              </div>
             </div>
           </div>
 
           {/* Table Card */}
-          <div className="glass-card rounded-2xl p-5">
+          <div
+            className="rounded-md overflow-hidden transition-colors"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-card-border text-muted">
-                    <th className="py-3 font-semibold">Doctor / Account Name</th>
-                    <th className="py-3 font-semibold">Hospital Name</th>
-                    <th className="py-3 font-semibold">Registration No.</th>
-                    <th className="py-3 font-semibold text-center">Credits</th>
-                    <th className="py-3 font-semibold text-center">Status</th>
-                    <th className="py-3 font-semibold text-right">Actions</th>
+                  <tr style={{ borderBottom: "1px solid var(--rule)", color: "var(--ink-muted)" }}>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Doctor Name</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Hospital / Institution</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Registration No.</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Credits</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Status</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-card-border/50">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={6} className="py-8 text-center text-muted">
-                        <div className="w-6 h-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto" />
-                      </td>
-                    </tr>
-                  ) : filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-muted-bg/30 transition-colors">
-                      <td className="py-4 font-semibold text-foreground">
-                        <div>
-                          <p className="font-semibold text-sm">{user.doctor_name || "N/A"}</p>
-                          <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-1 ${
-                            user.role === "admin"
-                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/15"
-                              : "bg-blue-500/10 text-blue-400 border border-blue-500/15"
-                          }`}>
-                            {user.role || "doctor"}
-                          </span>
+                <tbody>
+                  {filteredUsers.map((user) => (
+                    <tr
+                      key={user.id}
+                      onClick={() => router.push(`/users/${user.id}`)}
+                      className="cursor-pointer transition-colors"
+                      style={{ borderBottom: "1px solid var(--rule-soft)" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "var(--row-hover-bg)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <td className="py-4 px-6 font-medium">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-md flex items-center justify-center font-serif font-bold text-xs shrink-0 transition-colors"
+                            style={{
+                              backgroundColor: "var(--badge-light-bg)",
+                              border: "1px solid var(--rule)",
+                              color: "var(--ink)",
+                            }}
+                          >
+                            {user.doctor_name?.charAt(0).toUpperCase() || "D"}
+                          </div>
+                          <div>
+                            <p className="font-serif font-bold text-sm leading-tight transition-colors" style={{ color: "var(--ink)" }}>
+                              {user.doctor_name || "Doctor Name Unset"}
+                            </p>
+                            <span
+                              className="inline-block text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded mt-1"
+                              style={{
+                                backgroundColor: user.role === "admin" ? "var(--badge-dark-bg)" : "var(--badge-light-bg)",
+                                color: user.role === "admin" ? "var(--badge-dark-text)" : "var(--ink)",
+                                border: "1px solid var(--rule)",
+                              }}
+                            >
+                              {user.role || "doctor"}
+                            </span>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-4 text-muted">{user.hospital_name || "N/A"}</td>
-                      <td className="py-4 font-mono text-muted">{user.doctor_registration_no || "N/A"}</td>
-                      <td className="py-4 font-mono font-bold text-center text-amber-500">{user.credits ?? 0}</td>
-                      <td className="py-4 text-center">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          user.is_active !== false
-                            ? "bg-emerald-500/10 text-emerald-500"
-                            : "bg-red-500/10 text-red-500"
-                        }`}>
+
+                      <td className="py-4 px-6 font-medium" style={{ color: "var(--ink-soft)" }}>
+                        {user.hospital_name || <span className="italic opacity-60">Unassigned</span>}
+                      </td>
+
+                      <td className="py-4 px-6 font-mono" style={{ color: "var(--ink-muted)" }}>
+                        {user.doctor_registration_no || <span className="italic opacity-50">N/A</span>}
+                      </td>
+
+                      <td className="py-4 px-6 font-mono font-bold text-center text-sm" style={{ color: "var(--ink)" }}>
+                        {user.credits ?? 0}
+                      </td>
+
+                      <td className="py-4 px-6 text-center">
+                        <span
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                          style={{
+                            backgroundColor: user.is_active !== false ? "var(--status-success-bg)" : "var(--status-fail-bg)",
+                            color: user.is_active !== false ? "var(--status-success-text)" : "var(--status-fail-text)",
+                            border: `1px solid ${user.is_active !== false ? "var(--status-success-border)" : "var(--status-fail-border)"}`,
+                          }}
+                        >
                           {user.is_active !== false ? (
-                            <><CheckCircle weight="fill" /> Active</>
+                            <>
+                              <CheckCircle weight="fill" className="w-3 h-3" /> Active
+                            </>
                           ) : (
-                            <><XCircle weight="fill" /> Blocked</>
+                            <>
+                              <XCircle weight="fill" className="w-3 h-3" /> Deactivated
+                            </>
                           )}
                         </span>
                       </td>
-                      <td className="py-4 text-right">
+
+                      <td className="py-4 px-6 text-right">
                         <Link
                           href={`/users/${user.id}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 font-semibold transition-all border border-amber-500/15 cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all hover:opacity-85"
+                          style={{
+                            backgroundColor: "var(--btn-primary-bg)",
+                            color: "var(--btn-primary-text)",
+                          }}
                         >
                           <span>Manage</span>
-                          <ArrowSquareOut className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3 h-3" weight="bold" />
                         </Link>
                       </td>
                     </tr>
                   ))}
-                  {!loading && filteredUsers.length === 0 && (
+
+                  {filteredUsers.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-muted">
-                        No registered doctors found matching filters.
+                      <td colSpan={6} className="py-16 text-center text-xs" style={{ color: "var(--ink-muted)" }}>
+                        <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                        <p className="font-serif font-bold text-sm" style={{ color: "var(--ink)" }}>No doctors found matching filters</p>
+                        <p className="text-xs mt-1">Try resetting your search query or status filter.</p>
                       </td>
                     </tr>
                   )}

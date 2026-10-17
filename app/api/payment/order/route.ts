@@ -6,10 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import Razorpay from "razorpay";
 
 const PACKAGES: Record<number, { credits: number; amount: number }> = {
-  200: { credits: 1, amount: 200 },
-  1000: { credits: 5, amount: 1000 },
-  2000: { credits: 10, amount: 2000 },
-  5000: { credits: 25, amount: 5000 },
+  150:  { credits: 1,  amount: 150  }, // Starter: 1 credit
+  750:  { credits: 6,  amount: 750  }, // Standard: buy 5 get 1 free = 6 credits
+  1500: { credits: 12, amount: 1500 }, // Professional: buy 10 get 2 free = 12 credits
+  3000: { credits: 24, amount: 3000 }, // Enterprise: buy 20 get 4 free = 24 credits
 };
 
 export async function POST(req: NextRequest) {

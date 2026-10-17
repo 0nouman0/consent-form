@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +8,8 @@
    now shared by every authenticated screen (app shell, login, dashboard,
    generate, history, chat, profile, etc.) via these CSS variables. */
 :root {
+  --font-bricolage: 'Bricolage Grotesque', sans-serif;
+  --font-dm: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Raw editorial palette (use directly for one-off hex needs) */
   --paper: #F4F1E9;
   --sheet: #FCFBF7;
