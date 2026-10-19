@@ -70,8 +70,8 @@ function killTree(child) {
   } catch {}
 }
 
-const app   = run(cyan,   "npx next dev",           root);
-const luffy = run(yellow, "npx next dev -p 3001",   admin);
+const app   = run(cyan,   "npx next dev",                     root);
+const luffy = run(yellow, "npx next dev --webpack -p 3001",   admin);
 
 const cleanup = () => {
   killTree(app);

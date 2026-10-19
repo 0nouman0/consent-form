@@ -433,7 +433,7 @@ export default function Dashboard() {
 
               <div className="pt-4 mt-6" style={{ borderTop: "1px solid var(--rule)" }}>
                 <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-                  Telemetry streams from Supabase <code className="font-mono px-1 py-0.5 rounded" style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--ink)" }}>generation_audit</code> and Razorpay webhooks.
+                  Telemetry streams from Supabase <code className="font-mono px-1 py-0.5 rounded" style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--ink)" }}>generation_audit</code> and Cashfree payment records.
                 </p>
               </div>
             </div>

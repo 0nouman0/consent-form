@@ -17,6 +17,7 @@ import {
   Users,
   Coins,
   ShieldCheck,
+  Crown,
 } from "@phosphor-icons/react";
 
 export default function UsersList() {
@@ -26,6 +27,7 @@ export default function UsersList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [planFilter, setPlanFilter] = useState("all");
 
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -75,9 +77,13 @@ export default function UsersList() {
         (roleFilter === "doctor" && (user.role === "doctor" || !user.role)) ||
         (roleFilter === "admin" && user.role === "admin");
 
-      return matchesSearch && matchesStatus && matchesRole;
+      const userPlan = (user.subscription_tier || "free").toLowerCase();
+      const matchesPlan =
+        planFilter === "all" || userPlan === planFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus && matchesRole && matchesPlan;
     });
-  }, [users, searchTerm, statusFilter, roleFilter]);
+  }, [users, searchTerm, statusFilter, roleFilter, planFilter]);
 
   if (loading || error) {
     return (
@@ -268,6 +274,26 @@ export default function UsersList() {
                   <option value="admin">Admins Only</option>
                 </select>
               </div>
+
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em]"
+                style={{ backgroundColor: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--input-text)" }}
+              >
+                <Crown className="w-3.5 h-3.5" style={{ color: "var(--ink-muted)" }} />
+                <select
+                  value={planFilter}
+                  onChange={(e) => setPlanFilter(e.target.value)}
+                  className="bg-transparent border-0 outline-none text-xs cursor-pointer font-sans"
+                  style={{ color: "var(--input-text)" }}
+                >
+                  <option value="all">All Plans</option>
+                  <option value="free">Free Tier</option>
+                  <option value="starter">Starter</option>
+                  <option value="standard">Standard</option>
+                  <option value="professional">Professional</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -283,13 +309,18 @@ export default function UsersList() {
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Doctor Name</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Hospital / Institution</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Registration No.</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Plan</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Credits</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Status</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {filteredUsers.map((user) => {
+                    const planTier = (user.subscription_tier || "free").toLowerCase();
+                    const subStatus = (user.subscription_status || "active").toLowerCase();
+
+                    return (
                     <tr
                       key={user.id}
                       onClick={() => router.push(`/users/${user.id}`)}
@@ -340,6 +371,55 @@ export default function UsersList() {
                         {user.doctor_registration_no || <span className="italic opacity-50">N/A</span>}
                       </td>
 
+                      <td className="py-4 px-6 text-center">
+                        <div className="inline-flex flex-col items-center gap-0.5">
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded font-mono text-[10px] uppercase font-bold tracking-wider"
+                            style={{
+                              backgroundColor:
+                                planTier === "enterprise"
+                                  ? "rgba(245, 158, 11, 0.15)"
+                                  : planTier === "professional"
+                                  ? "rgba(139, 92, 246, 0.15)"
+                                  : planTier === "standard"
+                                  ? "rgba(16, 185, 129, 0.15)"
+                                  : planTier === "starter"
+                                  ? "rgba(59, 130, 246, 0.15)"
+                                  : "var(--badge-light-bg)",
+                              color:
+                                planTier === "enterprise"
+                                  ? "#d97706"
+                                  : planTier === "professional"
+                                  ? "#7c3aed"
+                                  : planTier === "standard"
+                                  ? "#059669"
+                                  : planTier === "starter"
+                                  ? "#2563eb"
+                                  : "var(--ink-muted)",
+                              border: `1px solid ${
+                                planTier === "enterprise"
+                                  ? "rgba(245, 158, 11, 0.3)"
+                                  : planTier === "professional"
+                                  ? "rgba(139, 92, 246, 0.3)"
+                                  : planTier === "standard"
+                                  ? "rgba(16, 185, 129, 0.3)"
+                                  : planTier === "starter"
+                                  ? "rgba(59, 130, 246, 0.3)"
+                                  : "var(--rule)"
+                              }`,
+                            }}
+                          >
+                            <Crown weight={planTier !== "free" ? "fill" : "regular"} className="w-3 h-3" />
+                            <span>{planTier}</span>
+                          </span>
+                          {subStatus !== "active" && (
+                            <span className="text-[9px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
+                              {subStatus}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
                       <td className="py-4 px-6 font-mono font-bold text-center text-sm" style={{ color: "var(--ink)" }}>
                         {user.credits ?? 0}
                       </td>
@@ -380,11 +460,12 @@ export default function UsersList() {
                         </Link>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
 
                   {filteredUsers.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-16 text-center text-xs" style={{ color: "var(--ink-muted)" }}>
+                      <td colSpan={7} className="py-16 text-center text-xs" style={{ color: "var(--ink-muted)" }}>
                         <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
                         <p className="font-serif font-bold text-sm" style={{ color: "var(--ink)" }}>No doctors found matching filters</p>
                         <p className="text-xs mt-1">Try resetting your search query or status filter.</p>

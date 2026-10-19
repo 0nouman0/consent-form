@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
-import crypto from "crypto";
-import Razorpay from "razorpay";
+import { getCashfreeOrder, getCashfreeOrderPayments, getCashfreeConfig } from "@/lib/cashfree";
 import { sendInvoiceEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
@@ -16,69 +15,75 @@ export async function POST(req: NextRequest) {
   const authResult = user;
 
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = await req.json();
+    const body = await req.json();
+    const orderId = body.order_id || body.orderId || body.cf_order_id;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (!orderId) {
       return NextResponse.json(
-        { error: "Missing required payment verification parameters" },
+        { error: "Missing required order_id for payment verification" },
         { status: 400 }
       );
     }
 
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keySecret) {
+    const config = getCashfreeConfig();
+    if (!config.isConfigured) {
       return NextResponse.json(
-        { error: "Razorpay integration is not configured on the server" },
+        { error: "Cashfree payment gateway is not configured on the server" },
         { status: 500 }
       );
     }
 
-    // Verify Razorpay Signature
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", keySecret)
-      .update(body.toString())
-      .digest("hex");
+    // 1. Fetch order details from Cashfree directly
+    const cfOrder = await getCashfreeOrder(orderId);
 
-    const isSignatureValid = expectedSignature === razorpay_signature;
+    // 2. Fetch payment attempts for this order
+    let cfPayments: any[] = [];
+    try {
+      cfPayments = await getCashfreeOrderPayments(orderId);
+    } catch (paymentFetchErr) {
+      console.warn("Could not fetch detailed Cashfree payments list:", paymentFetchErr);
+    }
 
-    if (!isSignatureValid) {
+    const successfulPayment = cfPayments.find((p) => p.payment_status === "SUCCESS");
+    const isOrderPaid = cfOrder.order_status === "PAID" || Boolean(successfulPayment);
+
+    if (!isOrderPaid) {
       return NextResponse.json(
-        { error: "Payment verification failed: Invalid signature" },
+        {
+          error: `Payment verification failed: Order status is ${cfOrder.order_status || "UNKNOWN"}`,
+          order_status: cfOrder.order_status,
+        },
         { status: 400 }
       );
     }
 
+    // 3. Extract payment metadata
+    const paymentId = successfulPayment?.cf_payment_id
+      ? String(successfulPayment.cf_payment_id)
+      : `cf_pay_${orderId}`;
+
+    const paymentGroup = successfulPayment?.payment_group || "cashfree";
+    const paymentMethodName = successfulPayment?.payment_group
+      ? `Cashfree (${successfulPayment.payment_group.toUpperCase()})`
+      : "Cashfree";
+
     // Connect to Supabase
     const supabase = createClient();
 
-    // Get the pending transaction to know how many credits/amount to add
+    // 4. Get the pending transaction from our DB
     const { data: tx, error: txError } = await supabase
       .from("transactions")
-      .select("credits, amount")
-      .eq("order_id", razorpay_order_id)
+      .select("credits, amount, status")
+      .eq("order_id", orderId)
       .single();
 
     if (txError || !tx) {
       console.error("Transaction not found for verification:", txError);
       return NextResponse.json(
-        { error: "Transaction record not found" },
+        { error: "Transaction record not found in system database" },
         { status: 404 }
       );
     }
-
-    // Fetch payment details from Razorpay to capture mode and other metadata
-    const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID!,
-      key_secret: keySecret,
-    });
-
-    let paymentMethod = "razorpay";
-    let paymentDetails: any = {};
 
     // Retrieve user profile for invoicing & metadata snapshot
     let profile: any = null;
@@ -95,43 +100,28 @@ export async function POST(req: NextRequest) {
       console.error("Failed to load user profile for snapshot:", profileErr);
     }
 
-    try {
-      const payment: any = await razorpay.payments.fetch(razorpay_payment_id);
-      paymentMethod = payment.method || "razorpay";
-      paymentDetails = {
-        method: payment.method,
-        email: payment.email,
-        contact: payment.contact,
-        fee: payment.fee,
-        tax: payment.tax,
-        card_id: payment.card_id,
-        bank: payment.bank,
-        wallet: payment.wallet,
-        vpa: payment.vpa, // UPI
-        acquirer_data: payment.acquirer_data,
-        created_at_timestamp: payment.created_at
-      };
-    } catch (fetchErr) {
-      console.error("Failed to fetch Razorpay details:", fetchErr);
-    }
-
-    // Mix in billing details snapshot
-    paymentDetails = {
-      ...paymentDetails,
+    const paymentDetails = {
+      provider: "cashfree",
+      method: paymentGroup,
+      cf_order_id: cfOrder.cf_order_id,
+      cf_payment_id: paymentId,
+      order_id: orderId,
+      bank_reference: successfulPayment?.bank_reference || "",
+      payment_time: successfulPayment?.payment_time || cfOrder.created_at,
       billing_doctor_name: profile?.doctor_name || "",
       billing_doctor_registration_no: profile?.doctor_registration_no || "",
       billing_hospital_name: profile?.hospital_name || "",
       billing_address: profile?.billing_address || profile?.hospital_address || "",
     };
 
-    // Call verify_and_add_credits RPC function
+    // 5. Call verify_and_add_credits RPC function
     const { data: newBalance, error: rpcError } = await supabase.rpc(
       "verify_and_add_credits",
       {
         p_user_id: authResult.id,
-        p_order_id: razorpay_order_id,
-        p_payment_id: razorpay_payment_id,
-        p_signature: razorpay_signature,
+        p_order_id: orderId,
+        p_payment_id: paymentId,
+        p_signature: `cashfree_verified_${Date.now()}`,
         p_amount: tx.amount,
         p_credits: tx.credits,
         p_metadata: paymentDetails,
@@ -146,17 +136,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userEmail = authResult.email || paymentDetails.email || "mohammednouman604@gmail.com";
+    const userEmail = authResult.email || "doctor@consentgen.in";
 
-    // Send invoice email asynchronously (do not block the response)
+    // 6. Send invoice email asynchronously
     sendInvoiceEmail(userEmail, profile?.doctor_name || "Doctor", {
-      orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
+      orderId: orderId,
+      paymentId: paymentId,
       amount: tx.amount / 100,
       credits: tx.credits,
       date: new Date().toLocaleDateString("en-IN"),
-      paymentMethod: paymentMethod,
-      billingAddress: paymentDetails.billing_address
+      paymentMethod: paymentMethodName,
+      billingAddress: paymentDetails.billing_address,
     }).catch((emailErr) => {
       console.error("Failed to trigger email delivery:", emailErr);
     });
@@ -165,11 +155,13 @@ export async function POST(req: NextRequest) {
       success: true,
       message: "Payment verified and credits added successfully",
       balance: newBalance,
+      order_id: orderId,
+      payment_id: paymentId,
     });
-  } catch (error) {
-    console.error("Verification error:", error);
+  } catch (error: any) {
+    console.error("Cashfree verification error:", error);
     return NextResponse.json(
-      { error: "Internal verification error" },
+      { error: error.message || "Internal verification error" },
       { status: 500 }
     );
   }

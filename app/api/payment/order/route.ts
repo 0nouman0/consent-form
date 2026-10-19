@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
-// We can import Razorpay. Since we installed it, we can import it.
-// If typescript complains, we can declare or typecast it.
-import Razorpay from "razorpay";
+import { createCashfreeOrder, getCashfreeConfig } from "@/lib/cashfree";
 
 const PACKAGES: Record<number, { credits: number; amount: number }> = {
   150:  { credits: 1,  amount: 150  }, // Starter: 1 credit
@@ -34,36 +32,63 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
+    const config = getCashfreeConfig();
+    if (!config.isConfigured) {
       return NextResponse.json(
-        { error: "Razorpay integration is not configured on the server" },
+        { error: "Cashfree payment gateway is not configured on the server" },
         { status: 500 }
       );
     }
 
-    const razorpay = new Razorpay({
-      key_id: keyId,
-      key_secret: keySecret,
-    });
+    const supabase = createClient();
 
+    // Retrieve doctor profile to populate customer details
+    let doctorName = "Doctor";
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("doctor_name")
+        .eq("id", authResult.id)
+        .single();
+      if (profile?.doctor_name) {
+        doctorName = profile.doctor_name;
+      }
+    } catch {
+      // Non-critical, fallback to default
+    }
+
+    // Cashfree order_id: alphanumeric, underscores, hyphens, max 45 chars
+    const cleanUserId = authResult.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+    const orderId = `cf_${cleanUserId}_${Date.now()}`;
     const amountInPaise = selectedPackage.amount * 100;
 
-    const order = await razorpay.orders.create({
-      amount: amountInPaise,
-      currency: "INR",
-      receipt: `receipt_${authResult.id.slice(0, 8)}_${Date.now()}`,
+    // Detect return URL for fallback redirect
+    const origin = req.headers.get("origin") || req.nextUrl.origin || "http://localhost:3000";
+    const returnUrl = `${origin}/credits?order_id={order_id}`;
+
+    // Create Cashfree Order
+    const cfOrder = await createCashfreeOrder({
+      order_id: orderId,
+      order_amount: selectedPackage.amount,
+      order_currency: "INR",
+      customer_details: {
+        customer_id: cleanUserId || "doctor_user",
+        customer_name: doctorName,
+        customer_email: authResult.email || "doctor@consentgen.in",
+        customer_phone: "9999999999",
+      },
+      order_meta: {
+        return_url: returnUrl,
+      },
+      order_note: `ConsentGen: ${selectedPackage.credits} Credits Package (₹${selectedPackage.amount})`,
     });
 
-    // Save pending transaction in database
-    const supabase = createClient();
+    // Save pending transaction in database (stored in paise for compatibility)
     const { error: txError } = await supabase
       .from("transactions")
       .insert({
         user_id: authResult.id,
-        order_id: order.id,
+        order_id: cfOrder.order_id,
         amount: amountInPaise,
         credits: selectedPackage.credits,
         status: "created",
@@ -78,13 +103,14 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key_id: keyId,
+      order_id: cfOrder.order_id,
+      payment_session_id: cfOrder.payment_session_id,
+      amount: selectedPackage.amount,
+      currency: "INR",
+      environment: config.env,
     });
   } catch (error: any) {
-    console.error("Order creation error:", error);
+    console.error("Cashfree order creation error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to initiate payment. Please try again." },
       { status: 500 }

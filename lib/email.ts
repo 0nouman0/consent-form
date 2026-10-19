@@ -79,7 +79,7 @@ export async function sendInvoiceEmail(
         </tr>
         <tr style="border-bottom: 1px solid #f1f5f9;">
           <td style="padding: 10px 0; color: #64748b;">Payment Mode</td>
-          <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #0f172a; text-transform: capitalize;">${invoiceDetails.paymentMethod || "Razorpay"}</td>
+          <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #0f172a; text-transform: capitalize;">${invoiceDetails.paymentMethod || "Cashfree"}</td>
         </tr>
         ${invoiceDetails.billingAddress ? `
         <tr style="border-bottom: 1px solid #f1f5f9;">

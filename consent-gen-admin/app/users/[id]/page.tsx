@@ -27,9 +27,72 @@ import {
   ArrowRight,
   WarningCircle,
   X,
+  Crown,
+  PencilSimple,
+  Plus,
+  Minus,
+  Sparkle,
 } from "@phosphor-icons/react";
 
 type ActiveTab = "consents" | "subscriptions" | "credits" | "profile";
+
+const SUBSCRIPTION_PLANS = [
+  {
+    tier: "free",
+    name: "Free Tier",
+    price: "₹0",
+    billing: "Pay as you go",
+    includedCredits: 0,
+    description: "Standard account. Practitioner purchases individual credits as needed.",
+    badgeBg: "var(--badge-light-bg)",
+    badgeText: "var(--ink-muted)",
+    borderColor: "var(--rule)",
+  },
+  {
+    tier: "starter",
+    name: "Starter Plan",
+    price: "₹150",
+    billing: "Single pack",
+    includedCredits: 1,
+    description: "1 credit included. Ideal for occasional clinical documentation.",
+    badgeBg: "rgba(59, 130, 246, 0.12)",
+    badgeText: "#2563eb",
+    borderColor: "rgba(59, 130, 246, 0.3)",
+  },
+  {
+    tier: "standard",
+    name: "Standard Growth",
+    price: "₹750",
+    billing: "Pack of 6",
+    includedCredits: 6,
+    description: "6 credits included (5 + 1 bonus). Great for regular daily practice.",
+    badgeBg: "rgba(16, 185, 129, 0.12)",
+    badgeText: "#059669",
+    borderColor: "rgba(16, 185, 129, 0.3)",
+  },
+  {
+    tier: "professional",
+    name: "Professional Practice",
+    price: "₹1,500",
+    billing: "Pack of 12",
+    includedCredits: 12,
+    description: "12 credits included (10 + 2 bonus). Best value for active clinics.",
+    badgeBg: "rgba(139, 92, 246, 0.12)",
+    badgeText: "#7c3aed",
+    borderColor: "rgba(139, 92, 246, 0.3)",
+  },
+  {
+    tier: "enterprise",
+    name: "Enterprise Hospital",
+    price: "₹3,000",
+    billing: "Pack of 24",
+    includedCredits: 24,
+    description: "24 credits included (20 + 4 bonus). Designed for hospital departments.",
+    badgeBg: "rgba(245, 158, 11, 0.12)",
+    badgeText: "#d97706",
+    borderColor: "rgba(245, 158, 11, 0.3)",
+  },
+];
 
 export default function UserDetailPage() {
   const { id } = useParams();
@@ -59,6 +122,22 @@ export default function UserDetailPage() {
   const [adminNote, setAdminNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [invoiceTx, setInvoiceTx] = useState<any>(null);
+
+  // Subscription Modal state
+  const [subModalOpen, setSubModalOpen] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<string>("free");
+  const [selectedSubStatus, setSelectedSubStatus] = useState<string>("active");
+  const [grantCredits, setGrantCredits] = useState<number>(0);
+  const [subAdminNote, setSubAdminNote] = useState<string>("");
+  const [subLoading, setSubLoading] = useState(false);
+
+  // Credit Modal state
+  const [creditModalOpen, setCreditModalOpen] = useState(false);
+  const [creditModalMode, setCreditModalMode] = useState<"set" | "adjust">("set");
+  const [exactCreditInput, setExactCreditInput] = useState<number>(0);
+  const [deltaCreditInput, setDeltaCreditInput] = useState<number>(5);
+  const [creditModalNote, setCreditModalNote] = useState<string>("");
+  const [creditModalLoading, setCreditModalLoading] = useState(false);
 
   // Initial load
   useEffect(() => {
@@ -342,6 +421,171 @@ export default function UserDetailPage() {
     }
   };
 
+  // Sync profile state when loaded
+  useEffect(() => {
+    if (userProfile) {
+      setSelectedTier((userProfile.subscription_tier || "free").toLowerCase());
+      setSelectedSubStatus((userProfile.subscription_status || "active").toLowerCase());
+      setExactCreditInput(userProfile.credits ?? 0);
+    }
+  }, [userProfile]);
+
+  // Handle Save Subscription from Modal or Operations
+  const handleSaveSubscription = async (targetTier?: string, targetStatus?: string) => {
+    if (!userProfile) return;
+    setSubLoading(true);
+    const tierToApply = (targetTier || selectedTier).toLowerCase();
+    const statusToApply = (targetStatus || selectedSubStatus).toLowerCase();
+
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const adminUser = authData?.user;
+      if (!adminUser) throw new Error("No admin session found");
+
+      const bonusCredits = Number(grantCredits) || 0;
+      const note = subAdminNote || `Updated subscription to ${tierToApply} (${statusToApply})${bonusCredits > 0 ? ` +${bonusCredits} credits` : ""}`;
+
+      // Call database RPC
+      const { error: rpcErr } = await supabase.rpc("luffy_update_user_subscription", {
+        p_user_id: userProfile.id,
+        p_subscription_tier: tierToApply,
+        p_subscription_status: statusToApply,
+        p_admin_id: adminUser.id,
+        p_grant_credits: bonusCredits,
+        p_note: note,
+      });
+
+      if (rpcErr) {
+        console.warn("RPC update failed, attempting direct profile update fallback:", rpcErr);
+        const updateObj: any = {
+          subscription_tier: tierToApply,
+          subscription_status: statusToApply,
+          updated_at: new Date().toISOString(),
+        };
+        if (bonusCredits > 0) {
+          updateObj.credits = (userProfile.credits || 0) + bonusCredits;
+        }
+
+        const { error: directErr } = await supabase
+          .from("profiles")
+          .update(updateObj)
+          .eq("id", userProfile.id);
+
+        if (directErr) throw directErr;
+
+        if (bonusCredits > 0) {
+          await supabase.from("credit_history").insert({
+            user_id: userProfile.id,
+            amount: bonusCredits,
+            action: "admin_subscription_grant",
+            balance_after: (userProfile.credits || 0) + bonusCredits,
+            reference_id: `sub_${tierToApply}_${adminUser.id.slice(0, 8)}`,
+          });
+        }
+      }
+
+      const newCredits = (userProfile.credits || 0) + bonusCredits;
+      setUserProfile((prev: any) => ({
+        ...prev,
+        subscription_tier: tierToApply,
+        subscription_status: statusToApply,
+        credits: newCredits,
+      }));
+
+      if (bonusCredits > 0) {
+        const { data: updatedLogs } = await supabase
+          .from("credit_history")
+          .select("*")
+          .eq("user_id", userProfile.id)
+          .order("created_at", { ascending: false });
+        if (updatedLogs) setCreditLogs(updatedLogs);
+      }
+
+      setSubModalOpen(false);
+      setSubAdminNote("");
+      setGrantCredits(0);
+      alert(`Subscription plan updated to ${tierToApply.toUpperCase()} (${statusToApply})!`);
+    } catch (err: any) {
+      alert(`Failed to update subscription: ${err.message}`);
+    } finally {
+      setSubLoading(false);
+    }
+  };
+
+  // Handle Save Credits from Detailed Modal
+  const handleSaveCreditsModal = async () => {
+    if (!userProfile) return;
+    setCreditModalLoading(true);
+
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const adminUser = authData?.user;
+      if (!adminUser) throw new Error("No admin session found");
+
+      let targetCredits = userProfile.credits || 0;
+      let delta = 0;
+
+      if (creditModalMode === "set") {
+        targetCredits = Math.max(0, Number(exactCreditInput) || 0);
+        delta = targetCredits - (userProfile.credits || 0);
+      } else {
+        delta = Number(deltaCreditInput) || 0;
+        targetCredits = (userProfile.credits || 0) + delta;
+        if (targetCredits < 0) {
+          alert("Credit balance cannot be negative.");
+          setCreditModalLoading(false);
+          return;
+        }
+      }
+
+      const note = creditModalNote || (creditModalMode === "set" ? `Set balance to ${targetCredits}` : `Adjusted balance by ${delta > 0 ? `+${delta}` : delta}`);
+
+      const { error: rpcErr } = await supabase.rpc("luffy_set_user_credits", {
+        p_user_id: userProfile.id,
+        p_new_credits: targetCredits,
+        p_admin_id: adminUser.id,
+        p_note: note,
+      });
+
+      if (rpcErr) {
+        console.warn("RPC set credits failed, attempting direct profile update fallback:", rpcErr);
+        const { error: directErr } = await supabase
+          .from("profiles")
+          .update({ credits: targetCredits, updated_at: new Date().toISOString() })
+          .eq("id", userProfile.id);
+
+        if (directErr) throw directErr;
+
+        if (delta !== 0) {
+          await supabase.from("credit_history").insert({
+            user_id: userProfile.id,
+            amount: delta,
+            action: "admin_adjustment",
+            balance_after: targetCredits,
+            reference_id: `admin_${adminUser.id.slice(0, 8)}`,
+          });
+        }
+      }
+
+      setUserProfile((prev: any) => ({ ...prev, credits: targetCredits }));
+
+      const { data: updatedLogs } = await supabase
+        .from("credit_history")
+        .select("*")
+        .eq("user_id", userProfile.id)
+        .order("created_at", { ascending: false });
+      if (updatedLogs) setCreditLogs(updatedLogs);
+
+      setCreditModalOpen(false);
+      setCreditModalNote("");
+      alert(`Credits updated successfully! New balance: ${targetCredits}`);
+    } catch (err: any) {
+      alert(`Failed to update credits: ${err.message}`);
+    } finally {
+      setCreditModalLoading(false);
+    }
+  };
+
   const handleCopyMarkdown = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -471,6 +715,50 @@ export default function UserDetailPage() {
                     >
                       {userProfile.role || "doctor"}
                     </span>
+
+                    <button
+                      onClick={() => setSubModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono uppercase font-bold rounded transition-all hover:opacity-85 cursor-pointer shadow-xs"
+                      style={{
+                        backgroundColor:
+                          (userProfile.subscription_tier || "free") === "enterprise"
+                            ? "rgba(245, 158, 11, 0.15)"
+                            : (userProfile.subscription_tier || "free") === "professional"
+                            ? "rgba(139, 92, 246, 0.15)"
+                            : (userProfile.subscription_tier || "free") === "standard"
+                            ? "rgba(16, 185, 129, 0.15)"
+                            : (userProfile.subscription_tier || "free") === "starter"
+                            ? "rgba(59, 130, 246, 0.15)"
+                            : "var(--badge-light-bg)",
+                        color:
+                          (userProfile.subscription_tier || "free") === "enterprise"
+                            ? "#d97706"
+                            : (userProfile.subscription_tier || "free") === "professional"
+                            ? "#7c3aed"
+                            : (userProfile.subscription_tier || "free") === "standard"
+                            ? "#059669"
+                            : (userProfile.subscription_tier || "free") === "starter"
+                            ? "#2563eb"
+                            : "var(--ink)",
+                        border: `1px solid ${
+                          (userProfile.subscription_tier || "free") === "enterprise"
+                            ? "rgba(245, 158, 11, 0.3)"
+                            : (userProfile.subscription_tier || "free") === "professional"
+                            ? "rgba(139, 92, 246, 0.3)"
+                            : (userProfile.subscription_tier || "free") === "standard"
+                            ? "rgba(16, 185, 129, 0.3)"
+                            : (userProfile.subscription_tier || "free") === "starter"
+                            ? "rgba(59, 130, 246, 0.3)"
+                            : "var(--rule)"
+                        }`,
+                      }}
+                      title="Click to change subscription plan"
+                    >
+                      <Crown weight="fill" className="w-3 h-3" />
+                      <span>{userProfile.subscription_tier || "free"} Plan</span>
+                      <span className="opacity-60 text-[9px]">({userProfile.subscription_status || "active"})</span>
+                      <PencilSimple className="w-2.5 h-2.5 ml-0.5 opacity-60" />
+                    </button>
                   </div>
 
                   <p className="text-xs flex items-center gap-2" style={{ color: "var(--ink-muted)" }}>
@@ -483,66 +771,133 @@ export default function UserDetailPage() {
                 </div>
               </div>
 
-              {/* Right: Key Summary Badges */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Right: Key Summary Badges (5 Cards with quick action buttons) */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                {/* 1. Subscription Plan */}
                 <div
-                  className="rounded-md p-3 text-center"
+                  className="rounded-md p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
-                  <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
-                    Consents
-                  </p>
-                  <p className="font-serif text-xl font-bold mt-0.5" style={{ color: "var(--ink)" }}>
-                    {unifiedConsents.length}
-                  </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: "#0f766e" }}>
-                    {unifiedConsents.filter((c) => c.status === "success").length} ok
-                  </p>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      Subscription
+                    </p>
+                    <p className="font-serif text-lg font-bold mt-0.5 truncate capitalize" style={{ color: "var(--ink)" }}>
+                      {userProfile.subscription_tier || "Free"}
+                    </p>
+                    <p className="text-[10px] font-mono mt-0.5 capitalize" style={{ color: "var(--ink-muted)" }}>
+                      {userProfile.subscription_status || "Active"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSubModalOpen(true)}
+                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
+                  >
+                    Change Plan
+                  </button>
                 </div>
 
+                {/* 2. Credits Balance */}
                 <div
-                  className="rounded-md p-3 text-center"
+                  className="rounded-md p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
-                  <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
-                    Credits
-                  </p>
-                  <p className="font-serif text-xl font-bold mt-0.5" style={{ color: "var(--ink)" }}>
-                    {userProfile.credits ?? 0}
-                  </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
-                    Balance
-                  </p>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      Credits
+                    </p>
+                    <p className="font-serif text-xl font-bold mt-0.5 flex items-center justify-center gap-1" style={{ color: "var(--ink)" }}>
+                      <Coins weight="fill" className="w-4 h-4" />
+                      <span>{userProfile.credits ?? 0}</span>
+                    </p>
+                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                      Available Balance
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCreditModalMode("adjust");
+                      setExactCreditInput(userProfile.credits ?? 0);
+                      setDeltaCreditInput(5);
+                      setCreditModalOpen(true);
+                    }}
+                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
+                  >
+                    Edit Credits
+                  </button>
                 </div>
 
+                {/* 3. Consents */}
                 <div
-                  className="rounded-md p-3 text-center"
+                  className="rounded-md p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
-                  <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
-                    Total Paid
-                  </p>
-                  <p className="font-serif text-xl font-bold mt-0.5" style={{ color: "var(--ink)" }}>
-                    ₹{totalPaidRevenue.toLocaleString("en-IN")}
-                  </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
-                    {paidTxs.length} orders
-                  </p>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      Consents
+                    </p>
+                    <p className="font-serif text-xl font-bold mt-0.5" style={{ color: "var(--ink)" }}>
+                      {unifiedConsents.length}
+                    </p>
+                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "#0f766e" }}>
+                      {unifiedConsents.filter((c) => c.status === "success").length} ok
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("consents")}
+                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
+                  >
+                    View All
+                  </button>
                 </div>
 
+                {/* 4. Total Paid */}
                 <div
-                  className="rounded-md p-3 text-center"
+                  className="rounded-md p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
-                  <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
-                    Joined
-                  </p>
-                  <p className="font-mono text-xs font-bold mt-1.5" style={{ color: "var(--ink)" }}>
-                    {userProfile.created_at ? formatDateTime(userProfile.created_at).datePart : "N/A"}
-                  </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
-                    {getRelativeTime(userProfile.created_at)}
-                  </p>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      Total Paid
+                    </p>
+                    <p className="font-serif text-base font-bold mt-0.5 truncate" style={{ color: "var(--ink)" }}>
+                      ₹{totalPaidRevenue.toLocaleString("en-IN")}
+                    </p>
+                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                      {paidTxs.length} orders
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("subscriptions")}
+                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
+                  >
+                    Ledger
+                  </button>
+                </div>
+
+                {/* 5. Joined */}
+                <div
+                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
+                >
+                  <div>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      Joined
+                    </p>
+                    <p className="font-mono text-xs font-bold mt-1.5" style={{ color: "var(--ink)" }}>
+                      {userProfile.created_at ? formatDateTime(userProfile.created_at).datePart : "N/A"}
+                    </p>
+                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                      {getRelativeTime(userProfile.created_at)}
+                    </p>
+                  </div>
+                  <span className="mt-2 text-[9px] font-mono uppercase text-neutral-400 py-1">
+                    Verified
+                  </span>
                 </div>
               </div>
             </div>
@@ -795,6 +1150,96 @@ export default function UserDetailPage() {
           {/* TAB 2: SUBSCRIPTIONS & BILLING */}
           {activeTab === "subscriptions" && (
             <div className="space-y-4">
+              {/* Current Active Subscription Feature Card */}
+              {(() => {
+                const currentPlan = SUBSCRIPTION_PLANS.find(
+                  (p) => p.tier === (userProfile.subscription_tier || "free").toLowerCase()
+                ) || SUBSCRIPTION_PLANS[0];
+                const subStatus = (userProfile.subscription_status || "active").toLowerCase();
+
+                return (
+                  <div
+                    className="rounded-md p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors"
+                    style={{
+                      backgroundColor: "var(--sheet)",
+                      border: "1px solid var(--rule)",
+                    }}
+                  >
+                    <div className="flex items-start sm:items-center gap-4">
+                      <div
+                        className="w-12 h-12 rounded-md flex items-center justify-center shrink-0"
+                        style={{
+                          backgroundColor: currentPlan.badgeBg,
+                          border: `1px solid ${currentPlan.borderColor}`,
+                          color: currentPlan.badgeText,
+                        }}
+                      >
+                        <Crown weight="fill" className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                            {currentPlan.name}
+                          </h3>
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-mono text-[10px] uppercase font-bold tracking-wider"
+                            style={{
+                              backgroundColor:
+                                subStatus === "active"
+                                  ? "var(--status-success-bg)"
+                                  : subStatus === "trialing"
+                                  ? "rgba(59, 130, 246, 0.15)"
+                                  : "var(--status-fail-bg)",
+                              color:
+                                subStatus === "active"
+                                  ? "var(--status-success-text)"
+                                  : subStatus === "trialing"
+                                  ? "#2563eb"
+                                  : "var(--status-fail-text)",
+                              border: `1px solid ${
+                                subStatus === "active"
+                                  ? "var(--status-success-border)"
+                                  : subStatus === "trialing"
+                                  ? "rgba(59, 130, 246, 0.3)"
+                                  : "var(--status-fail-border)"
+                              }`,
+                            }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            {subStatus}
+                          </span>
+                          <span className="font-mono text-xs font-semibold" style={{ color: "var(--ink-muted)" }}>
+                            {currentPlan.price} • {currentPlan.billing}
+                          </span>
+                        </div>
+                        <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>
+                          {currentPlan.description}
+                          {currentPlan.includedCredits > 0 && (
+                            <strong className="ml-1 font-mono font-semibold" style={{ color: "var(--ink)" }}>
+                              ({currentPlan.includedCredits} credits package)
+                            </strong>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={() => setSubModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 cursor-pointer shadow-xs"
+                        style={{
+                          backgroundColor: "var(--btn-primary-bg)",
+                          color: "var(--btn-primary-text)",
+                        }}
+                      >
+                        <Crown weight="bold" className="w-4 h-4" />
+                        <span>Change Subscription</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div
                   className="rounded-md p-5"
@@ -957,9 +1402,24 @@ export default function UserDetailPage() {
                     <Coins weight="fill" className="w-6 h-6" style={{ color: "var(--ink)" }} />
                     <span>{userProfile.credits ?? 0}</span>
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
-                    Usable for generation queries
-                  </p>
+                  <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t" style={{ borderColor: "var(--rule-soft)" }}>
+                    <p className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                      Usable for queries
+                    </p>
+                    <button
+                      onClick={() => {
+                        setCreditModalMode("set");
+                        setExactCreditInput(userProfile.credits ?? 0);
+                        setDeltaCreditInput(5);
+                        setCreditModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                      style={{ backgroundColor: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                    >
+                      <Coins className="w-3 h-3" />
+                      <span>Set / Adjust</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div
@@ -1153,45 +1613,127 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-md"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5 rounded-md"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
-                  {/* Credit adjustment */}
+                  {/* Subscription plan override */}
                   <div className="space-y-2.5">
-                    <p className="text-xs font-bold" style={{ color: "var(--ink)" }}>Manual Credit Adjustment</p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-                      Add (positive) or deduct (negative) credits directly for this doctor account.
+                    <p className="text-xs font-bold flex items-center gap-1.5" style={{ color: "var(--ink)" }}>
+                      <Crown weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Subscription Plan Override</span>
                     </p>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        placeholder="e.g. 10 or -5"
-                        value={creditAdjustment || ""}
-                        onChange={(e) => setCreditAdjustment(parseInt(e.target.value) || 0)}
-                        className="w-32 px-3 py-2 rounded-md text-xs font-mono outline-none"
+                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                      Current: <strong className="capitalize" style={{ color: "var(--ink)" }}>{userProfile.subscription_tier || "Free"}</strong> ({userProfile.subscription_status || "Active"})
+                    </p>
+                    <div className="space-y-1.5">
+                      <select
+                        value={selectedTier}
+                        onChange={(e) => setSelectedTier(e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded-md text-xs font-sans outline-none"
                         style={{
                           backgroundColor: "var(--input-bg)",
                           border: "1px solid var(--input-border)",
                           color: "var(--input-text)",
                         }}
-                      />
+                      >
+                        <option value="free">Free Tier (Pay per credit)</option>
+                        <option value="starter">Starter Plan (₹150)</option>
+                        <option value="standard">Standard Growth (₹750)</option>
+                        <option value="professional">Professional Practice (₹1,500)</option>
+                        <option value="enterprise">Enterprise Hospital (₹3,000)</option>
+                      </select>
+
+                      <div className="flex gap-2">
+                        <select
+                          value={selectedSubStatus}
+                          onChange={(e) => setSelectedSubStatus(e.target.value)}
+                          className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-sans outline-none"
+                          style={{
+                            backgroundColor: "var(--input-bg)",
+                            border: "1px solid var(--input-border)",
+                            color: "var(--input-text)",
+                          }}
+                        >
+                          <option value="active">Active</option>
+                          <option value="trialing">Trialing</option>
+                          <option value="past_due">Past Due</option>
+                          <option value="canceled">Canceled</option>
+                        </select>
+                        <button
+                          onClick={() => handleSaveSubscription()}
+                          disabled={subLoading}
+                          className="px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer"
+                          style={{
+                            backgroundColor: "var(--btn-primary-bg)",
+                            color: "var(--btn-primary-text)",
+                          }}
+                        >
+                          {subLoading ? "Saving..." : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Credit adjustment */}
+                  <div className="space-y-2.5">
+                    <p className="text-xs font-bold flex items-center gap-1.5" style={{ color: "var(--ink)" }}>
+                      <Coins weight="fill" className="w-3.5 h-3.5" style={{ color: "var(--ink)" }} />
+                      <span>Credit Balance Controls</span>
+                    </p>
+                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                      Current: <strong className="font-mono" style={{ color: "var(--ink)" }}>{userProfile.credits ?? 0} credits</strong>. Delta adjust or set exact total.
+                    </p>
+                    <div className="space-y-1.5">
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Delta: +5 or -2"
+                          value={creditAdjustment || ""}
+                          onChange={(e) => setCreditAdjustment(parseInt(e.target.value) || 0)}
+                          className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-mono outline-none"
+                          style={{
+                            backgroundColor: "var(--input-bg)",
+                            border: "1px solid var(--input-border)",
+                            color: "var(--input-text)",
+                          }}
+                        />
+                        <button
+                          onClick={handleAdjustCredits}
+                          disabled={actionLoading || creditAdjustment === 0}
+                          className="px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer"
+                          style={{
+                            backgroundColor: "var(--btn-primary-bg)",
+                            color: "var(--btn-primary-text)",
+                          }}
+                        >
+                          Apply
+                        </button>
+                      </div>
                       <button
-                        onClick={handleAdjustCredits}
-                        disabled={actionLoading || creditAdjustment === 0}
-                        className="px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer"
+                        onClick={() => {
+                          setCreditModalMode("set");
+                          setExactCreditInput(userProfile.credits ?? 0);
+                          setDeltaCreditInput(5);
+                          setCreditModalOpen(true);
+                        }}
+                        className="w-full py-1 text-[10px] font-mono uppercase tracking-wider font-semibold rounded transition-opacity hover:opacity-85 cursor-pointer"
                         style={{
-                          backgroundColor: "var(--btn-primary-bg)",
-                          color: "var(--btn-primary-text)",
+                          backgroundColor: "var(--sheet)",
+                          border: "1px solid var(--rule)",
+                          color: "var(--ink)",
                         }}
                       >
-                        Apply
+                        Open Exact Credit Editor
                       </button>
                     </div>
                   </div>
 
                   {/* Account lock/unlock */}
                   <div className="space-y-2.5">
-                    <p className="text-xs font-bold" style={{ color: "var(--ink)" }}>Access Restriction</p>
+                    <p className="text-xs font-bold flex items-center gap-1.5" style={{ color: "var(--ink)" }}>
+                      <Shield weight="fill" className="w-3.5 h-3.5" style={{ color: "var(--ink)" }} />
+                      <span>Access Restriction</span>
+                    </p>
                     <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                       Instantly toggle whether this user can log in and generate legal consents.
                     </p>
@@ -1199,7 +1741,7 @@ export default function UserDetailPage() {
                       <button
                         onClick={handleToggleStatus}
                         disabled={actionLoading}
-                        className="px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all cursor-pointer"
+                        className="w-full px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all cursor-pointer mt-1"
                         style={{
                           backgroundColor: userProfile.is_active !== false ? "var(--status-fail-bg)" : "var(--status-success-bg)",
                           color: userProfile.is_active !== false ? "var(--status-fail-text)" : "var(--status-success-text)",
@@ -1448,6 +1990,485 @@ export default function UserDetailPage() {
                 }}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CHANGE SUBSCRIPTION PLAN MODAL */}
+      {subModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-foreground font-body">
+          <div
+            className="w-full max-w-2xl max-h-[90vh] rounded-md p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundColor: "var(--sheet)",
+              border: "1px solid var(--rule)",
+            }}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b shrink-0" style={{ borderColor: "var(--rule)" }}>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="p-1 rounded font-mono text-xs"
+                    style={{ backgroundColor: "rgba(245, 158, 11, 0.15)", color: "#d97706" }}
+                  >
+                    <Crown weight="fill" className="w-4 h-4" />
+                  </span>
+                  <span className="font-mono text-xs uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                    Account Tier Governance
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                  Change Subscription Plan
+                </h3>
+                <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
+                  Practitioner: <strong style={{ color: "var(--ink)" }}>{userProfile.doctor_name || "Doctor"}</strong> • Current Tier:{" "}
+                  <strong className="uppercase" style={{ color: "var(--ink)" }}>{userProfile.subscription_tier || "Free"}</strong> ({userProfile.subscription_status || "Active"})
+                </p>
+              </div>
+
+              <button
+                onClick={() => setSubModalOpen(false)}
+                className="p-1.5 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                style={{ color: "var(--ink-muted)" }}
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              <div>
+                <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-2" style={{ color: "var(--ink)" }}>
+                  Select Target Plan Tier
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {SUBSCRIPTION_PLANS.map((plan) => {
+                    const isSelected = selectedTier === plan.tier;
+                    return (
+                      <div
+                        key={plan.tier}
+                        onClick={() => {
+                          setSelectedTier(plan.tier);
+                          // Default grant credits if changing to a paid plan
+                          if (plan.includedCredits > 0) {
+                            setGrantCredits(plan.includedCredits);
+                          } else {
+                            setGrantCredits(0);
+                          }
+                        }}
+                        className={`p-3.5 rounded-md border text-left cursor-pointer transition-all ${
+                          isSelected ? "ring-2 ring-blue-500 shadow-sm" : "hover:border-neutral-400"
+                        }`}
+                        style={{
+                          backgroundColor: isSelected ? "var(--row-hover-bg)" : "var(--paper)",
+                          borderColor: isSelected ? "var(--ink)" : "var(--rule)",
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-serif font-bold text-sm" style={{ color: "var(--ink)" }}>
+                            {plan.name}
+                          </span>
+                          <span
+                            className="px-2 py-0.5 rounded font-mono text-[10px] font-bold uppercase tracking-wider"
+                            style={{
+                              backgroundColor: plan.badgeBg,
+                              color: plan.badgeText,
+                              border: `1px solid ${plan.borderColor}`,
+                            }}
+                          >
+                            {plan.price}
+                          </span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed mb-1.5" style={{ color: "var(--ink-muted)" }}>
+                          {plan.description}
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] font-mono" style={{ color: "var(--ink-soft)" }}>
+                          <span>{plan.billing}</span>
+                          {plan.includedCredits > 0 ? (
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                              +{plan.includedCredits} Credits included
+                            </span>
+                          ) : (
+                            <span>0 base credits</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status and Credit Grant */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div>
+                  <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    Subscription Status
+                  </label>
+                  <select
+                    value={selectedSubStatus}
+                    onChange={(e) => setSelectedSubStatus(e.target.value)}
+                    className="w-full px-3 py-2 rounded-md text-xs font-sans outline-none cursor-pointer"
+                    style={{
+                      backgroundColor: "var(--input-bg)",
+                      border: "1px solid var(--input-border)",
+                      color: "var(--input-text)",
+                    }}
+                  >
+                    <option value="active">Active (Full access)</option>
+                    <option value="trialing">Trialing (Trial evaluation)</option>
+                    <option value="past_due">Past Due (Payment grace)</option>
+                    <option value="canceled">Canceled (Terminated)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    Grant Plan Credits (Optional)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={grantCredits}
+                      onChange={(e) => setGrantCredits(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 rounded-md text-xs font-mono outline-none"
+                      style={{
+                        backgroundColor: "var(--input-bg)",
+                        border: "1px solid var(--input-border)",
+                        color: "var(--input-text)",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const plan = SUBSCRIPTION_PLANS.find((p) => p.tier === selectedTier);
+                        setGrantCredits(plan?.includedCredits || 0);
+                      }}
+                      className="text-[10px] font-mono uppercase px-2 py-2 rounded shrink-0 border"
+                      style={{
+                        backgroundColor: "var(--paper)",
+                        borderColor: "var(--rule)",
+                        color: "var(--ink-muted)",
+                      }}
+                      title="Reset to default credits for selected tier"
+                    >
+                      Default
+                    </button>
+                  </div>
+                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                    Will increase current balance ({userProfile.credits ?? 0}) by +{grantCredits}.
+                  </p>
+                </div>
+              </div>
+
+              {/* Justification Note */}
+              <div>
+                <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  Audit Justification Note
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Plan upgrade requested by clinic via billing support..."
+                  value={subAdminNote}
+                  onChange={(e) => setSubAdminNote(e.target.value)}
+                  className="w-full px-3 py-2 rounded-md text-xs outline-none"
+                  style={{
+                    backgroundColor: "var(--input-bg)",
+                    border: "1px solid var(--input-border)",
+                    color: "var(--input-text)",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between pt-3 border-t shrink-0" style={{ borderColor: "var(--rule)" }}>
+              <div className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>
+                Selected: <strong className="uppercase" style={{ color: "var(--ink)" }}>{selectedTier}</strong> ({selectedSubStatus})
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSubModalOpen(false)}
+                  disabled={subLoading}
+                  className="px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: "var(--paper)",
+                    border: "1px solid var(--rule)",
+                    color: "var(--ink)",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleSaveSubscription()}
+                  disabled={subLoading}
+                  className="px-5 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                  style={{
+                    backgroundColor: "var(--btn-primary-bg)",
+                    color: "var(--btn-primary-text)",
+                  }}
+                >
+                  <Crown weight="bold" className="w-3.5 h-3.5" />
+                  <span>{subLoading ? "Updating..." : "Confirm & Update Plan"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT / SET CREDITS MODAL */}
+      {creditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-foreground font-body">
+          <div
+            className="w-full max-w-lg max-h-[90vh] rounded-md p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundColor: "var(--sheet)",
+              border: "1px solid var(--rule)",
+            }}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b shrink-0" style={{ borderColor: "var(--rule)" }}>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="p-1 rounded font-mono text-xs"
+                    style={{ backgroundColor: "rgba(16, 185, 129, 0.15)", color: "#059669" }}
+                  >
+                    <Coins weight="fill" className="w-4 h-4" />
+                  </span>
+                  <span className="font-mono text-xs uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                    Treasury & Balance Ledger
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+                  Modify User Credits
+                </h3>
+                <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
+                  Doctor: <strong style={{ color: "var(--ink)" }}>{userProfile.doctor_name || "Doctor"}</strong> • Current Balance:{" "}
+                  <strong className="font-mono font-bold" style={{ color: "var(--ink)" }}>{userProfile.credits ?? 0} credits</strong>
+                </p>
+              </div>
+
+              <button
+                onClick={() => setCreditModalOpen(false)}
+                className="p-1.5 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                style={{ color: "var(--ink-muted)" }}
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              {/* Mode Toggle */}
+              <div className="flex rounded-md p-1" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
+                <button
+                  type="button"
+                  onClick={() => setCreditModalMode("set")}
+                  className={`flex-1 py-1.5 text-xs font-mono uppercase tracking-[0.08em] font-bold rounded transition-all cursor-pointer ${
+                    creditModalMode === "set" ? "shadow-xs" : "opacity-60 hover:opacity-100"
+                  }`}
+                  style={{
+                    backgroundColor: creditModalMode === "set" ? "var(--sheet)" : "transparent",
+                    color: "var(--ink)",
+                  }}
+                >
+                  Set Exact Balance
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCreditModalMode("adjust")}
+                  className={`flex-1 py-1.5 text-xs font-mono uppercase tracking-[0.08em] font-bold rounded transition-all cursor-pointer ${
+                    creditModalMode === "adjust" ? "shadow-xs" : "opacity-60 hover:opacity-100"
+                  }`}
+                  style={{
+                    backgroundColor: creditModalMode === "adjust" ? "var(--sheet)" : "transparent",
+                    color: "var(--ink)",
+                  }}
+                >
+                  Add / Deduct (Delta)
+                </button>
+              </div>
+
+              {creditModalMode === "set" ? (
+                /* Mode 1: Set Exact Balance */
+                <div className="space-y-3">
+                  <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block" style={{ color: "var(--ink)" }}>
+                    New Total Credit Balance
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={exactCreditInput}
+                    onChange={(e) => setExactCreditInput(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2.5 rounded-md text-base font-mono font-bold outline-none"
+                    style={{
+                      backgroundColor: "var(--input-bg)",
+                      border: "1px solid var(--input-border)",
+                      color: "var(--input-text)",
+                    }}
+                  />
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    <span className="text-[10px] font-mono uppercase text-neutral-400 mr-1">Presets:</span>
+                    {[0, 5, 10, 25, 50, 100].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setExactCreditInput(preset)}
+                        className="px-2.5 py-1 text-xs font-mono rounded border transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+                        style={{
+                          backgroundColor: exactCreditInput === preset ? "var(--ink)" : "var(--paper)",
+                          color: exactCreditInput === preset ? "var(--paper)" : "var(--ink)",
+                          borderColor: "var(--rule)",
+                        }}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* Mode 2: Delta Adjust */
+                <div className="space-y-3">
+                  <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block" style={{ color: "var(--ink)" }}>
+                    Credits to Add (+) or Deduct (-)
+                  </label>
+                  <input
+                    type="number"
+                    value={deltaCreditInput || ""}
+                    onChange={(e) => setDeltaCreditInput(parseInt(e.target.value) || 0)}
+                    placeholder="e.g. +5 or -2"
+                    className="w-full px-3 py-2.5 rounded-md text-base font-mono font-bold outline-none"
+                    style={{
+                      backgroundColor: "var(--input-bg)",
+                      border: "1px solid var(--input-border)",
+                      color: "var(--input-text)",
+                    }}
+                  />
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    <span className="text-[10px] font-mono uppercase text-neutral-400 mr-1">Quick:</span>
+                    {[
+                      { label: "+1", val: 1 },
+                      { label: "+5", val: 5 },
+                      { label: "+10", val: 10 },
+                      { label: "+25", val: 25 },
+                      { label: "-1", val: -1 },
+                      { label: "-5", val: -5 },
+                    ].map((btn) => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => setDeltaCreditInput(btn.val)}
+                        className="px-2.5 py-1 text-xs font-mono rounded border transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+                        style={{
+                          backgroundColor: deltaCreditInput === btn.val ? "var(--ink)" : "var(--paper)",
+                          color: deltaCreditInput === btn.val ? "var(--paper)" : "var(--ink)",
+                          borderColor: "var(--rule)",
+                        }}
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Result Box */}
+              {(() => {
+                const current = userProfile.credits ?? 0;
+                const finalBalance =
+                  creditModalMode === "set"
+                    ? Math.max(0, Number(exactCreditInput) || 0)
+                    : current + (Number(deltaCreditInput) || 0);
+                const difference = finalBalance - current;
+
+                return (
+                  <div
+                    className="p-3.5 rounded-md border flex items-center justify-between"
+                    style={{
+                      backgroundColor: "var(--paper)",
+                      borderColor: "var(--rule)",
+                    }}
+                  >
+                    <div>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                        Current Balance
+                      </p>
+                      <p className="font-mono text-sm font-bold" style={{ color: "var(--ink)" }}>
+                        {current} credits
+                      </p>
+                    </div>
+
+                    <div className="text-center font-mono text-xs font-bold" style={{ color: difference < 0 ? "var(--red)" : "#059669" }}>
+                      {difference > 0 ? `+${difference}` : difference}
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-[10px] font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                        New Resulting Balance
+                      </p>
+                      <p
+                        className="font-mono text-base font-bold"
+                        style={{ color: finalBalance < 0 ? "var(--red)" : "#059669" }}
+                      >
+                        {finalBalance} credits
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Justification Note */}
+              <div>
+                <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  Audit Justification Note
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Courtesy top-up for webinar attendees, or billing correction..."
+                  value={creditModalNote}
+                  onChange={(e) => setCreditModalNote(e.target.value)}
+                  className="w-full px-3 py-2 rounded-md text-xs outline-none"
+                  style={{
+                    backgroundColor: "var(--input-bg)",
+                    border: "1px solid var(--input-border)",
+                    color: "var(--input-text)",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t shrink-0" style={{ borderColor: "var(--rule)" }}>
+              <button
+                onClick={() => setCreditModalOpen(false)}
+                disabled={creditModalLoading}
+                className="px-4 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-colors cursor-pointer"
+                style={{
+                  backgroundColor: "var(--paper)",
+                  border: "1px solid var(--rule)",
+                  color: "var(--ink)",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveCreditsModal}
+                disabled={creditModalLoading}
+                className="px-5 py-2 rounded-md text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                style={{
+                  backgroundColor: "var(--btn-primary-bg)",
+                  color: "var(--btn-primary-text)",
+                }}
+              >
+                <Coins weight="bold" className="w-3.5 h-3.5" />
+                <span>{creditModalLoading ? "Saving..." : "Save Credit Balance"}</span>
               </button>
             </div>
           </div>

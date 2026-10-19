@@ -451,7 +451,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
                 <span style={{ color: "var(--ink-muted)" }}>Payment Method</span>
-                <span className="font-bold capitalize text-right" style={{ color: "var(--ink)" }}>{invoiceTx.metadata?.method || "Razorpay"}</span>
+                <span className="font-bold capitalize text-right" style={{ color: "var(--ink)" }}>{invoiceTx.metadata?.method || "Cashfree"}</span>
               </div>
               <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
                 <span style={{ color: "var(--ink-muted)" }}>Credits Credited</span>
