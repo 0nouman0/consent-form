@@ -4,11 +4,12 @@ import { useState, useEffect, useRef, ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
+import { List, X, CheckCircle, ShieldCheck, Translate, Clock } from "@phosphor-icons/react";
 
 /* ═══════════════════════════════════════════════════════════
    CONSENTGEN — LANDING
    Editorial paper-and-ink system. Typography does the work.
-   Palette: paper / ink / one stamp red. No gradients. No glass.
+   Palette: paper / ink / one stamp red.
 ═══════════════════════════════════════════════════════════ */
 
 const PAPER = "#F4F1E9";
@@ -19,10 +20,6 @@ const RULE = "rgba(23,20,16,0.15)";
 const RULE_SOFT = "rgba(23,20,16,0.08)";
 const RED = "#BE3D2A";
 
-/* Display type uses the app's own Bricolage Grotesque (loaded in layout.tsx,
-   applied here via the `font-serif` utility) instead of a one-off imported
-   font — accent phrases are set in the red ink rather than italics, since
-   the grotesque has no italic cut. */
 function Accent({ children }: { children: ReactNode }) {
   return <span style={{ color: RED }}>{children}</span>;
 }
@@ -60,6 +57,7 @@ const SECTIONS = [
     body:
       "Enter the patient, the procedure, and the counseling language. The engine drafts a complete consent form — every mandatory clause present, every signature block timestamped, the procedure named exactly as you typed it. Blanket consent is void in Indian law; ConsentGen never writes it.",
     metric: { value: "30 s", label: "average generation, down from 30 minutes of manual drafting" },
+    type: "stream",
   },
   {
     num: "§ 02",
@@ -67,15 +65,17 @@ const SECTIONS = [
     title: ["Nothing signed", "before it's checked."],
     body:
       "A live clause register audits the draft as it streams in — authorization, risk disclosure, alternatives, withdrawal rights, capacity. Anything missing is flagged before the form ever reaches a patient. The checklist follows the same eleven clauses courts look for.",
-    metric: { value: "11", label: "mandatory clauses verified on every single form" },
+    metric: { value: "11", label: "mandatory clauses verified against Supreme Court precedent" },
+    type: "checklist",
   },
   {
     num: "§ 03",
     tag: "Language",
     title: ["Counseled in Hindi,", "filed in English."],
     body:
-      "Indian courts require proof the patient understood. ConsentGen generates the full form twice — once in English for the record, once in any of twelve Indian languages for the patient — with the counseling language stated on the face of the document.",
-    metric: { value: "12", label: "Indian languages, generated as complete paired documents" },
+      "Indian courts require proof the patient understood in their own tongue. ConsentGen generates the complete document twice — once in English for the hospital record, once in any of 11 regional Indian languages for the patient — with the counseling language affirmed on the face of the document. 12 languages total: English plus Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali, Marathi, Gujarati, Punjabi, Odia, and Urdu.",
+    metric: { value: "12", label: "languages total — English plus 11 regional Indian languages" },
+    type: "bilingual",
   },
 ];
 
@@ -99,7 +99,7 @@ const STEPS = [
 
 const STATS = [
   { value: "10", suffix: "types", label: "Surgical, obstetric, psychiatric, telemedicine, research & more" },
-  { value: "12", suffix: "languages", label: "Bilingual output with counseling language on record" },
+  { value: "12", suffix: "languages", label: "English + 11 regional Indian languages with counseling language on record" },
   { value: "6", suffix: "frameworks", label: "IMC, BNS, MoRTH, CPA, Aadhaar Act, DPDP" },
   { value: "40", suffix: "+ procedures", label: "Pre-mapped risk libraries with autocomplete" },
 ];
@@ -112,7 +112,6 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
     const el = ref.current;
     if (!el) return;
 
-    // Already in (or above) the viewport — show immediately.
     const show = () => el.classList.add("is-visible");
     if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
       show();
@@ -134,7 +133,6 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
     );
     obs.observe(el);
 
-    // Scroll fallback for environments where IO never fires.
     const onScroll = () => {
       if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
         show();
@@ -201,20 +199,19 @@ function GhostButton({ href, children }: { href: string; children: ReactNode }) 
 
 function Specimen() {
   return (
-    <div className="relative select-none" aria-hidden>
-      {/* Sheet behind */
-      }
+    <div className="relative select-none max-w-[420px] w-full mx-auto" aria-hidden>
+      {/* Sheet behind */}
       <div
-        className="absolute inset-0 translate-x-3 translate-y-3 rotate-[1.2deg]"
+        className="absolute inset-0 translate-x-2 sm:translate-x-3 translate-y-2 sm:translate-y-3 rotate-[1.2deg] pointer-events-none"
         style={{ backgroundColor: SHEET, border: `1px solid ${RULE_SOFT}` }}
       />
       {/* Main sheet */}
       <div
-        className="relative p-7 sm:p-9"
+        className="relative p-6 sm:p-8"
         style={{ backgroundColor: SHEET, border: `1px solid ${RULE}`, boxShadow: "0 24px 48px -24px rgba(23,20,16,0.25)" }}
       >
         {/* Doc header */}
-        <div className="flex items-baseline justify-between pb-4 mb-5" style={{ borderBottom: `1px solid ${INK}` }}>
+        <div className="flex items-baseline justify-between pb-3 mb-4" style={{ borderBottom: `1px solid ${INK}` }}>
           <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: INK }}>
             Form CG-01
           </span>
@@ -226,7 +223,7 @@ function Specimen() {
         <p className="text-center text-[13px] uppercase tracking-[0.14em] font-semibold mb-1" style={{ color: INK }}>
           Standard Informed Consent
         </p>
-        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] mb-6" style={{ color: MUTED }}>
+        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] mb-5" style={{ color: MUTED }}>
           Surgical procedure · Bilingual — English / हिन्दी
         </p>
 
@@ -237,40 +234,40 @@ function Specimen() {
           ["Procedure", "Laparoscopic Cholecystectomy"],
           ["Counseled in", "Hindi"],
         ].map(([k, v]) => (
-          <div key={k} className="flex items-baseline gap-3 py-2" style={{ borderBottom: `1px solid ${RULE_SOFT}` }}>
+          <div key={k} className="flex items-baseline gap-3 py-1.5" style={{ borderBottom: `1px solid ${RULE_SOFT}` }}>
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] w-24 shrink-0" style={{ color: MUTED }}>
               {k}
             </span>
-            <span className="text-[15px] font-serif font-medium" style={{ color: INK }}>
+            <span className="text-[14.5px] font-serif font-medium" style={{ color: INK }}>
               {v}
             </span>
           </div>
         ))}
 
         {/* Clause excerpt */}
-        <p className="mt-6 mb-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+        <p className="mt-5 mb-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
           Cl. 08 — Voluntariness
         </p>
-        <p className="text-[12.5px] leading-[1.75]" style={{ color: "#4A463C", textAlign: "justify" }}>
+        <p className="text-[12px] leading-[1.7]" style={{ color: "#4A463C", textAlign: "justify" }}>
           I confirm this consent is given freely, without coercion, and that I retain the right to withdraw
           it at any time before the procedure begins, per BNS § 27. The procedure named above is the only
           procedure authorised by this document.
         </p>
 
         {/* Signature row */}
-        <div className="mt-7 grid grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6">
           <div>
-            <p className="text-[22px] font-serif font-medium leading-none mb-1.5 pl-1" style={{ color: INK }}>
+            <p className="text-[20px] font-serif font-medium leading-none mb-1 pl-1" style={{ color: INK }}>
               A. Deshmukh
             </p>
-            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1.5">
+            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1">
               <span className="font-mono text-[9px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
                 Patient · Date & Time
               </span>
             </div>
           </div>
           <div className="flex flex-col justify-end">
-            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1.5">
+            <div style={{ borderTop: `1px solid ${INK}` }} className="pt-1">
               <span className="font-mono text-[9px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
                 Physician · Reg. No.
               </span>
@@ -278,27 +275,130 @@ function Specimen() {
           </div>
         </div>
 
-        {/* Stamp */}
+        {/* Stamp clamped within mobile bounds */}
         <div
-          className="absolute -right-3 top-36 rotate-[8deg] px-3.5 py-2.5 text-center"
-          style={{ border: `2px solid ${RED}`, borderRadius: "3px", backgroundColor: "rgba(252,251,247,0.92)" }}
+          className="absolute right-2 sm:-right-2 top-28 sm:top-36 rotate-[6deg] sm:rotate-[8deg] px-2.5 sm:px-3.5 py-2 text-center"
+          style={{ border: `2px solid ${RED}`, borderRadius: "3px", backgroundColor: "rgba(252,251,247,0.96)", boxShadow: "0 4px 12px rgba(190,61,42,0.15)" }}
         >
-          <p className="font-mono text-[9px] uppercase tracking-[0.22em] leading-tight" style={{ color: RED }}>
+          <p className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.22em] leading-tight" style={{ color: RED }}>
             Verified
           </p>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] leading-tight mt-0.5" style={{ color: RED }}>
+          <p className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.14em] leading-tight mt-0.5" style={{ color: RED }}>
             IMC 2002
           </p>
           <div className="my-1" style={{ borderTop: `1px solid ${RED}` }} />
-          <p className="font-mono text-[8px] uppercase tracking-[0.18em] leading-tight" style={{ color: RED }}>
+          <p className="font-mono text-[7px] sm:text-[8px] uppercase tracking-[0.18em] leading-tight" style={{ color: RED }}>
             11/11 clauses
           </p>
         </div>
       </div>
 
       {/* Caption */}
-      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
         Fig. 01 — Generated in 28.4 seconds. Streamed, verified, filed.
+      </p>
+    </div>
+  );
+}
+
+/* ─── METHOD PREVIEW CARDS (fills empty right space) ─── */
+
+function MethodVisualCard({ type }: { type: string }) {
+  if (type === "stream") {
+    return (
+      <div
+        className="w-full max-w-[340px] p-5 rounded-sm border"
+        style={{ backgroundColor: SHEET, borderColor: RULE, boxShadow: "0 12px 24px -12px rgba(23,20,16,0.15)" }}
+      >
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/10">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] flex items-center gap-1.5" style={{ color: RED }}>
+            <Clock size={13} weight="bold" /> Live Clause Stream
+          </span>
+          <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+            ACTIVE
+          </span>
+        </div>
+        <div className="space-y-2 text-left font-mono text-[11px]">
+          <div className="p-2 rounded bg-[#F4F1E9]/60 flex items-center justify-between">
+            <span style={{ color: INK }}>Cl. 01 Authorization</span>
+            <span className="text-emerald-700 font-semibold text-[10px]">✓ DRAFTED</span>
+          </div>
+          <div className="p-2 rounded bg-[#F4F1E9]/60 flex items-center justify-between">
+            <span style={{ color: INK }}>Cl. 05 Anaesthesia</span>
+            <span className="text-emerald-700 font-semibold text-[10px]">✓ DRAFTED</span>
+          </div>
+          <div className="p-2 rounded bg-[#F4F1E9]/60 flex items-center justify-between">
+            <span style={{ color: INK }}>Cl. 08 Voluntariness</span>
+            <span className="text-emerald-700 font-semibold text-[10px]">✓ DRAFTED</span>
+          </div>
+          <div className="p-2 rounded bg-amber-50/60 flex items-center justify-between border border-amber-200/50">
+            <span style={{ color: INK }}>Cl. 11 Timestamps</span>
+            <span className="text-amber-700 font-semibold text-[10px] animate-pulse">● STREAMING</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "checklist") {
+    return (
+      <div
+        className="w-full max-w-[340px] p-5 rounded-sm border"
+        style={{ backgroundColor: SHEET, borderColor: RULE, boxShadow: "0 12px 24px -12px rgba(23,20,16,0.15)" }}
+      >
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/10">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] flex items-center gap-1.5" style={{ color: INK }}>
+            <ShieldCheck size={14} weight="bold" style={{ color: RED }} /> 11-Point Register Audit
+          </span>
+          <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+            11/11 PASS
+          </span>
+        </div>
+        <div className="space-y-1.5 text-left text-[12px] font-sans">
+          {[
+            { text: "Specific procedure named (no blanket consent)", ref: "Samira Kohli (SC)" },
+            { text: "Complications & reasonable alternatives disclosed", ref: "IMC Reg. 7.16" },
+            { text: "Patient capacity & sobriety affirmed", ref: "BNS §§ 24–26" },
+            { text: "Uncoerced withdrawal right acknowledged", ref: "BNS § 27" },
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-start gap-2 py-1 border-b border-black/5 last:border-b-0">
+              <CheckCircle size={15} weight="fill" className="text-emerald-700 shrink-0 mt-0.5" />
+              <div>
+                <p className="leading-tight text-[12px]" style={{ color: INK }}>{item.text}</p>
+                <p className="font-mono text-[9px] uppercase tracking-[0.1em]" style={{ color: MUTED }}>{item.ref}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-full max-w-[340px] p-5 rounded-sm border"
+      style={{ backgroundColor: SHEET, borderColor: RULE, boxShadow: "0 12px 24px -12px rgba(23,20,16,0.15)" }}
+    >
+      <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/10">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] flex items-center gap-1.5" style={{ color: INK }}>
+          <Translate size={14} weight="bold" style={{ color: RED }} /> Dual-Record Output
+        </span>
+        <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-200">
+          BILINGUAL
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-left">
+        <div className="p-2.5 rounded bg-[#F4F1E9]/70 border border-black/5">
+          <p className="font-mono text-[9px] uppercase tracking-[0.1em] mb-1 font-semibold" style={{ color: MUTED }}>Hospital Copy</p>
+          <p className="font-serif text-[11px] leading-snug" style={{ color: INK }}>English record filed with permanent SHA-256 consent hash.</p>
+        </div>
+        <div className="p-2.5 rounded bg-[#F4F1E9]/70 border border-black/5">
+          <p className="font-mono text-[9px] uppercase tracking-[0.1em] mb-1 font-semibold" style={{ color: RED }}>Patient Copy</p>
+          <p className="font-serif text-[11px] leading-snug" style={{ color: INK }}>हिन्दी / বাংলা / தமிழ் in verified vernacular script.</p>
+        </div>
+      </div>
+      <p className="mt-3 font-mono text-[9.5px] uppercase tracking-[0.12em] text-center" style={{ color: MUTED }}>
+        Counseling language affirmed on face of record
       </p>
     </div>
   );
@@ -308,9 +408,9 @@ function Specimen() {
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Enable reveal animations only once JS is confirmed running.
   useEffect(() => {
     rootRef.current?.classList.add("js-anim");
   }, []);
@@ -327,7 +427,7 @@ export default function LandingPage() {
   const primaryHref = isLoggedIn ? "/generate" : "/login?redirect=/generate";
 
   return (
-    <div ref={rootRef} className="landing min-h-screen font-body" style={{ backgroundColor: PAPER, color: INK }}>
+    <div ref={rootRef} className="landing min-h-screen font-body overflow-x-clip" style={{ backgroundColor: PAPER, color: INK }}>
 
       {/* ══ TICKER ══ */}
       <div className="overflow-hidden py-2" style={{ backgroundColor: RED }}>
@@ -352,36 +452,45 @@ export default function LandingPage() {
       {/* ══ NAV ══ */}
       <header className="sticky top-0 z-50" style={{ backgroundColor: `${PAPER}F2`, backdropFilter: "blur(8px)", borderBottom: `1px solid ${RULE}` }}>
         <nav className="mx-auto flex max-w-[1320px] items-center justify-between px-5 sm:px-8 h-[68px]">
-          <Link href="/" className="flex items-baseline gap-1">
+          <Link href="/" className="inline-flex items-center gap-1 shrink-0">
             <span className="text-[22px] font-serif font-semibold tracking-tight" style={{ color: INK }}>
               ConsentGen
             </span>
-            <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+            <span className="text-[10px] font-mono leading-none align-super font-bold" style={{ color: RED }}>®</span>
           </Link>
 
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {[
               ["The form", "#anatomy"],
               ["Method", "#method"],
               ["Process", "#process"],
+              ["Regulations", "/regulations"],
             ].map(([label, href]) => (
-              <a key={href} href={href} className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
-                {label}
-              </a>
+              href.startsWith("#") ? (
+                <a key={href} href={href} className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                  {label}
+                </a>
+              ) : (
+                <Link key={href} href={href} className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                  {label}
+                </Link>
+              )
             ))}
           </div>
 
-          <div className="flex items-center gap-5">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-5">
             {isLoggedIn === true ? (
               <>
-                <Link href="/dashboard" className="link-rule hidden sm:inline font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                <Link href="/dashboard" className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
                   Dashboard
                 </Link>
                 <UserMenu compact />
               </>
             ) : (
               <>
-                <Link href="/login" className="link-rule hidden sm:inline font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
+                <Link href="/login" className="link-rule font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INK }}>
                   Sign in
                 </Link>
                 <Link
@@ -394,19 +503,121 @@ export default function LandingPage() {
               </>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link
+              href={primaryHref}
+              className="px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]"
+              style={{ backgroundColor: INK, color: PAPER, borderRadius: "2px" }}
+            >
+              Start
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              className="p-2 rounded border transition-colors"
+              style={{ borderColor: RULE, color: INK, backgroundColor: SHEET }}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X size={20} weight="bold" /> : <List size={20} weight="bold" />}
+            </button>
+          </div>
         </nav>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div
+            className="md:hidden border-b px-5 py-6 space-y-4"
+            style={{ backgroundColor: SHEET, borderColor: RULE }}
+          >
+            <div className="flex flex-col space-y-3">
+              {[
+                ["The form", "#anatomy"],
+                ["Method", "#method"],
+                ["Process", "#process"],
+                ["Regulations", "/regulations"],
+              ].map(([label, href]) => (
+                href.startsWith("#") ? (
+                  <a
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="font-serif text-[18px] py-1 border-b border-black/5"
+                    style={{ color: INK }}
+                  >
+                    {label}
+                  </a>
+                ) : (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="font-serif text-[18px] py-1 border-b border-black/5"
+                    style={{ color: INK }}
+                  >
+                    {label}
+                  </Link>
+                )
+              ))}
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2.5">
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 font-mono text-[12px] uppercase tracking-[0.14em] border"
+                    style={{ borderColor: RULE, color: INK }}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/generate"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 font-mono text-[12px] uppercase tracking-[0.14em]"
+                    style={{ backgroundColor: INK, color: PAPER }}
+                  >
+                    Generate Form
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 font-mono text-[12px] uppercase tracking-[0.14em] border"
+                    style={{ borderColor: RULE, color: INK }}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/login?mode=signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 font-mono text-[12px] uppercase tracking-[0.14em]"
+                    style={{ backgroundColor: INK, color: PAPER }}
+                  >
+                    Create Account
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ══ HERO ══ */}
-      <section className="mx-auto max-w-[1320px] px-5 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pt-16 sm:pt-24 pb-20">
+      <section className="mx-auto max-w-[1320px] px-5 sm:px-8 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pt-12 sm:pt-20 pb-16 sm:pb-20 items-center">
           <div className="lg:col-span-7 flex flex-col justify-center">
             <Reveal>
               <MonoLabel red>For registered medical practitioners · India</MonoLabel>
             </Reveal>
             <Reveal delay={80}>
               <h1
-                className="mt-6 font-serif font-semibold text-[13.5vw] sm:text-[76px] lg:text-[88px] leading-[0.98] tracking-[-0.02em]"
+                className="mt-6 font-serif font-semibold text-[13vw] sm:text-[76px] lg:text-[88px] leading-[0.98] tracking-[-0.02em]"
                 style={{ color: INK }}
               >
                 Consent, drafted
@@ -417,10 +628,10 @@ export default function LandingPage() {
               </h1>
             </Reveal>
             <Reveal delay={160}>
-              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.7]" style={{ color: MUTED }}>
-                ConsentGen turns patient details into complete, medico-legally sound informed
-                consent — every clause present, every signature timestamped, in English and
-                eleven Indian languages. Thirty seconds, not thirty minutes.
+              <p className="mt-8 max-w-[48ch] text-[16px] leading-[1.7]" style={{ color: MUTED }}>
+                ConsentGen turns clinical procedure details into complete, medico-legally sound informed
+                consent — every clause present, every signature timestamped, in English and 11 regional
+                Indian languages (12 total). Thirty seconds, not thirty minutes.
               </p>
             </Reveal>
             <Reveal delay={240}>
@@ -430,8 +641,8 @@ export default function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={320}>
-              <div className="mt-14 flex flex-wrap gap-x-10 gap-y-3">
-                {["Est. 30 s / form", "10 consent types", "12 languages"].map((t) => (
+              <div className="mt-12 sm:mt-14 flex flex-wrap gap-x-8 gap-y-3">
+                {["Est. 30 s / form", "10 consent types", "12 languages (EN + 11 IN)"].map((t) => (
                   <span key={t} className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
                     {t}
                   </span>
@@ -440,8 +651,8 @@ export default function LandingPage() {
             </Reveal>
           </div>
 
-          <div className="lg:col-span-5 flex items-center">
-            <Reveal delay={200} className="w-full max-w-[440px] mx-auto lg:mx-0">
+          <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
+            <Reveal delay={200} className="w-full">
               <Specimen />
             </Reveal>
           </div>
@@ -454,7 +665,7 @@ export default function LandingPage() {
           <Reveal>
             <div className="flex items-baseline justify-between mb-8">
               <MonoLabel>Index of frameworks</MonoLabel>
-              <MonoLabel>06 instruments</MonoLabel>
+              <MonoLabel>06 statutory instruments</MonoLabel>
             </div>
           </Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ borderTop: `1px solid ${RULE}` }}>
@@ -535,7 +746,7 @@ export default function LandingPage() {
       <section id="method" style={{ borderTop: `1px solid ${RULE}` }}>
         {SECTIONS.map((s, idx) => (
           <div key={s.num} style={idx > 0 ? { borderTop: `1px solid ${RULE}` } : undefined}>
-            <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="mx-auto max-w-[1320px] px-5 sm:px-8 py-20 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-2">
                 <Reveal>
                   <span className="font-mono text-[13px] tracking-[0.1em]" style={{ color: RED }}>{s.num}</span>
@@ -544,28 +755,29 @@ export default function LandingPage() {
                   </p>
                 </Reveal>
               </div>
-              <div className={`lg:col-span-6 ${idx % 2 === 1 ? "lg:order-3" : ""}`}>
+              <div className={`lg:col-span-5 ${idx % 2 === 1 ? "lg:order-3" : ""}`}>
                 <Reveal delay={60}>
                   <h3 className="font-serif font-semibold text-[36px] sm:text-[48px] leading-[1.04] tracking-[-0.01em]" style={{ color: INK }}>
                     {s.title[0]}
                     <br />
                     <Accent>{s.title[1]}</Accent>
                   </h3>
-                  <p className="mt-6 max-w-[52ch] text-[15.5px] leading-[1.75]" style={{ color: MUTED }}>
+                  <p className="mt-6 max-w-[50ch] text-[15.5px] leading-[1.75]" style={{ color: MUTED }}>
                     {s.body}
                   </p>
+                  <div className="mt-8 flex items-baseline gap-4">
+                    <span className="font-serif font-semibold text-[56px] leading-none" style={{ color: INK }}>
+                      {s.metric.value}
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] leading-snug max-w-[26ch]" style={{ color: MUTED }}>
+                      {s.metric.label}
+                    </span>
+                  </div>
                 </Reveal>
               </div>
-              <div className={`lg:col-span-4 flex lg:justify-end ${idx % 2 === 1 ? "lg:order-2 lg:justify-start" : ""}`}>
-                <Reveal delay={140}>
-                  <div className="lg:text-right">
-                    <p className="font-serif font-semibold text-[84px] sm:text-[104px] leading-none tracking-[-0.02em]" style={{ color: INK }}>
-                      {s.metric.value}
-                    </p>
-                    <p className="mt-3 max-w-[26ch] font-mono text-[10px] uppercase tracking-[0.14em] leading-[1.8] lg:ml-auto" style={{ color: MUTED }}>
-                      {s.metric.label}
-                    </p>
-                  </div>
+              <div className={`lg:col-span-5 flex justify-center lg:justify-end ${idx % 2 === 1 ? "lg:order-2 lg:justify-start" : ""}`}>
+                <Reveal delay={140} className="w-full flex justify-center lg:justify-end">
+                  <MethodVisualCard type={s.type} />
                 </Reveal>
               </div>
             </div>
@@ -591,7 +803,6 @@ export default function LandingPage() {
                   className="py-10 md:pr-10 h-full"
                   style={{
                     borderBottom: `1px solid ${RULE}`,
-                    ...(i > 0 ? {} : {}),
                   }}
                 >
                   <span className="font-serif font-semibold text-[64px] leading-none" style={{ color: "rgba(23,20,16,0.18)" }}>
@@ -610,18 +821,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══ PULL QUOTE ══ */}
+      {/* ══ JURISPRUDENCE QUOTE (Replaces placeholder testimonial) ══ */}
       <section style={{ borderTop: `1px solid ${RULE}` }}>
         <div className="mx-auto max-w-[980px] px-5 sm:px-8 py-24 sm:py-32 text-center">
           <Reveal>
             <span className="text-[28px]" style={{ color: RED }}>✳</span>
-            <blockquote className="mt-8 font-serif font-medium text-[30px] sm:text-[44px] leading-[1.25] tracking-[-0.01em]" style={{ color: INK }}>
-              “The forms are accurate, compliant, and save me thirty minutes a day.
-              The clause register means <Accent>nothing critical is ever missed</Accent> before
-              a procedure.”
+            <blockquote className="mt-8 font-serif font-medium text-[26px] sm:text-[38px] leading-[1.3] tracking-[-0.01em]" style={{ color: INK }}>
+              “A doctor has to seek and secure the consent of the patient before commencing a treatment...
+              Consent so given should be real and valid, based on adequate information concerning the nature
+              of the condition, proposed treatment, alternatives, and <Accent>substantial risks</Accent>.”
             </blockquote>
-            <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: MUTED }}>
-              Dr. Rajesh Kumar — Senior Surgeon, New Delhi
+            <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: INK }}>
+              Supreme Court of India
+            </p>
+            <p className="mt-1 font-mono text-[10px] tracking-[0.14em]" style={{ color: MUTED }}>
+              Samira Kohli v. Dr. Prabha Manchanda (2008) 2 SCC 1 · Landmark Medico-Legal Ruling
             </p>
           </Reveal>
         </div>
@@ -683,7 +897,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-14">
             <div className="col-span-2 md:col-span-1">
               <p className="font-serif font-semibold text-[20px]" style={{ color: INK }}>
-                ConsentGen<span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+                ConsentGen<span className="text-[10px] font-mono align-super" style={{ color: RED }}>®</span>
               </p>
               <p className="mt-3 max-w-[28ch] text-[12.5px] leading-[1.7]" style={{ color: MUTED }}>
                 Medico-legal consent documentation for Indian clinical practice.
@@ -691,7 +905,7 @@ export default function LandingPage() {
             </div>
             {[
               { h: "Product", links: [["Generate", "/generate"], ["Templates", "/templates"], ["History", "/history"], ["Chat", "/chat"]] },
-              { h: "Reference", links: [["Regulations", "/regulations"], ["The form", "#anatomy"], ["Method", "#method"]] },
+              { h: "Compliance & Law", links: [["Regulations", "/regulations"], ["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"], ["The form", "#anatomy"], ["Method", "#method"]] },
               { h: "Account", links: [["Sign in", "/login"], ["Dashboard", "/dashboard"], ["Credits", "/credits"]] },
             ].map((col) => (
               <div key={col.h}>
@@ -701,9 +915,15 @@ export default function LandingPage() {
                 <ul className="space-y-2.5">
                   {col.links.map(([label, href]) => (
                     <li key={label}>
-                      <Link href={href} className="link-rule text-[13.5px]" style={{ color: "#4A463C" }}>
-                        {label}
-                      </Link>
+                      {href.startsWith("#") ? (
+                        <a href={href} className="link-rule text-[13.5px]" style={{ color: "#4A463C" }}>
+                          {label}
+                        </a>
+                      ) : (
+                        <Link href={href} className="link-rule text-[13.5px]" style={{ color: "#4A463C" }}>
+                          {label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -712,17 +932,26 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 py-5" style={{ borderTop: `1px solid ${RULE}` }}>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+                © {new Date().getFullYear()} ConsentGen
+              </span>
+              <Link href="/terms" className="font-mono text-[10px] uppercase tracking-[0.16em] hover:underline" style={{ color: MUTED }}>
+                Terms
+              </Link>
+              <Link href="/privacy" className="font-mono text-[10px] uppercase tracking-[0.16em] hover:underline" style={{ color: MUTED }}>
+                Privacy
+              </Link>
+              <Link href="/regulations" className="font-mono text-[10px] uppercase tracking-[0.16em] hover:underline" style={{ color: MUTED }}>
+                Regulations
+              </Link>
+            </div>
             <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
-              © {new Date().getFullYear()} ConsentGen — Not a substitute for legal counsel
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
-              Made for Indian practice ✳ IMC · BNS · MoRTH
+              Made for Indian practice ✳ IMC · BNS · MoRTH · DPDP
             </span>
           </div>
 
-          {/* Giant wordmark — sized off the container's own width (not the
-              viewport) so it always fits without clipping, with a subtle
-              ink → red → ink gradient for depth */}
+          {/* Wordmark */}
           <div className="overflow-hidden -mb-2 [container-type:inline-size]" aria-hidden>
             <p
               className="text-center whitespace-nowrap font-serif font-semibold leading-[0.78] tracking-[-0.02em] translate-y-[12%] select-none"

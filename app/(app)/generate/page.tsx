@@ -85,10 +85,10 @@ function GenerateContent() {
           if (data) {
             setCredits(data.credits);
             // Authoritative clinician auto-fill from the server profile
-            if (data.doctor_name) form.setValue("clinical.doctorName", data.doctor_name);
-            if (data.doctor_registration_no) form.setValue("clinical.doctorRegistrationNo", data.doctor_registration_no);
-            if (data.hospital_name) form.setValue("clinical.hospitalName", data.hospital_name);
-            if (data.hospital_address) form.setValue("clinical.hospitalAddress", data.hospital_address);
+            if (data.doctor_name) form.setValue("clinical.doctorName", data.doctor_name, { shouldValidate: true, shouldDirty: true });
+            if (data.doctor_registration_no) form.setValue("clinical.doctorRegistrationNo", data.doctor_registration_no, { shouldValidate: true, shouldDirty: true });
+            if (data.hospital_name) form.setValue("clinical.hospitalName", data.hospital_name, { shouldValidate: true, shouldDirty: true });
+            if (data.hospital_address) form.setValue("clinical.hospitalAddress", data.hospital_address, { shouldValidate: true, shouldDirty: true });
           }
         }
       } catch (err) {
@@ -407,10 +407,33 @@ function GenerateContent() {
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center justify-center p-12 rounded-md max-w-md mx-auto"
-            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+            className="space-y-3"
           >
-            <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--rule)", borderTopColor: "var(--ink)" }} />
+            {/* Skeleton cards mimicking the form-type selector */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-md p-10 min-h-[380px] flex flex-col gap-5 animate-pulse"
+                  style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+                >
+                  <div className="w-14 h-14 rounded-md" style={{ backgroundColor: "var(--rule)" }} />
+                  <div className="space-y-2">
+                    <div className="h-5 rounded-md w-2/5" style={{ backgroundColor: "var(--rule)" }} />
+                    <div className="h-3 rounded-md w-4/5" style={{ backgroundColor: "var(--rule)" }} />
+                    <div className="h-3 rounded-md w-3/5" style={{ backgroundColor: "var(--rule)" }} />
+                  </div>
+                  <div className="flex flex-col gap-2 mt-2">
+                    {[1, 2, 3, 4].map((j) => (
+                      <div key={j} className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: "var(--rule)" }} />
+                        <div className="h-3 rounded-md flex-1" style={{ backgroundColor: "var(--rule)" }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         ) : credits === 0 ? (
           <motion.div

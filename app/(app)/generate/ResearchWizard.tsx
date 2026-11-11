@@ -98,6 +98,7 @@ function Toggle({ id, checked, onChange, label, description }: ToggleProps) {
 export default function ResearchWizard({ form, onSubmit, status }: ResearchWizardProps) {
   const [step, setStep] = useState(0);
   const [sliding, setSliding] = useState<"none" | "left" | "right">("none");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const titleRef = useRef<HTMLDivElement>(null);
 
   const { register, watch, setValue, getValues, formState: { errors } } = form;
@@ -516,10 +517,17 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                   <input
                     id="participant.age"
                     className={inputCls}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={3}
                     aria-required="true"
                     aria-invalid={!!getError("participant.age")}
                     aria-describedby={getError("participant.age") ? "err-participantAge" : undefined}
                     placeholder="e.g. 28"
+                    onKeyDown={(e) => {
+                      const allowed = ["Backspace","Delete","Tab","ArrowLeft","ArrowRight","Home","End"];
+                      if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
+                    }}
                     {...register("participant.age")}
                   />
                   <FieldError id="err-participantAge" message={getError("participant.age")} />
@@ -604,6 +612,23 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
         {/* Step 5: Preview */}
         {step === 5 && (
           <div>
+            {validationError && (
+              <div
+                role="alert"
+                className="mb-5 rounded-md px-5 py-4 flex gap-3 items-start"
+                style={{
+                  backgroundColor: "rgba(190,61,42,0.08)",
+                  border: "1.5px solid rgba(190,61,42,0.35)",
+                  color: "var(--red)",
+                }}
+              >
+                <span className="text-xl leading-none mt-0.5" aria-hidden="true">&#9888;</span>
+                <div className="text-sm leading-relaxed">
+                  <p className="font-semibold mb-0.5">Please correct the following before generating:</p>
+                  <p>{validationError}</p>
+                </div>
+              </div>
+            )}
             <ResearchConsentPreview data={getValues()} />
           </div>
         )}
@@ -634,8 +659,27 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={form.handleSubmit(onSubmit)}
-            className="rounded-md px-6 py-2.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:opacity-90 flex items-center gap-2"
+            onClick={form.handleSubmit(
+              async (data) => {
+                setValidationError(null);
+                await onSubmit(data);
+              },
+              (errors) => {
+                console.error("Research Consent Form submission errors:", errors);
+                const msgs: string[] = [];
+                const walk = (obj: any) => {
+                  if (!obj || typeof obj !== "object") return;
+                  if (typeof obj.message === "string") {
+                    msgs.push(obj.message);
+                  } else {
+                    Object.values(obj).forEach(walk);
+                  }
+                };
+                walk(errors);
+                setValidationError(msgs[0] || "Please check all required fields before generating.");
+              }
+            )}
+            className="rounded-md px-6 py-2.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:opacity-90 flex items-center gap-2 cursor-pointer"
             style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             {isSubmitting ? (

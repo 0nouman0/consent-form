@@ -176,6 +176,18 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
 
           {/* Menu items */}
           <div className="p-2">
+            {profile?.role === "admin" && (
+              <a
+                href={process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001"}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold transition-colors hover:bg-amber-500/10 text-amber-800 mb-1 border border-amber-200/50 bg-amber-50/50"
+              >
+                <Crown weight="fill" className="w-4 h-4 text-amber-600" />
+                Admin Ops Console
+              </a>
+            )}
             <Link
               href="/dashboard"
               onClick={() => setOpen(false)}

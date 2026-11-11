@@ -229,7 +229,11 @@ export default function ProfilePage() {
             <div>
               <label htmlFor="doctorRegistrationNo" className={labelCls}>Medical Council Registration No.</label>
               <input id="doctorRegistrationNo" name="doctorRegistrationNo" value={profileData.doctorRegistrationNo}
-                onChange={handleInputChange} type="text" placeholder="e.g. KMC 12345" className={inputCls} />
+                onChange={handleInputChange} type="text" placeholder="e.g. KMC 12345" className={inputCls}
+                maxLength={30} />
+              <p className="text-xs mt-1" style={{ color: "var(--ink-muted)" }}>
+                Maximum 30 characters (e.g. KMC 12345, MCI-48291, KMC-111-222-111-222)
+              </p>
             </div>
             <div>
               <label htmlFor="hospitalName" className={labelCls}>Hospital / Clinic Name</label>

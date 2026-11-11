@@ -80,6 +80,15 @@ export async function createCashfreeOrder(params: CashfreeOrderParams): Promise<
     throw new Error("Cashfree Payment Gateway is not configured on the server (missing credentials).");
   }
 
+  // Defensively sanitize order_meta for Cashfree Production (strictly requires https://)
+  const orderMeta = params.order_meta ? { ...params.order_meta } : undefined;
+  if (orderMeta?.return_url && config.env === "production" && orderMeta.return_url.startsWith("http://")) {
+    orderMeta.return_url = orderMeta.return_url.replace(/^http:\/\//, "https://");
+  }
+  if (orderMeta?.notify_url && config.env === "production" && orderMeta.notify_url.startsWith("http://")) {
+    orderMeta.notify_url = orderMeta.notify_url.replace(/^http:\/\//, "https://");
+  }
+
   const response = await fetch(`${config.baseUrl}/orders`, {
     method: "POST",
     headers: {
@@ -98,7 +107,7 @@ export async function createCashfreeOrder(params: CashfreeOrderParams): Promise<
         customer_email: params.customer_details.customer_email || "doctor@consentgen.in",
         customer_phone: params.customer_details.customer_phone || "9999999999",
       },
-      order_meta: params.order_meta,
+      order_meta: orderMeta,
       order_note: params.order_note,
     }),
   });

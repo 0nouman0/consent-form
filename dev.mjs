@@ -31,22 +31,43 @@ function freePort(port) {
   } catch {}
 }
 
-function run(color, script, cwd) {
-  const child = spawn(isWin ? "cmd" : "sh", isWin ? ["/c", script] : ["-c", script], {
-    cwd,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  child.stdout.on("data", (d) =>
-    d.toString().split("\n").filter(Boolean).forEach((l) => console.log(color(l)))
-  );
-  child.stderr.on("data", (d) =>
-    d.toString().split("\n").filter(Boolean).forEach((l) => console.error(color(l)))
-  );
-  child.on("exit", (code) => {
-    console.log(color(`process exited with code ${code}`));
-    process.exit(code ?? 1);
-  });
-  return child;
+function run(color, script, cwd, name) {
+  let child = null;
+  let isRestarting = false;
+
+  function start() {
+    child = spawn(isWin ? "cmd" : "sh", isWin ? ["/c", `call ${script}`] : ["-c", script], {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    child.stdout.on("data", (d) =>
+      d.toString().split("\n").filter(Boolean).forEach((l) => console.log(color(l)))
+    );
+
+    child.stderr.on("data", (d) =>
+      d.toString().split("\n").filter(Boolean).forEach((l) => console.error(color(l)))
+    );
+
+    child.on("exit", (code) => {
+      if (isRestarting) return;
+      console.log(color(`exited with code ${code}. Auto-restarting in 2s...`));
+      isRestarting = true;
+      setTimeout(() => {
+        isRestarting = false;
+        start();
+      }, 2000);
+    });
+  }
+
+  start();
+  return {
+    getChild: () => child,
+    stop: () => {
+      isRestarting = true;
+      killTree(child);
+    }
+  };
 }
 
 import { fileURLToPath } from "url";
@@ -74,8 +95,8 @@ const app   = run(cyan,   "npx next dev",                     root);
 const luffy = run(yellow, "npx next dev --webpack -p 3001",   admin);
 
 const cleanup = () => {
-  killTree(app);
-  killTree(luffy);
+  app.stop();
+  luffy.stop();
   process.exit(0);
 };
 

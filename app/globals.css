@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* ─── DESIGN TOKENS ───
    Editorial paper-and-ink system — same palette as the landing page,
    now shared by every authenticated screen (app shell, login, dashboard,

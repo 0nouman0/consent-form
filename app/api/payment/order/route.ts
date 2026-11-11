@@ -63,8 +63,18 @@ export async function POST(req: NextRequest) {
     const amountInPaise = selectedPackage.amount * 100;
 
     // Detect return URL for fallback redirect
-    const origin = req.headers.get("origin") || req.nextUrl.origin || "http://localhost:3000";
-    const returnUrl = `${origin}/credits?order_id={order_id}`;
+    // Note: Cashfree Production requires https:// protocol for return_url
+    const customSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+    let siteOrigin = req.headers.get("origin") || req.nextUrl.origin || "http://localhost:3000";
+
+    if (config.env === "production") {
+      if (customSiteUrl && customSiteUrl.startsWith("https://")) {
+        siteOrigin = customSiteUrl;
+      } else if (siteOrigin.startsWith("http://")) {
+        siteOrigin = siteOrigin.replace(/^http:\/\//, "https://");
+      }
+    }
+    const returnUrl = `${siteOrigin.replace(/\/+$/, "")}/credits?order_id={order_id}`;
 
     // Create Cashfree Order
     const cfOrder = await createCashfreeOrder({
