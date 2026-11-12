@@ -39,9 +39,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  const defaultUrl = "https://gqxqaqnohabahcfrszwz.supabase.co";
+  const defaultKey =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxeHFhcW5vaGFiYWhjZnJzend6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTcyMDcsImV4cCI6MjA5NTczMzIwN30.EVi1adqR3aC9zB4GabNr0hZRSC9A1_7WPBPE6k-7Od0";
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || defaultUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      defaultKey,
     {
       cookies: {
         get(name: string) {
