@@ -16,10 +16,12 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { v4 as uuidv4 } from "uuid";
+import { createClient } from "@/lib/supabase/client";
 
 interface Message {
   role: "user" | "assistant" | "system";
   content: string;
+  timestamp?: string;
 }
 
 interface ChatSession {
@@ -53,12 +55,41 @@ const SUGGESTED_PROMPTS = [
   },
 ];
 
-function relativeDate(iso: string) {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days === 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+function formatSidebarTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  const time = d.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  if (isToday) return `Today · ${time}`;
+  if (isYesterday) return `Yesterday · ${time}`;
+  const datePart = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return `${datePart} · ${time}`;
+}
+
+function formatMessageTime(iso?: string) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  if (isToday) return time;
+  const datePart = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return `${datePart}, ${time}`;
 }
 
 function repairMarkdown(raw: string): string {
@@ -77,25 +108,101 @@ function repairMarkdown(raw: string): string {
 export default function ChatPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    const saved = localStorage.getItem("consentgen_chat_history");
-    if (saved) {
+    let active = true;
+
+    async function loadSessions() {
       try {
-        const parsed = JSON.parse(saved);
-        setSessions(parsed);
-        if (parsed.length > 0) setActiveSessionId(parsed[0].id);
-      } catch {
-        console.error("Failed to parse chat history");
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!active) return;
+
+        if (user) {
+          setUserId(user.id);
+          const { data: rows, error } = await supabase
+            .from("chat_sessions")
+            .select("id, title, messages, updated_at, created_at")
+            .eq("user_id", user.id)
+            .order("updated_at", { ascending: false });
+
+          if (!error && rows) {
+            const loaded: ChatSession[] = rows.map((r: any) => ({
+              id: r.id,
+              title: r.title,
+              date: r.updated_at || r.created_at,
+              messages: Array.isArray(r.messages) ? r.messages : [DEFAULT_MESSAGE],
+            }));
+
+            // One-time migration of any legacy localStorage sessions not yet in Supabase
+            const localRaw = localStorage.getItem("consentgen_chat_history");
+            if (localRaw && loaded.length === 0) {
+              try {
+                const localParsed: ChatSession[] = JSON.parse(localRaw);
+                if (Array.isArray(localParsed) && localParsed.length > 0) {
+                  const toInsert = localParsed.map((s) => ({
+                    id: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s.id)
+                      ? s.id
+                      : uuidv4(),
+                    user_id: user.id,
+                    title: s.title || "Conversation",
+                    messages: s.messages || [DEFAULT_MESSAGE],
+                    created_at: s.date || new Date().toISOString(),
+                    updated_at: s.date || new Date().toISOString(),
+                  }));
+                  await supabase.from("chat_sessions").upsert(toInsert);
+                  if (active) {
+                    const migrated = toInsert.map((r) => ({
+                      id: r.id,
+                      title: r.title,
+                      date: r.updated_at,
+                      messages: r.messages,
+                    }));
+                    setSessions(migrated);
+                    setActiveSessionId(migrated[0]?.id ?? null);
+                  }
+                  return;
+                }
+              } catch {}
+            }
+
+            if (active) {
+              setSessions(loaded);
+              if (loaded.length > 0) setActiveSessionId(loaded[0].id);
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load chat history from Supabase:", err);
+      } finally {
+        if (active) setLoadingHistory(false);
+      }
+
+      // Fallback to localStorage if unauthenticated or query failed
+      const saved = localStorage.getItem("consentgen_chat_history");
+      if (saved && active) {
+        try {
+          const parsed = JSON.parse(saved);
+          setSessions(parsed);
+          if (parsed.length > 0) setActiveSessionId(parsed[0].id);
+        } catch {}
       }
     }
-  }, []);
+
+    loadSessions();
+    return () => {
+      active = false;
+    };
+  }, [supabase]);
 
   useEffect(() => {
     localStorage.setItem("consentgen_chat_history", JSON.stringify(sessions));
@@ -108,77 +215,139 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  const persistSession = async (session: ChatSession, isNew: boolean) => {
+    if (!userId) return;
+    try {
+      if (isNew) {
+        await supabase.from("chat_sessions").insert({
+          id: session.id,
+          user_id: userId,
+          title: session.title,
+          messages: session.messages,
+          created_at: session.date,
+          updated_at: session.date,
+        });
+      } else {
+        await supabase
+          .from("chat_sessions")
+          .update({
+            messages: session.messages,
+            updated_at: session.date,
+          })
+          .eq("id", session.id)
+          .eq("user_id", userId);
+      }
+    } catch (err) {
+      console.error("Failed to persist chat session:", err);
+    }
+  };
+
   const handleNewChat = () => {
     setActiveSessionId(null);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
   };
 
-  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
+  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const updated = sessions.filter((s) => s.id !== id);
     setSessions(updated);
     if (activeSessionId === id) {
       setActiveSessionId(updated.length > 0 ? updated[0].id : null);
     }
+    if (userId) {
+      try {
+        await supabase.from("chat_sessions").delete().eq("id", id).eq("user_id", userId);
+      } catch (err) {
+        console.error("Failed to delete chat session:", err);
+      }
+    }
   };
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: text.trim() };
+    const nowIso = new Date().toISOString();
+    const userMessage: Message = { role: "user", content: text.trim(), timestamp: nowIso };
     const currentMessages = [...messages, userMessage];
     let currentSessionId = activeSessionId;
+    const isNew = !currentSessionId;
+    let workingSession: ChatSession;
 
     if (!currentSessionId) {
       currentSessionId = uuidv4();
-      const newSession: ChatSession = {
+      workingSession = {
         id: currentSessionId,
         title: userMessage.content.slice(0, 44) + (userMessage.content.length > 44 ? "…" : ""),
-        date: new Date().toISOString(),
+        date: nowIso,
         messages: [DEFAULT_MESSAGE, userMessage],
       };
-      setSessions((prev) => [newSession, ...prev]);
+      setSessions((prev) => [workingSession, ...prev]);
       setActiveSessionId(currentSessionId);
     } else {
+      workingSession = {
+        id: currentSessionId,
+        title: activeSession?.title || userMessage.content.slice(0, 44),
+        date: nowIso,
+        messages: currentMessages,
+      };
       setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSessionId ? { ...s, messages: currentMessages } : s
-        )
+        prev.map((s) => (s.id === currentSessionId ? workingSession : s))
       );
     }
+
+    await persistSession(workingSession, isNew);
 
     setInput("");
     setIsLoading(true);
 
     try {
+      const apiMessages = currentMessages
+        .filter((m) => m.role !== "system")
+        .map(({ role, content }) => ({ role, content }));
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: currentMessages.filter((m) => m.role !== "system") }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
 
       if (!response.ok) throw new Error("Failed to get response");
 
       const data = await response.json();
+      const replyIso = new Date().toISOString();
+      const assistantMessage: Message = {
+        role: data.role || "assistant",
+        content: data.content,
+        timestamp: replyIso,
+      };
+
+      const finalMessages = [...workingSession.messages, assistantMessage];
+      const updatedSession: ChatSession = {
+        ...workingSession,
+        date: replyIso,
+        messages: finalMessages,
+      };
+
       setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSessionId ? { ...s, messages: [...s.messages, data] } : s
-        )
+        prev.map((s) => (s.id === currentSessionId ? updatedSession : s))
       );
+      await persistSession(updatedSession, false);
     } catch {
+      const errIso = new Date().toISOString();
+      const errMessage: Message = {
+        role: "assistant",
+        content: "Unable to reach the assistant right now. Please try again.",
+        timestamp: errIso,
+      };
+      const updatedSession: ChatSession = {
+        ...workingSession,
+        date: errIso,
+        messages: [...workingSession.messages, errMessage],
+      };
       setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSessionId
-            ? {
-                ...s,
-                messages: [
-                  ...s.messages,
-                  { role: "assistant", content: "Unable to reach the assistant right now. Please try again." },
-                ],
-              }
-            : s
-        )
+        prev.map((s) => (s.id === currentSessionId ? updatedSession : s))
       );
+      await persistSession(updatedSession, false);
     } finally {
       setIsLoading(false);
     }
@@ -331,7 +500,13 @@ export default function ChatPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
-          {sessions.length === 0 ? (
+          {loadingHistory ? (
+            <div className="space-y-2 p-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-10 rounded bg-black/5 animate-pulse" />
+              ))}
+            </div>
+          ) : sessions.length === 0 ? (
             <p className="text-xs px-3 py-8 text-center" style={{ color: "var(--ink-muted)" }}>
               No conversations yet.
             </p>
@@ -355,7 +530,7 @@ export default function ChatPage() {
                   <div className="min-w-0 flex-1 pr-2">
                     <p className="text-[12.5px] font-medium truncate">{session.title}</p>
                     <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
-                      {relativeDate(session.date)}
+                      {formatSidebarTime(session.date)}
                     </p>
                   </div>
                   <button
@@ -444,26 +619,40 @@ export default function ChatPage() {
             <div className="max-w-3xl mx-auto w-full space-y-6">
               {messages.slice(1).map((msg, i) => {
                 const idx = i + 1;
+                const timeStr = formatMessageTime(msg.timestamp);
+
                 if (msg.role === "user") {
                   return (
-                    <div key={idx} className="flex justify-end">
+                    <div key={idx} className="flex flex-col items-end">
                       <div
                         className="max-w-[82%] sm:max-w-[70%] px-4 py-2.5 rounded-lg text-[14px] leading-relaxed whitespace-pre-wrap"
                         style={{ backgroundColor: "var(--paper)", color: "var(--ink)", border: "1px solid var(--rule)" }}
                       >
                         {msg.content}
                       </div>
+                      {timeStr && (
+                        <span className="font-mono text-[10px] mt-1 pr-0.5" style={{ color: "var(--ink-muted)" }}>
+                          {timeStr}
+                        </span>
+                      )}
                     </div>
                   );
                 }
 
                 return (
                   <div key={idx} className="group">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <MessageSquare className="w-3.5 h-3.5" style={{ color: "var(--red)" }} />
-                      <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
-                        ConsentGen
-                      </span>
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-3.5 h-3.5" style={{ color: "var(--red)" }} />
+                        <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                          ConsentGen
+                        </span>
+                        {timeStr && (
+                          <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                            · {timeStr}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="pl-0.5 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
