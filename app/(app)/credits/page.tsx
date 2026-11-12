@@ -110,10 +110,14 @@ export default function CreditsPage() {
     loadData();
   }, []);
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
+  const loadCashfreeScript = () => {
+    return new Promise<boolean>((resolve) => {
+      if ((window as any).Cashfree) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -125,13 +129,13 @@ export default function CreditsPage() {
     setMessage(null);
 
     try {
-      // 1. Load Razorpay script
-      const scriptLoaded = await loadRazorpayScript();
+      // 1. Load Cashfree SDK
+      const scriptLoaded = await loadCashfreeScript();
       if (!scriptLoaded) {
-        throw new Error("Failed to load Razorpay SDK. Please check your connection.");
+        throw new Error("Failed to load Cashfree SDK. Please check your connection.");
       }
 
-      // 2. Call backend to create order
+      // 2. Create order on backend
       const orderRes = await fetch("/api/payment/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,82 +147,59 @@ export default function CreditsPage() {
         throw new Error(err.error ?? "Failed to initialize order");
       }
 
-      const orderData = await orderRes.json();
-      const { order_id, amount: orderAmount, currency, key_id } = orderData;
+      const { order_id, payment_session_id } = await orderRes.json();
 
-      const { data: { user } } = await supabase.auth.getUser();
+      // 3. Open Cashfree checkout modal
+      const cashfree = (window as any).Cashfree({
+        mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
+      });
 
-      // 3. Configure Razorpay checkout options
-      const options = {
-        key: key_id,
-        amount: orderAmount,
-        currency,
-        name: "ConsentGen",
-        description: `Purchase ${PACKAGES.find(p => p.amount === amount)?.credits} credits`,
-        order_id,
-        prefill: {
-          email: user?.email || "",
-        },
-        theme: {
-          color: "#171410",
-        },
-        handler: async function (response: any) {
-          setLoading(true);
-          try {
-            // Verify payment on the server
-            const verifyRes = await fetch("/api/payment/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            });
+      const result = await cashfree.checkout({
+        paymentSessionId: payment_session_id,
+        redirectTarget: "_modal",
+      });
 
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) {
-              throw new Error(verifyData.error ?? "Payment verification failed");
-            }
+      if (result.error) {
+        throw new Error(result.error.message ?? "Payment failed");
+      }
 
-            setMessage({
-              type: "success",
-              text: `Payment successful! ${PACKAGES.find(p => p.amount === amount)?.credits} credits have been added.`
-            });
+      // 4. Verify payment on backend
+      setLoading(true);
+      const verifyRes = await fetch("/api/payment/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id }),
+      });
 
-            // Dispatch global event for components (e.g. AppHeader) to reload credits
-            window.dispatchEvent(new Event("credits-updated"));
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.error ?? "Payment verification failed");
+      }
 
-            // Reload user data to update credit balance
-            await loadData();
-            setBuyingAmount(null);
-          } catch (verifyErr: any) {
-            setMessage({
-              type: "error",
-              text: verifyErr.message || "Failed to verify transaction signature."
-            });
-            setLoading(false);
-            setBuyingAmount(null);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setBuyingAmount(null);
-          }
-        }
-      };
+      setMessage({
+        type: "success",
+        text: `Payment successful! ${PACKAGES.find(p => p.amount === amount)?.credits} credits have been added.`
+      });
 
-      // 4. Open Razorpay payment modal
-      const paymentObject = new (window as any).Razorpay(options);
-      paymentObject.open();
+      window.dispatchEvent(new Event("credits-updated"));
+      await loadData();
+      setBuyingAmount(null);
 
     } catch (err: any) {
+      // User closed the modal — not an error worth showing
+      if (err?.message?.toLowerCase().includes("modal closed") ||
+          err?.message?.toLowerCase().includes("popup closed")) {
+        setBuyingAmount(null);
+        return;
+      }
       console.error(err);
       setMessage({
         type: "error",
-        text: err.message || "An unexpected error occurred during checkout setup."
+        text: err.message || "An unexpected error occurred during checkout."
       });
       setBuyingAmount(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -521,7 +502,7 @@ export default function CreditsPage() {
               </div>
               <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
                 <span style={{ color: "var(--ink-muted)" }}>Payment Method</span>
-                <span className="font-bold capitalize text-right" style={{ color: "var(--ink)" }}>{invoiceTx.metadata?.method || "Razorpay"}</span>
+                <span className="font-bold capitalize text-right" style={{ color: "var(--ink)" }}>{invoiceTx.metadata?.method || "Cashfree"}</span>
               </div>
               <div className="flex justify-between pb-2" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
                 <span style={{ color: "var(--ink-muted)" }}>Credits Purchased</span>
