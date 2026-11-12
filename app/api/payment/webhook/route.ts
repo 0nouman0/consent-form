@@ -27,7 +27,9 @@ function verifyWebhookSignature(
     .createHmac("sha256", secretKey)
     .update(payload)
     .digest("base64");
-  return expected === signature;
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function POST(req: NextRequest) {

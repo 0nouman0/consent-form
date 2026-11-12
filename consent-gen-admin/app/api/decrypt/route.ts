@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing encrypted name" }, { status: 400 });
     }
 
-    const key = process.env.PATIENT_NAME_ENCRYPTION_KEY || "luffy-default-super-secret-key-123";
+    const key = process.env.PATIENT_NAME_ENCRYPTION_KEY;
+    if (!key) {
+      console.error("PATIENT_NAME_ENCRYPTION_KEY is not configured");
+      return NextResponse.json({ error: "Decryption is not configured" }, { status: 500 });
+    }
 
     const { data: decrypted, error } = await supabase.rpc("decrypt_patient_name", {
       p_enc: patient_name_enc,

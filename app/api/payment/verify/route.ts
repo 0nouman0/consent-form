@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     // 4. Get the pending transaction from our DB
     const { data: tx, error: txError } = await supabase
       .from("transactions")
-      .select("credits, amount, status")
+      .select("user_id, credits, amount, status")
       .eq("order_id", orderId)
       .single();
 
@@ -83,6 +83,16 @@ export async function POST(req: NextRequest) {
         { error: "Transaction record not found in system database" },
         { status: 404 }
       );
+    }
+
+    // The order must belong to the caller and the gateway amount must match what we recorded
+    if (tx.user_id !== authResult.id) {
+      console.warn("Payment verify: order/user mismatch", orderId);
+      return NextResponse.json({ error: "Transaction record not found in system database" }, { status: 404 });
+    }
+    if (Math.round(Number(cfOrder.order_amount) * 100) !== tx.amount) {
+      console.error("Payment verify: amount mismatch", orderId, cfOrder.order_amount, tx.amount);
+      return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 });
     }
 
     // Retrieve user profile for invoicing & metadata snapshot

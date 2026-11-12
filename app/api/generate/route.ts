@@ -103,10 +103,13 @@ export async function POST(req: NextRequest) {
 
     // Encrypt patient name using security definer RPC
     const patientName = isResearch ? input.participant?.participantName : input.patient?.patientName;
-    const encryptionKey = process.env.PATIENT_NAME_ENCRYPTION_KEY || process.env.CASHFREE_SECRET_KEY || process.env.RAZORPAY_KEY_SECRET || "luffy-default-super-secret-key-123";
+    const encryptionKey = process.env.PATIENT_NAME_ENCRYPTION_KEY;
     let patientNameEnc = null;
 
-    if (patientName) {
+    if (patientName && !encryptionKey) {
+      console.error("PATIENT_NAME_ENCRYPTION_KEY is not set — patient name will not be stored");
+    }
+    if (patientName && encryptionKey) {
       const { data: encData, error: encErr } = await supabase.rpc("encrypt_patient_name", {
         p_name: patientName,
         p_key: encryptionKey

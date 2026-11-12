@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
-    pathname.includes(".")
+    /\.(?:svg|png|jpe?g|gif|webp|ico|css|js|map|txt|woff2?)$/i.test(pathname)
   ) {
     return response;
   }
