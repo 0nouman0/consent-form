@@ -906,7 +906,7 @@ export default function LandingPage() {
             {[
               { h: "Product", links: [["Generate", "/generate"], ["Templates", "/templates"], ["History", "/history"], ["Chat", "/chat"]] },
               { h: "Compliance & Law", links: [["Regulations", "/regulations"], ["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"], ["The form", "#anatomy"], ["Method", "#method"]] },
-              { h: "Account", links: [["Sign in", "/login"], ["Dashboard", "/dashboard"], ["Credits", "/credits"]] },
+              { h: "Account", links: [isLoggedIn ? ["Profile", "/profile"] : ["Sign in", "/login"], ["Dashboard", "/dashboard"], ["Credits", "/credits"]] },
             ].map((col) => (
               <div key={col.h}>
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: MUTED }}>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft, Scales, BookOpen, CheckCircle, Warning, FileText } from "@phosphor-icons/react/dist/ssr";
+import PublicNavActions from "@/components/PublicNavActions";
+import PublicCTA from "@/components/PublicCTA";
 
 export const metadata = {
   title: "Statutory Regulations & Medico-Legal Frameworks — ConsentGen",
@@ -77,9 +79,7 @@ export default function RegulationsPage() {
           <span className="font-serif font-semibold text-lg tracking-tight" style={{ color: INK }}>ConsentGen</span>
           <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
         </Link>
-        <Link href="/login" className="px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.12em] rounded" style={{ backgroundColor: INK, color: PAPER }}>
-          Practitioner Portal
-        </Link>
+        <PublicNavActions label="Practitioner Portal" loggedInLabel="Dashboard" loggedInHref="/dashboard" />
       </header>
 
       {/* Main Content */}
@@ -175,14 +175,7 @@ export default function RegulationsPage() {
           <p className="text-sm mb-6" style={{ color: MUTED }}>
             Experience 30-second drafting with real-time statutory audit.
           </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 font-mono text-xs uppercase tracking-wider font-semibold rounded"
-            style={{ backgroundColor: INK, color: PAPER }}
-          >
-            <span>Start Generating Today</span>
-            <span>→</span>
-          </Link>
+          <PublicCTA label="Start Generating Today" />
         </div>
       </main>
     </div>

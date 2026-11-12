@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft, Scales, FileText, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import PublicNavActions from "@/components/PublicNavActions";
 
 export const metadata = {
   title: "Terms of Service — ConsentGen",
@@ -26,9 +27,7 @@ export default function TermsPage() {
           <span className="font-serif font-semibold text-lg tracking-tight" style={{ color: INK }}>ConsentGen</span>
           <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
         </Link>
-        <Link href="/login" className="px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.12em] rounded" style={{ backgroundColor: INK, color: PAPER }}>
-          Sign In
-        </Link>
+        <PublicNavActions label="Sign In" loggedInLabel="Dashboard" loggedInHref="/dashboard" />
       </header>
 
       {/* Main Content */}

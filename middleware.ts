@@ -66,6 +66,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Redirect already-authenticated users away from /login
+  if (request.nextUrl.pathname === "/login") {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const rawRedirect = request.nextUrl.searchParams.get("redirect");
+        const safeTarget =
+          rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+            ? rawRedirect
+            : "/dashboard";
+        return NextResponse.redirect(new URL(safeTarget, request.url));
+      }
+    } catch {
+      // Allow rendering /login if session check fails
+    }
+  }
+
   // Check if the current route is protected
   const isProtected = PROTECTED_ROUTES.some((route) =>
     request.nextUrl.pathname.startsWith(route)
