@@ -4,10 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import {
-  User, SignOut, ChartBar, ShieldCheck,
-  Crown, Eye, Stethoscope, CaretDown,
-} from "@phosphor-icons/react/dist/ssr";
+import { LayoutDashboard, User, LogOut, ChevronDown } from "lucide-react";
 import type { UserRole } from "@/lib/rbac";
 
 interface ProfileInfo {
@@ -16,10 +13,10 @@ interface ProfileInfo {
   role: UserRole;
 }
 
-const ROLE_LABELS: Record<UserRole, { label: string; color: string; icon: React.ElementType }> = {
-  admin:  { label: "Admin",   color: "#BE3D2A", icon: Crown      },
-  doctor: { label: "Doctor",  color: "#171410", icon: Stethoscope },
-  viewer: { label: "Viewer",  color: "#7A7466", icon: Eye        },
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: "Admin",
+  doctor: "Doctor",
+  viewer: "Viewer",
 };
 
 export default function UserMenu({ compact = false }: { compact?: boolean }) {
@@ -33,7 +30,10 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setLoading(false); return; }
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       setEmail(user.email ?? null);
 
       const { data: p } = await supabase
@@ -49,9 +49,8 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
       });
       setLoading(false);
     });
-  }, []);
+  }, [supabase]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -63,60 +62,67 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
   }, []);
 
   const handleSignOut = async () => {
+    try {
+      localStorage.removeItem("consentgen_doctor_profile");
+      document.cookie = "consentgen_onboarded=; path=/; max-age=0; SameSite=Lax";
+    } catch {}
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
 
   if (loading) {
-    return (
-      <div className="w-8 h-8 rounded-full bg-neutral-200 animate-pulse" />
-    );
+    return <div className="w-8 h-8 rounded-md bg-neutral-200 animate-pulse" />;
   }
 
-  if (!email) return null; // Not logged in — parent handles fallback
+  if (!email) return null;
 
   const initials = profile?.doctorName
-    ? profile.doctorName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()
+    ? profile.doctorName
+        .replace(/^Dr\.?\s*/i, "")
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
     : email[0].toUpperCase();
 
-  const roleInfo = ROLE_LABELS[profile?.role ?? "doctor"];
-  const RoleIcon = roleInfo.icon;
+  const roleLabel = ROLE_LABELS[profile?.role ?? "doctor"];
 
   return (
     <div className="relative" ref={menuRef}>
       {/* Trigger */}
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full transition-all hover:opacity-90 focus:outline-none"
+        className="flex items-center gap-2 rounded-md transition-colors hover:bg-[var(--sheet)] focus:outline-none"
         style={{
-          padding: compact ? "3px" : "3px 10px 3px 3px",
+          padding: compact ? "3px" : "4px 10px 4px 4px",
           border: "1px solid var(--rule)",
           background: "var(--paper)",
         }}
         aria-label="Open user menu"
       >
-        {/* Avatar */}
         <div
-          className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
+          className="w-7 h-7 rounded flex items-center justify-center text-[11px] font-semibold shrink-0"
           style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
         >
           {initials}
         </div>
 
-        {/* Name + role — hidden in compact mode */}
         {!compact && (
           <>
-            <div className="text-left hidden sm:block">
-              <p className="font-serif font-semibold text-xs leading-tight" style={{ color: "var(--ink)" }}>
+            <div className="text-left hidden sm:block max-w-[140px]">
+              <p className="font-serif font-semibold text-xs leading-tight truncate" style={{ color: "var(--ink)" }}>
                 {profile?.doctorName || "Account"}
               </p>
-              <p className="text-[10px] leading-tight font-mono uppercase tracking-[0.06em]" style={{ color: roleInfo.color }}>
-                {roleInfo.label}
+              <p className="text-[10px] leading-tight truncate" style={{ color: "var(--ink-muted)" }}>
+                {profile?.hospitalName || roleLabel}
               </p>
             </div>
-            <CaretDown
-              className="w-3 h-3 transition-transform"
+            <ChevronDown
+              className="w-3.5 h-3.5 transition-transform"
               style={{ color: "var(--ink-muted)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
             />
           </>
@@ -126,96 +132,72 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-64 rounded-md z-[9999]"
+          className="absolute right-0 top-full mt-2 w-72 rounded-md z-[9999]"
           style={{
             background: "var(--sheet)",
             border: "1px solid var(--rule)",
-            boxShadow: "0 16px 48px rgba(23,20,16,0.14), 0 4px 12px rgba(23,20,16,0.08)",
+            boxShadow: "0 12px 32px rgba(23,20,16,0.10), 0 2px 8px rgba(23,20,16,0.05)",
             overflow: "hidden",
           }}
         >
-          {/* Header */}
-          <div className="px-4 py-4" style={{ borderBottom: "1px solid var(--rule)" }}>
+          {/* Account Summary */}
+          <div className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-md flex items-center justify-center text-sm font-bold shrink-0"
+                className="w-9 h-9 rounded-md flex items-center justify-center text-xs font-semibold shrink-0"
                 style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
               >
                 {initials}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-serif font-semibold text-sm truncate" style={{ color: "var(--ink)" }}>
-                  {profile?.doctorName || "Doctor"}
+                  {profile?.doctorName || "Doctor Account"}
                 </p>
-                <p className="text-xs truncate" style={{ color: "var(--ink-muted)" }}>{email}</p>
-                {profile?.hospitalName && (
-                  <p className="text-xs truncate mt-0.5" style={{ color: "var(--ink-muted)" }}>{profile.hospitalName}</p>
-                )}
+                <p className="text-xs truncate" style={{ color: "var(--ink-muted)" }}>
+                  {email}
+                </p>
               </div>
             </div>
-
-            {/* Role badge */}
-            <div className="mt-3 flex items-center gap-2">
-              <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
-                style={{
-                  color: roleInfo.color,
-                  backgroundColor: `${roleInfo.color}12`,
-                  border: `1px solid ${roleInfo.color}28`,
-                }}
-              >
-                <RoleIcon weight="fill" className="w-3.5 h-3.5" />
-                {roleInfo.label}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
-                style={{ color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }}>
-                <ShieldCheck weight="fill" className="w-3.5 h-3.5" /> Verified
-              </span>
+            <div
+              className="mt-2.5 pt-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.08em]"
+              style={{ borderTop: "1px solid rgba(23,20,16,0.07)", color: "var(--ink-muted)" }}
+            >
+              <span>{profile?.hospitalName || "No hospital set"}</span>
+              <span style={{ color: "var(--ink-soft)" }}>{roleLabel}</span>
             </div>
           </div>
 
-          {/* Menu items */}
-          <div className="p-2">
-            {profile?.role === "admin" && (
-              <a
-                href={process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001"}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold transition-colors hover:bg-amber-500/10 text-amber-800 mb-1 border border-amber-200/50 bg-amber-50/50"
-              >
-                <Crown weight="fill" className="w-4 h-4 text-amber-600" />
-                Admin Ops Console
-              </a>
-            )}
+          {/* Navigation */}
+          <div className="p-1.5">
             <Link
               href="/dashboard"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[var(--paper)]"
+              className="flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[var(--paper)]"
               style={{ color: "var(--ink-soft)" }}
             >
-              <ChartBar weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
+              <LayoutDashboard className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               Dashboard
             </Link>
             <Link
               href="/profile"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[var(--paper)]"
+              className="flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[var(--paper)]"
               style={{ color: "var(--ink-soft)" }}
             >
-              <User weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
-              Profile & Settings
+              <User className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
+              Profile &amp; Settings
             </Link>
           </div>
 
-          {/* Sign out */}
-          <div className="p-2" style={{ borderTop: "1px solid var(--rule)" }}>
+          {/* Sign Out */}
+          <div className="p-1.5" style={{ borderTop: "1px solid var(--rule)" }}>
             <button
+              type="button"
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[rgba(190,61,42,0.08)]"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[rgba(190,61,42,0.06)]"
               style={{ color: "var(--red)" }}
             >
-              <SignOut weight="bold" className="w-4 h-4" />
+              <LogOut className="w-4 h-4" />
               Sign Out
             </button>
           </div>
