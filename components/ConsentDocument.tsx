@@ -7,7 +7,6 @@ import rehypeRaw from "rehype-raw";
 import { motion } from "framer-motion";
 import {
   DownloadSimple,
-  Copy,
   ArrowCounterClockwise,
   CheckCircle,
   FileDoc,
@@ -50,7 +49,6 @@ export default function ConsentDocument({
   formData,
 }: ConsentDocumentProps) {
   const [activeTab, setActiveTab] = useState<"english" | "other">("english");
-  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -334,12 +332,6 @@ export default function ConsentDocument({
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(activeMarkdown);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
   // Automatically save to history as soon as generation completes
   useEffect(() => {
     if (!isComplete || !formData || !englishMarkdown || !consentId) return;
@@ -605,14 +597,6 @@ export default function ConsentDocument({
 
         {isComplete && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)]"
-              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
-            >
-              <Copy className="w-3.5 h-3.5" />
-              {copied ? "Copied!" : "Copy"}
-            </button>
             <button
               onClick={handlePrint}
               title="Print consent form"
