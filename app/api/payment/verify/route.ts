@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { getCashfreeOrder, getCashfreeOrderPayments, getCashfreeConfig } from "@/lib/cashfree";
 import { sendInvoiceEmail } from "@/lib/email";
 
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
     };
 
     // 5. Call verify_and_add_credits RPC function
-    const { data: newBalance, error: rpcError } = await supabase.rpc(
+    const { data: newBalance, error: rpcError } = await (hasServiceRole() ? createAdminClient() : supabase).rpc(
       "verify_and_add_credits",
       {
         p_user_id: authResult.id,

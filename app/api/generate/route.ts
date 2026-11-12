@@ -4,6 +4,7 @@ import { consentFormSchema, researchConsentFormSchema } from "@/lib/schema";
 import { buildSystemPrompt, buildUserPrompt, buildResearchSystemPrompt, buildResearchUserPrompt } from "@/lib/prompt";
 import { generateConsentId } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 
 export async function POST(req: NextRequest) {
   const supabase = createClient();
@@ -188,21 +189,26 @@ export async function POST(req: NextRequest) {
             }
           }
           // Stream completed successfully! Deduct credit.
-          const deductRes = await fetch(
-            `${supabaseUrl}/rest/v1/rpc/deduct_credit`,
-            {
+          // deduct_credit is locked to the server (service role); fall back to the user's token
+          // only if the service-role key has not been configured yet.
+          let deductRes: { ok: boolean; text: () => Promise<string> };
+          if (hasServiceRole()) {
+            const { error: deductErr } = await createAdminClient().rpc("deduct_credit", {
+              p_user_id: userId,
+              p_reference_id: consentId,
+            });
+            deductRes = { ok: !deductErr, text: async () => deductErr?.message ?? "" };
+          } else {
+            deductRes = await fetch(`${supabaseUrl}/rest/v1/rpc/deduct_credit`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${token}`,
                 apikey: supabaseKey,
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                p_user_id: userId,
-                p_reference_id: consentId,
-              }),
-            }
-          );
+              body: JSON.stringify({ p_user_id: userId, p_reference_id: consentId }),
+            });
+          }
 
           let creditHistId = null;
           if (deductRes.ok) {

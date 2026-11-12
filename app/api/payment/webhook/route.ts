@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { sendInvoiceEmail } from "@/lib/email";
 import crypto from "crypto";
 
@@ -34,7 +34,10 @@ function verifyWebhookSignature(
 
 export async function POST(req: NextRequest) {
   const secretKey = process.env.CASHFREE_SECRET_KEY;
-  if (!secretKey) {
+  if (!secretKey || !hasServiceRole()) {
+    // The webhook has no user session, so it needs the service-role key to read the transaction
+    // and credit the account.
+    console.error("Cashfree webhook not configured (CASHFREE_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY)");
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
 
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   // Look up our pending transaction
   const { data: tx, error: txError } = await supabase
