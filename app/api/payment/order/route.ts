@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createCashfreeOrder, getCashfreeConfig } from "@/lib/cashfree";
 
 const PACKAGES: Record<number, { credits: number; amount: number }> = {
-  5:   { credits: 1,  amount: 5   }, // Starter: 1 credit
-  25:  { credits: 6,  amount: 25  }, // Standard: buy 5 get 1 free = 6 credits
-  50:  { credits: 12, amount: 50  }, // Professional: buy 10 get 2 free = 12 credits
-  100: { credits: 24, amount: 100 }, // Enterprise: buy 20 get 4 free = 24 credits
+  150:  { credits: 1,  amount: 150  }, // Starter: 1 credit
+  750:  { credits: 6,  amount: 750  }, // Standard: buy 5 get 1 free = 6 credits
+  1500: { credits: 12, amount: 1500 }, // Professional: buy 10 get 2 free = 12 credits
+  3000: { credits: 24, amount: 3000 }, // Enterprise: buy 20 get 4 free = 24 credits
 };
 
 export async function POST(req: NextRequest) {

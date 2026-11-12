@@ -17,10 +17,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const PACKAGES = [
-  { amount: 5,   credits: 1,  bonusCredits: 0, label: "Starter",      popular: false, description: "Try it out with a single consent form generation." },
-  { amount: 25,  credits: 6,  bonusCredits: 1, label: "Standard",     popular: true,  description: "Great for regular practice — buy 5, get 1 free." },
-  { amount: 50,  credits: 12, bonusCredits: 2, label: "Professional", popular: false, description: "Best value for active clinics — buy 10, get 2 free." },
-  { amount: 100, credits: 24, bonusCredits: 4, label: "Enterprise",   popular: false, description: "Ideal for hospitals — buy 20, get 4 free." },
+  { amount: 150,  credits: 1,  bonusCredits: 0, label: "Starter",      popular: false, description: "Try it out with a single consent form generation." },
+  { amount: 750,  credits: 6,  bonusCredits: 1, label: "Standard",     popular: true,  description: "Buy 5, get 1 free (6 credits total) — great for regular practice." },
+  { amount: 1500, credits: 12, bonusCredits: 2, label: "Professional", popular: false, description: "Buy 10, get 2 free (12 credits total) — best value for active clinics." },
+  { amount: 3000, credits: 24, bonusCredits: 4, label: "Enterprise",   popular: false, description: "Buy 20, get 4 free (24 credits total) — ideal for hospitals." },
 ];
 
 interface CreditLog {
@@ -334,7 +334,7 @@ export default function CreditsPage() {
                   {/* Credit count + bonus badge */}
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm font-bold" style={{ color: "var(--ink-soft)" }}>
-                      {pkg.credits} Credit{pkg.credits > 1 ? "s" : ""}
+                      {paidCredits} Credit{paidCredits > 1 ? "s" : ""}
                     </span>
                     {pkg.bonusCredits > 0 && (
                       <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded"
