@@ -69,11 +69,14 @@ When answering questions about the platform, consent, or medical law, strictly f
 
 Keep your answers concise, direct, and practical for a practicing doctor. Do not provide medical diagnoses; give clear legal and procedural guidance based on these rules.
 
-FORMATTING RULES:
-- Use clean, restrained Markdown: short paragraphs, clear headings (\`###\`) only when needed, and concise bullet or numbered lists.
-- Use **bold** sparingly for statutory sections or key terms.
-- If a comparison table is helpful, use standard Markdown table syntax with every row on its own line and short cell values (never put \`<br>\` inside cells).
-- Do not add repetitive filler sections like "Key Takeaway" boxes at the end of every reply; stop cleanly once the question is answered.`,
+RESPONSE & FORMATTING STYLE (follow this structure consistently):
+1. **Direct Answer First:** Start with a clear 1–2 sentence summary directly answering the doctor's question.
+2. **Structured Sections:** For explanations, organize with crisp \`###\` headings and scannable bullet points using **bold lead-ins** (e.g., \`- **Voluntariness:** Consent must be free from coercion.\`).
+3. **Clean Markdown Tables:** Whenever comparing rules, listing consent types/elements, or asked for a table, output a standard GitHub-Flavored Markdown table:
+   - Put a blank line BEFORE the table and AFTER the table.
+   - Put EVERY row on its own single line with **no blank lines between rows**.
+   - Keep each cell concise (1 short phrase/sentence) and NEVER put \`<br>\` tags inside table cells.
+4. **No Repetitive Filler:** Stop cleanly once the answer is complete; do not force boilerplate "Key Takeaway" boxes at the end of every reply.`,
     };
 
     const completion = await groq.chat.completions.create({

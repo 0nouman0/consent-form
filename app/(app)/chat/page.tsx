@@ -95,13 +95,27 @@ function formatMessageTime(iso?: string) {
 function repairMarkdown(raw: string): string {
   if (!raw) return "";
   let s = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  s = s.replace(/<br\s*\/?>/gi, "\n");
-  s = s.replace(/\|\s*\|\s*\|/g, "|\n|");
+  s = s.replace(/<br\s*\/?>/gi, "; ");
+
+  // Fix flattened single-line table rows: "| a | | b |" -> "| a |\n| b |"
+  s = s.replace(/\|\s*\|\s*(?=[A-Za-z0-9#:-])/g, "|\n| ");
   s = s.replace(/\|\s{2,}\|/g, "|\n|");
-  s = s.replace(/(\|[^|]+\|)(\s*\|[-: ]+\|)/g, "$1\n$2");
-  s = s.replace(/(\|[-: ]+\|)(\s*\|[^|]+\|)/g, "$1\n$2");
-  s = s.replace(/([^\n])(\n\|)/g, "$1\n\n|");
-  s = s.replace(/([^\n])(\n#{1,4} )/g, "$1\n\n$2");
+
+  // Ensure separator row (|---|---|) is on its own line
+  s = s.replace(/(\|[^\n|]+\|)\s*(\|[\s:|-]+\|)/g, "$1\n$2");
+  s = s.replace(/(\|[\s:|-]+\|)\s*(\|[^\n|]+\|)/g, "$1\n$2");
+
+  // CRITICAL: Remove blank lines BETWEEN consecutive table rows so GFM parses the whole table
+  while (/(\|[^\n]*\|)[ \t]*\n(?:[ \t]*\n)+([ \t]*\|)/.test(s)) {
+    s = s.replace(/(\|[^\n]*\|)[ \t]*\n(?:[ \t]*\n)+([ \t]*\|)/g, "$1\n$2");
+  }
+
+  // Ensure a blank line BEFORE a table starts (only if previous line is non-empty and NOT a table row)
+  s = s.replace(/^([^\n|].*)\n(\|[^\n]+\|\n\|[\s:|-]+\|)/gm, "$1\n\n$2");
+
+  // Ensure a blank line before headings (#, ##, ###)
+  s = s.replace(/([^\n])\n(#{1,4} )/g, "$1\n\n$2");
+
   return s;
 }
 
