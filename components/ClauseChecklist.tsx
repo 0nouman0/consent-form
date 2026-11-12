@@ -1,5 +1,6 @@
 "use client";
 
+import { Warning as WarningIcon } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { ShieldCheck, CheckCircle, Circle } from "@phosphor-icons/react/dist/ssr";
 import { REQUIRED_CLAUSES } from "@/lib/clauses";
@@ -69,7 +70,7 @@ export default function ClauseChecklist({ detectedClauses, consentType }: Clause
 
       {/* Warning */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs font-semibold text-amber-700 font-body">
-        ⚠ Missing clause or timestamp = medico-legal loophole
+        <WarningIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="fill" />Missing clause or timestamp = medico-legal loophole
       </div>
     </div>
   );

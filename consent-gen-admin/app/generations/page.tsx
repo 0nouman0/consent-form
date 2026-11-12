@@ -213,7 +213,7 @@ export default function GenerationsList() {
                           <p className="font-mono font-bold select-all" style={{ color: "var(--ink)" }}>
                             {audit.id}
                           </p>
-                          <span className="text-[10px] font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                          <span className="text-xs font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
                             {audit.consent_id || "N/A"}
                           </span>
                         </td>
@@ -226,7 +226,7 @@ export default function GenerationsList() {
                           >
                             {audit.profiles?.doctor_name || "Doctor Account"}
                           </Link>
-                          <span className="text-[10px] font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                          <span className="text-xs font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
                             {audit.user_id.slice(0, 8)}
                           </span>
                         </td>
@@ -236,13 +236,13 @@ export default function GenerationsList() {
                             {audit.consent_type ? audit.consent_type.replace(/_/g, " ") : "Consent"}
                           </p>
                           {audit.sub_type && (
-                            <span className="text-[10px] font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                            <span className="text-xs font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
                               {audit.sub_type}
                             </span>
                           )}
                         </td>
 
-                        <td className="py-4 px-6 font-mono text-[11px] whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>
+                        <td className="py-4 px-6 font-mono text-xs whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>
                           {audit.created_at
                             ? new Date(audit.created_at).toLocaleString("en-IN", {
                                 day: "2-digit",
@@ -265,7 +265,7 @@ export default function GenerationsList() {
 
                         <td className="py-4 px-6 text-center">
                           <span
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                             style={{
                               backgroundColor: isSuccess
                                 ? "var(--status-success-bg)"

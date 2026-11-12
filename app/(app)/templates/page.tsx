@@ -42,7 +42,7 @@ export default function TemplatesPage() {
       <div className="max-w-screen-xl mx-auto space-y-4">
 
         {/* Page Header Card */}
-        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        <div className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Library</p>
@@ -75,7 +75,7 @@ export default function TemplatesPage() {
         </div>
 
         {/* Tabs + Search + Filter row */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           {/* Tab switcher */}
           <div className="flex px-6 sm:px-8" style={{ borderBottom: "1px solid var(--rule)" }}>
             <button
@@ -147,7 +147,7 @@ export default function TemplatesPage() {
                   <Link
                     key={template.id}
                     href={`/generate?formType=${activeTab}&templateId=${template.id}`}
-                    className="rounded-md p-6 flex flex-col group hover:-translate-y-0.5 transition-all duration-200"
+                    className="rounded-xl p-6 flex flex-col group hover:-translate-y-0.5 transition-all duration-200"
                     style={{
                       border: "1px solid var(--rule)",
                       backgroundColor: "var(--paper)",
@@ -163,7 +163,7 @@ export default function TemplatesPage() {
                           <BookOpen className="w-5 h-5" style={{ color: "var(--ink-muted)" }} />
                         )}
                       </div>
-                      <span className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold px-2.5 py-1 rounded-md" style={{ color: "var(--ink-muted)", backgroundColor: "var(--sheet)" }}>
+                      <span className="font-mono text-xs uppercase tracking-[0.06em] font-semibold px-2.5 py-1 rounded-md" style={{ color: "var(--ink-muted)", backgroundColor: "var(--sheet)" }}>
                         {template.category}
                       </span>
                     </div>

@@ -15,13 +15,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 w-full relative pb-20 md:pb-0 min-w-0 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 w-full relative pb-28 md:pb-0 min-w-0 flex flex-col h-screen overflow-hidden">
         {/* AppHeader (Desktop top header) */}
         <AppHeader />
 
         {/* Mobile Header */}
         <header
-          className="md:hidden fixed top-3 left-3 right-3 z-50 flex items-center justify-between px-4 py-2 rounded-md"
+          className="md:hidden fixed top-3 left-3 right-3 z-50 flex items-center justify-between px-4 py-2 rounded-2xl"
           style={{
             background: "var(--sheet)",
             boxShadow: "0 2px 16px rgba(23,20,16,0.08)",
@@ -49,8 +49,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Nav */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-2 pb-safe pt-1"
-        style={{ background: "rgba(252,251,247,0.98)", backdropFilter: "blur(16px)", borderTop: "1px solid var(--rule)" }}
+        className="md:hidden fixed left-3 right-3 z-50 px-2 py-1 rounded-2xl"
+        style={{
+          bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
+          background: "rgba(252,251,247,0.96)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid var(--rule)",
+          boxShadow: "0 4px 24px rgba(23,20,16,0.10)",
+        }}
       >
         <SidebarNav isMobile />
       </nav>

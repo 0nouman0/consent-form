@@ -257,7 +257,7 @@ export default function CreditsPage() {
       <div className="max-w-screen-xl mx-auto space-y-4">
 
         {/* Header Card */}
-        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        <div className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Billing</p>
@@ -272,7 +272,7 @@ export default function CreditsPage() {
               <Coins className="w-5 h-5" weight="duotone" style={{ color: "var(--sheet)" }} />
             </div>
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>Available Credits</p>
+              <p className="font-mono text-xs uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>Available Credits</p>
               <p className="font-serif text-2xl font-bold leading-tight" style={{ color: "var(--ink)" }}>
                 {credits !== null ? credits : "—"}
               </p>
@@ -308,28 +308,28 @@ export default function CreditsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {PACKAGES.map((pkg) => {
             const paidCredits = pkg.credits - pkg.bonusCredits;
-            const perCredit = Math.round(pkg.amount / paidCredits);
+            const perCredit = Math.round(pkg.amount / pkg.credits);
             return (
               <div
                 key={pkg.amount}
-                className="rounded-md p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300"
+                className="rounded-xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300"
                 style={{
                   backgroundColor: "var(--sheet)",
                   border: pkg.popular ? "1.5px solid var(--ink)" : "1px solid var(--rule)",
                 }}
               >
                 {pkg.popular && (
-                  <div className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1"
+                  <div className="absolute top-3 right-3 text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1"
                     style={{ backgroundColor: "var(--red)", color: "var(--sheet)" }}>
                     <Sparkle weight="fill" className="w-2.5 h-2.5" /> Best Deal
                   </div>
                 )}
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>{pkg.label}</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>{pkg.label}</p>
                   <div className="flex items-baseline gap-1 mt-2 mb-1">
                     <span className="font-serif text-4xl font-bold" style={{ color: "var(--ink)" }}>₹{pkg.amount.toLocaleString("en-IN")}</span>
                   </div>
-                  <p className="text-[10px] font-mono mb-3" style={{ color: "var(--ink-muted)" }}>₹{perCredit}/credit</p>
+                  <p className="text-xs font-mono mb-3" style={{ color: "var(--ink-muted)" }}>₹{perCredit} per credit</p>
 
                   {/* Credit count + bonus badge */}
                   <div className="flex items-center gap-2 mb-3">
@@ -337,7 +337,7 @@ export default function CreditsPage() {
                       {paidCredits} Credit{paidCredits > 1 ? "s" : ""}
                     </span>
                     {pkg.bonusCredits > 0 && (
-                      <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded"
+                      <span className="text-xs font-black uppercase tracking-wide px-1.5 py-0.5 rounded"
                         style={{ backgroundColor: "rgba(63,122,78,0.12)", color: "#3f7a4e" }}>
                         +{pkg.bonusCredits} FREE
                       </span>
@@ -372,7 +372,7 @@ export default function CreditsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Credit Usage History */}
-          <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: "1px solid var(--rule)" }}>
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
                 <ClockCounterClockwise weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
@@ -405,7 +405,7 @@ export default function CreditsPage() {
                         <p className="font-bold capitalize" style={{ color: "var(--ink)" }}>
                           {log.action.replace(/_/g, " ")}
                         </p>
-                        <p className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           <CalendarBlank className="w-3 h-3" />
                           {new Date(log.created_at).toLocaleDateString("en-IN", {
                             day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
@@ -417,7 +417,7 @@ export default function CreditsPage() {
                       <p className="font-bold" style={{ color: log.amount < 0 ? "var(--red)" : "#3f7a4e" }}>
                         {log.amount > 0 ? `+${log.amount}` : log.amount}
                       </p>
-                      <p className="text-[10px]" style={{ color: "var(--ink-muted)" }}>Bal: {log.balance_after}</p>
+                      <p className="text-xs" style={{ color: "var(--ink-muted)" }}>Bal: {log.balance_after}</p>
                     </div>
                   </div>
                 ))}
@@ -426,7 +426,7 @@ export default function CreditsPage() {
           </div>
 
           {/* Payment Transactions */}
-          <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: "1px solid var(--rule)" }}>
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
                 <CreditCard weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
@@ -448,10 +448,10 @@ export default function CreditsPage() {
                         <p className="font-mono font-bold" style={{ color: "var(--ink)" }}>
                           {tx.order_id}
                         </p>
-                        <p className="text-[9px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           ID: {tx.payment_id || "Pending"}
                         </p>
-                        <p className="text-[10px] flex items-center gap-1 mt-1" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs flex items-center gap-1 mt-1" style={{ color: "var(--ink-muted)" }}>
                           <CalendarBlank className="w-3 h-3" />
                           {new Date(tx.created_at).toLocaleDateString("en-IN")}
                         </p>
@@ -461,7 +461,7 @@ export default function CreditsPage() {
                       <div className="text-right">
                         <p className="font-bold" style={{ color: "var(--ink)" }}>₹{(tx.amount / 100).toFixed(0)}</p>
                         <span
-                          className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-md mt-1"
+                          className="inline-block text-xs font-bold px-2 py-0.5 rounded-md mt-1"
                           style={
                             tx.status === "paid"
                               ? { color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)" }
@@ -520,11 +520,11 @@ export default function CreditsPage() {
               }
             }
           `}} />
-          <div id="printable-invoice-modal" className="w-full max-w-[500px] rounded-md p-6 sm:p-8 relative" style={{ backgroundColor: "var(--sheet)", color: "var(--ink-soft)", border: "1px solid var(--rule)" }}>
+          <div id="printable-invoice-modal" className="w-full max-w-[500px] rounded-xl p-6 sm:p-8 relative" style={{ backgroundColor: "var(--sheet)", color: "var(--ink-soft)", border: "1px solid var(--rule)" }}>
             {/* Header */}
             <div className="text-center pb-5 mb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
               <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>Payment Invoice</h2>
-              <p className="font-mono text-[11px] mt-1 uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>Consent Form Generator</p>
+              <p className="font-mono text-xs mt-1 uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>Consent Form Generator</p>
             </div>
 
             {/* Info details */}

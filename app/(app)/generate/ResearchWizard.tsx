@@ -1,5 +1,6 @@
 "use client";
 
+import { Check as CheckIcon } from "@phosphor-icons/react";
 import { useRef, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ResearchConsentFormSchema } from "@/lib/schema";
@@ -158,11 +159,11 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
   const isSubmitting = status === "loading" || status === "streaming";
 
   return (
-    <div className="rounded-md overflow-hidden flex min-h-[600px]" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+    <div className="rounded-xl overflow-hidden flex min-h-[600px]" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
 
       {/* ── LEFT: Step navigator ── */}
       <aside className="hidden md:flex flex-col w-60 shrink-0 py-8 px-5" style={{ borderRight: "1px solid var(--rule)", backgroundColor: "var(--paper)" }}>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.08em] mb-6 px-1" style={{ color: "var(--ink-muted)" }}>
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.08em] mb-6 px-1" style={{ color: "var(--ink-muted)" }}>
           Research Consent
         </p>
         <nav aria-label="Form steps">
@@ -186,14 +187,14 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                     aria-current={active ? "step" : undefined}
                   >
                     <span
-                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold transition-all"
+                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-xs font-bold transition-all"
                       style={{
                         backgroundColor: active ? "var(--sheet)" : done ? "var(--ink)" : "transparent",
                         color: active ? "var(--ink)" : done ? "var(--sheet)" : "var(--ink-muted)",
                         border: active || done ? "1px solid transparent" : "1px solid var(--rule)",
                       }}
                     >
-                      {done ? "✓" : i + 1}
+                      {done ? <CheckIcon className="w-3.5 h-3.5" weight="bold" /> : i + 1}
                     </span>
                     <span className="truncate">{title}</span>
                   </button>
@@ -204,7 +205,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
         </nav>
 
         <div className="mt-auto pt-6">
-          <div className="flex justify-between font-mono text-[10px] mb-2" style={{ color: "var(--ink-muted)" }}>
+          <div className="flex justify-between font-mono text-xs mb-2" style={{ color: "var(--ink-muted)" }}>
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
@@ -650,7 +651,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
           <button
             type="button"
             onClick={goNext}
-            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all hover:opacity-90"
+            className="rounded-xl px-6 py-2.5 text-sm font-semibold transition-all hover:opacity-90"
             style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             Next
@@ -679,7 +680,7 @@ export default function ResearchWizard({ form, onSubmit, status }: ResearchWizar
                 setValidationError(msgs[0] || "Please check all required fields before generating.");
               }
             )}
-            className="rounded-md px-6 py-2.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:opacity-90 flex items-center gap-2 cursor-pointer"
+            className="rounded-xl px-6 py-2.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:opacity-90 flex items-center gap-2 cursor-pointer"
             style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             {isSubmitting ? (

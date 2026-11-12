@@ -45,7 +45,7 @@ export default function LandingNavbar() {
         </Link>
 
         {/* Nav links — desktop */}
-        <div className="hidden md:flex items-center gap-6 text-[14px] text-neutral-500">
+        <div className="hidden md:flex items-center gap-6 text-sm text-neutral-500">
           <a href="#" className="flex items-center gap-1 font-medium" style={{ color: "#0b0f1a" }}>
             Home
             <span className="w-1.5 h-1.5 rounded-full inline-block ml-1" style={{ backgroundColor: "#0b0f1a" }} />

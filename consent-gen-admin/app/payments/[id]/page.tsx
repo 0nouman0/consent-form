@@ -90,12 +90,12 @@ export default function PaymentDetail() {
                 </h3>
 
                 <div>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                     Payment Status
                   </span>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                       style={{
                         backgroundColor:
                           tx.status === "paid"
@@ -128,19 +128,19 @@ export default function PaymentDetail() {
 
                 <div className="pt-3 space-y-2.5 text-xs" style={{ borderTop: "1px solid var(--rule)" }}>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                       Database Record UUID
                     </span>
                     <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.id}</span>
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                       Credits Added
                     </span>
                     <span className="font-mono font-bold" style={{ color: "#0f766e" }}>+{tx.credits} Credits</span>
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                       Paid Amount
                     </span>
                     <span className="font-serif font-bold text-base" style={{ color: "var(--ink)" }}>
@@ -148,7 +148,7 @@ export default function PaymentDetail() {
                     </span>
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                       Timestamp
                     </span>
                     <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>
@@ -168,14 +168,14 @@ export default function PaymentDetail() {
                 </h3>
                 <div className="space-y-2 text-xs pt-2" style={{ borderTop: "1px solid var(--rule-soft)" }}>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                       Payment Method
                     </span>
                     <span className="font-medium capitalize" style={{ color: "var(--ink)" }}>{tx.metadata?.method || "N/A"}</span>
                   </div>
                   {tx.metadata?.email && (
                     <div>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                         Billing Email
                       </span>
                       <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.metadata.email}</span>
@@ -183,7 +183,7 @@ export default function PaymentDetail() {
                   )}
                   {tx.metadata?.vpa && (
                     <div>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
+                      <span className="font-mono text-xs uppercase tracking-[0.08em] block" style={{ color: "var(--ink-muted)" }}>
                         UPI VPA
                       </span>
                       <span className="font-mono select-all text-xs" style={{ color: "var(--ink)" }}>{tx.metadata.vpa}</span>
@@ -219,7 +219,7 @@ export default function PaymentDetail() {
                   <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                     Tax Invoice & Receipt
                   </h2>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                     ConsentGen Medico-Legal Platform
                   </p>
                 </div>

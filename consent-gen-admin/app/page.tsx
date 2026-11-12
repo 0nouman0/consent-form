@@ -297,7 +297,7 @@ export default function Dashboard() {
                   <h2 className="font-serif text-lg font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                     Consent Generation Activity
                   </h2>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                  <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                     Success vs Failures (Last 7 Days)
                   </p>
                 </div>
@@ -328,12 +328,12 @@ export default function Dashboard() {
                       dataKey="name"
                       stroke="var(--ink-muted)"
                       tickLine={false}
-                      className="text-[11px] font-mono"
+                      className="text-xs font-mono"
                     />
                     <YAxis
                       stroke="var(--ink-muted)"
                       tickLine={false}
-                      className="text-[11px] font-mono"
+                      className="text-xs font-mono"
                       allowDecimals={false}
                     />
                     <Tooltip
@@ -379,7 +379,7 @@ export default function Dashboard() {
                 <h2 className="font-serif text-lg font-bold tracking-tight mb-1" style={{ color: "var(--ink)" }}>
                   Operational Reliability
                 </h2>
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] mb-5" style={{ color: "var(--ink-muted)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.08em] mb-5" style={{ color: "var(--ink-muted)" }}>
                   Pipeline Success Metric
                 </p>
 
@@ -432,7 +432,7 @@ export default function Dashboard() {
               </div>
 
               <div className="pt-4 mt-6" style={{ borderTop: "1px solid var(--rule)" }}>
-                <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                   Telemetry streams from Supabase <code className="font-mono px-1 py-0.5 rounded" style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--ink)" }}>generation_audit</code> and Cashfree payment records.
                 </p>
               </div>
@@ -452,7 +452,7 @@ export default function Dashboard() {
                 <h2 className="font-serif text-lg font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                   Recent Consent Generations
                 </h2>
-                <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Real-time audit log
                 </p>
               </div>
@@ -501,7 +501,7 @@ export default function Dashboard() {
                         <td className="py-3.5 px-6 capitalize font-medium" style={{ color: "var(--ink)" }}>
                           {audit.consent_type ? audit.consent_type.replace(/_/g, " ") : "Consent"}
                           {audit.sub_type && (
-                            <span className="font-mono text-[10px] ml-1.5 opacity-70">
+                            <span className="font-mono text-xs ml-1.5 opacity-70">
                               ({audit.sub_type})
                             </span>
                           )}
@@ -509,7 +509,7 @@ export default function Dashboard() {
                         <td className="py-3.5 px-6 truncate max-w-[180px]" style={{ color: "var(--ink-soft)" }}>
                           {audit.hospital_name || "—"}
                         </td>
-                        <td className="py-3.5 px-6 font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                        <td className="py-3.5 px-6 font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                           {new Date(audit.created_at).toLocaleString("en-IN", {
                             dateStyle: "medium",
                             timeStyle: "short",
@@ -517,7 +517,7 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3.5 px-6 text-right">
                           <span
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                             style={{
                               backgroundColor: isSuccess
                                 ? "var(--status-success-bg)"

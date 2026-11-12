@@ -138,7 +138,7 @@ export default function AuditLogsList() {
                           </td>
                           <td className="py-4 px-6">
                             <span
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                               style={{
                                 backgroundColor: isDanger
                                   ? "var(--status-fail-bg)"
@@ -166,7 +166,7 @@ export default function AuditLogsList() {
                           <td className="py-4 px-6 font-medium capitalize" style={{ color: "var(--ink)" }}>
                             {log.target_type}
                             {log.target_id && (
-                              <span className="font-mono text-[10px] block opacity-70 mt-0.5">
+                              <span className="font-mono text-xs block opacity-70 mt-0.5">
                                 {log.target_id.slice(0, 10)}...
                               </span>
                             )}
@@ -174,7 +174,7 @@ export default function AuditLogsList() {
                           <td className="py-4 px-6 max-w-xs" style={{ color: "var(--ink-soft)" }}>
                             {log.note || <span className="italic opacity-60">No audit justification recorded</span>}
                           </td>
-                          <td className="py-4 px-6 text-right font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                          <td className="py-4 px-6 text-right font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                             {new Date(log.created_at).toLocaleString("en-IN", {
                               dateStyle: "medium",
                               timeStyle: "short",

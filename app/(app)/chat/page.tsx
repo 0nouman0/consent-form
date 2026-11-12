@@ -3,16 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import {
   ArrowUp,
-  Loader2,
+  CircleNotch,
   Plus,
-  Trash2,
-  Menu,
+  Trash,
+  List,
   X,
   Copy,
   Check,
   ArrowRight,
-  MessageSquare,
-} from "lucide-react";
+  ChatCircle,
+} from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { v4 as uuidv4 } from "uuid";
@@ -386,22 +386,22 @@ export default function ChatPage() {
       </h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="font-serif text-[15px] font-semibold text-[var(--ink)] mt-4 mb-1.5 pb-1 border-b border-[var(--rule)]">
+      <h2 className="font-serif text-base font-semibold text-[var(--ink)] mt-4 mb-1.5 pb-1 border-b border-[var(--rule)]">
         {children}
       </h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-[13.5px] font-semibold text-[var(--ink)] mt-3.5 mb-1">
+      <h3 className="text-sm font-semibold text-[var(--ink)] mt-3.5 mb-1">
         {children}
       </h3>
     ),
     h4: ({ children }: any) => (
-      <h4 className="text-[13px] font-semibold text-[var(--ink)] mt-2.5 mb-1">
+      <h4 className="text-sm font-semibold text-[var(--ink)] mt-2.5 mb-1">
         {children}
       </h4>
     ),
     p: ({ children }: any) => (
-      <p className="text-[14px] leading-[1.7] my-2 text-[var(--ink-soft)]">
+      <p className="text-sm leading-[1.7] my-2 text-[var(--ink-soft)]">
         {children}
       </p>
     ),
@@ -416,7 +416,7 @@ export default function ChatPage() {
       </ol>
     ),
     li: ({ children }: any) => (
-      <li className="text-[14px] leading-[1.65] text-[var(--ink-soft)] pl-0.5">
+      <li className="text-sm leading-[1.65] text-[var(--ink-soft)] pl-0.5">
         {children}
       </li>
     ),
@@ -427,19 +427,19 @@ export default function ChatPage() {
       <em className="italic text-[var(--ink-soft)]">{children}</em>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="my-3 pl-3.5 py-0.5 border-l-2 border-[var(--rule)] text-[13.5px] text-[var(--ink-muted)] leading-relaxed">
+      <blockquote className="my-3 pl-3.5 py-0.5 border-l-2 border-[var(--rule)] text-sm text-[var(--ink-muted)] leading-relaxed">
         {children}
       </blockquote>
     ),
     code: ({ children }: any) => (
-      <code className="px-1.5 py-0.5 rounded bg-[var(--paper)] border border-[var(--rule)] font-mono text-[12px] text-[var(--ink)]">
+      <code className="px-1.5 py-0.5 rounded bg-[var(--paper)] border border-[var(--rule)] font-mono text-xs text-[var(--ink)]">
         {children}
       </code>
     ),
     hr: () => <hr className="my-4 border-[var(--rule)]" />,
     table: ({ children }: any) => (
       <div className="my-4 overflow-x-auto rounded border border-[var(--rule)] bg-[var(--sheet)]">
-        <table className="w-full border-collapse text-left text-[13px] min-w-[460px]">
+        <table className="w-full border-collapse text-left text-sm min-w-[460px]">
           {children}
         </table>
       </div>
@@ -456,12 +456,12 @@ export default function ChatPage() {
       <tr className="even:bg-[rgba(23,20,16,0.015)]">{children}</tr>
     ),
     th: ({ children }: any) => (
-      <th className="px-3.5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] whitespace-nowrap">
+      <th className="px-3.5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] whitespace-nowrap">
         {children}
       </th>
     ),
     td: ({ children }: any) => (
-      <td className="px-3.5 py-2.5 align-top text-[var(--ink-soft)] leading-relaxed text-[13px]">
+      <td className="px-3.5 py-2.5 align-top text-[var(--ink-soft)] leading-relaxed text-sm">
         {children}
       </td>
     ),
@@ -469,7 +469,7 @@ export default function ChatPage() {
 
   return (
     <div
-      className="flex-1 flex w-full font-body overflow-hidden relative"
+      className="flex-1 flex min-w-0 font-body overflow-hidden relative md:m-4 md:mt-3 md:rounded-xl md:border md:border-[var(--rule)]"
       style={{ backgroundColor: "var(--sheet)" }}
     >
       {/* Mobile overlay */}
@@ -489,7 +489,7 @@ export default function ChatPage() {
         style={{ backgroundColor: "var(--paper)", borderRight: "1px solid var(--rule)" }}
       >
         <div className="px-4 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--rule)" }}>
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
             Conversations
           </span>
           <div className="flex items-center gap-1">
@@ -540,8 +540,8 @@ export default function ChatPage() {
                   style={active ? { border: "1px solid var(--rule)" } : { border: "1px solid transparent" }}
                 >
                   <div className="min-w-0 flex-1 pr-2">
-                    <p className="text-[12.5px] font-medium truncate">{session.title}</p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-medium truncate">{session.title}</p>
+                    <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                       {formatSidebarTime(session.date)}
                     </p>
                   </div>
@@ -551,7 +551,7 @@ export default function ChatPage() {
                     className="opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity text-[var(--ink-muted)] hover:text-[var(--red)]"
                     title="Delete conversation"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 </div>
               );
@@ -573,7 +573,7 @@ export default function ChatPage() {
               className="md:hidden p-1.5 -ml-1 rounded text-[var(--ink-muted)] hover:text-[var(--ink)]"
               onClick={() => setIsSidebarOpen(true)}
             >
-              <Menu className="w-4 h-4" />
+              <List className="w-4 h-4" />
             </button>
             <span className="text-xs font-medium truncate" style={{ color: "var(--ink-soft)" }}>
               {activeSession ? activeSession.title : "Medico-Legal Assistant"}
@@ -596,7 +596,7 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           {isNewChat ? (
             <div className="h-full flex flex-col justify-center max-w-2xl mx-auto">
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--red)" }}>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] mb-2" style={{ color: "var(--red)" }}>
                 Medico-Legal Desk
               </p>
               <h2 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight mb-2" style={{ color: "var(--ink)" }}>
@@ -637,13 +637,13 @@ export default function ChatPage() {
                   return (
                     <div key={idx} className="flex flex-col items-end">
                       <div
-                        className="max-w-[82%] sm:max-w-[70%] px-4 py-2.5 rounded-lg text-[14px] leading-relaxed whitespace-pre-wrap"
+                        className="max-w-[82%] sm:max-w-[70%] px-4 py-2.5 rounded-lg text-sm leading-relaxed whitespace-pre-wrap"
                         style={{ backgroundColor: "var(--paper)", color: "var(--ink)", border: "1px solid var(--rule)" }}
                       >
                         {msg.content}
                       </div>
                       {timeStr && (
-                        <span className="font-mono text-[10px] mt-1 pr-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <span className="font-mono text-xs mt-1 pr-0.5" style={{ color: "var(--ink-muted)" }}>
                           {timeStr}
                         </span>
                       )}
@@ -655,12 +655,12 @@ export default function ChatPage() {
                   <div key={idx} className="group">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <MessageSquare className="w-3.5 h-3.5" style={{ color: "var(--red)" }} />
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                        <ChatCircle className="w-3.5 h-3.5" style={{ color: "var(--red)" }} />
+                        <span className="font-mono text-xs uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
                           ConsentGen
                         </span>
                         {timeStr && (
-                          <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                          <span className="font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                             · {timeStr}
                           </span>
                         )}
@@ -675,7 +675,7 @@ export default function ChatPage() {
                       <button
                         type="button"
                         onClick={() => handleCopyMessage(msg.content, idx)}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity py-0.5"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity py-0.5"
                         style={{ color: "var(--ink-muted)" }}
                       >
                         {copiedIdx === idx ? (
@@ -697,7 +697,7 @@ export default function ChatPage() {
 
               {isLoading && (
                 <div className="flex items-center gap-2 text-xs py-2" style={{ color: "var(--ink-muted)" }}>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <CircleNotch className="w-3.5 h-3.5 animate-spin" />
                   <span>Drafting response…</span>
                 </div>
               )}
@@ -733,10 +733,10 @@ export default function ChatPage() {
               className="absolute right-2.5 bottom-2.5 w-8 h-8 rounded-md flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-85 transition-opacity"
               style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
             >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
+              {isLoading ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
             </button>
           </form>
-          <p className="text-[11px] text-center mt-2" style={{ color: "var(--ink-muted)" }}>
+          <p className="text-xs text-center mt-2" style={{ color: "var(--ink-muted)" }}>
             Verify statutory citations against institutional guidelines.
           </p>
         </div>

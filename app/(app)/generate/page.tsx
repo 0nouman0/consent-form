@@ -1,5 +1,6 @@
 "use client";
 
+import { Check as CheckIcon } from "@phosphor-icons/react";
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -364,7 +365,7 @@ function GenerateContent() {
     <main role="main" aria-label="Consent Form Generator" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4" style={{ backgroundColor: "var(--paper)" }}>
       {/* Page Header Card */}
       <div
-        className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex items-center gap-4"
+        className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex items-center gap-4"
         style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
       >
         {formType !== "select" && status === "idle" && (
@@ -378,7 +379,7 @@ function GenerateContent() {
           </button>
         )}
         <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
             Forms
           </p>
           <h1
@@ -519,13 +520,13 @@ function GenerateContent() {
                 ))}
               </ul>
               <div className="flex flex-wrap gap-2 mt-auto">
-                <span className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold px-3 py-1.5 rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink)", border: "1px solid var(--rule)" }}>
+                <span className="font-mono text-xs uppercase tracking-[0.06em] font-semibold px-3 py-1.5 rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink)", border: "1px solid var(--rule)" }}>
                   10 consent types
                 </span>
                 <span className="text-xs font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
                   <Clock className="w-3 h-3" /> ~5 min
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium px-3 py-1.5 rounded-md" style={{ color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }}>
+                <span className="font-mono text-xs uppercase tracking-[0.06em] font-medium px-3 py-1.5 rounded-md" style={{ color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }}>
                   IMC 2002
                 </span>
               </div>
@@ -567,13 +568,13 @@ function GenerateContent() {
                 ))}
               </ul>
               <div className="flex flex-wrap gap-2 mt-auto">
-                <span className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold px-3 py-1.5 rounded-md" style={{ backgroundColor: "rgba(190,61,42,0.08)", color: "var(--red)", border: "1px solid rgba(190,61,42,0.2)" }}>
+                <span className="font-mono text-xs uppercase tracking-[0.06em] font-semibold px-3 py-1.5 rounded-md" style={{ backgroundColor: "rgba(190,61,42,0.08)", color: "var(--red)", border: "1px solid rgba(190,61,42,0.2)" }}>
                   ICMR compliant
                 </span>
                 <span className="text-xs font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
                   <Clock className="w-3 h-3" /> ~5 min
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium px-3 py-1.5 rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)", border: "1px solid var(--rule)" }}>
+                <span className="font-mono text-xs uppercase tracking-[0.06em] font-medium px-3 py-1.5 rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)", border: "1px solid var(--rule)" }}>
                   GCP aligned
                 </span>
               </div>
@@ -606,7 +607,7 @@ function GenerateContent() {
                   className="w-8 h-8 rounded-md flex items-center justify-center text-sm font-bold"
                   style={{ backgroundColor: "var(--sheet)", color: "var(--ink)", border: "1px solid var(--rule)" }}
                 >
-                  ✓
+                  <CheckIcon className="w-4 h-4" weight="bold" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: "var(--ink)" }}>

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LayoutDashboard, User, LogOut, ChevronDown } from "lucide-react";
+import { SquaresFour, User, SignOut, CaretDown } from "@phosphor-icons/react";
 import type { UserRole } from "@/lib/rbac";
 
 interface ProfileInfo {
@@ -105,7 +105,7 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
         aria-label="Open user menu"
       >
         <div
-          className="w-7 h-7 rounded flex items-center justify-center text-[11px] font-semibold shrink-0"
+          className="w-7 h-7 rounded flex items-center justify-center text-xs font-semibold shrink-0"
           style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
         >
           {initials}
@@ -117,11 +117,11 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
               <p className="font-serif font-semibold text-xs leading-tight truncate" style={{ color: "var(--ink)" }}>
                 {profile?.doctorName || "Account"}
               </p>
-              <p className="text-[10px] leading-tight truncate" style={{ color: "var(--ink-muted)" }}>
+              <p className="text-xs leading-tight truncate" style={{ color: "var(--ink-muted)" }}>
                 {profile?.hospitalName || roleLabel}
               </p>
             </div>
-            <ChevronDown
+            <CaretDown
               className="w-3.5 h-3.5 transition-transform"
               style={{ color: "var(--ink-muted)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
             />
@@ -159,7 +159,7 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
               </div>
             </div>
             <div
-              className="mt-2.5 pt-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.08em]"
+              className="mt-2.5 pt-2 flex items-center justify-between text-xs font-mono uppercase tracking-[0.08em]"
               style={{ borderTop: "1px solid rgba(23,20,16,0.07)", color: "var(--ink-muted)" }}
             >
               <span>{profile?.hospitalName || "No hospital set"}</span>
@@ -172,16 +172,16 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
             <Link
               href="/dashboard"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[var(--paper)]"
+              className="flex items-center gap-2.5 px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-[var(--paper)]"
               style={{ color: "var(--ink-soft)" }}
             >
-              <LayoutDashboard className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
+              <SquaresFour className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               Dashboard
             </Link>
             <Link
               href="/profile"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[var(--paper)]"
+              className="flex items-center gap-2.5 px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-[var(--paper)]"
               style={{ color: "var(--ink-soft)" }}
             >
               <User className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
@@ -194,10 +194,10 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-[13px] font-medium transition-colors hover:bg-[rgba(190,61,42,0.06)]"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-[rgba(190,61,42,0.06)]"
               style={{ color: "var(--red)" }}
             >
-              <LogOut className="w-4 h-4" />
+              <SignOut className="w-4 h-4" />
               Sign Out
             </button>
           </div>

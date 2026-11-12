@@ -59,15 +59,23 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col sticky top-0 h-screen overflow-hidden"
+      className="hidden md:block sticky top-0 h-screen shrink-0"
       style={{
-        width: collapsed ? "68px" : "240px",
-        minWidth: collapsed ? "68px" : "240px",
+        // 16px gutter top / bottom / left so the panel floats free of the viewport edges
+        width: collapsed ? "84px" : "256px",
+        minWidth: collapsed ? "84px" : "256px",
+        padding: "16px 0 16px 16px",
         transition: "width 0.25s cubic-bezier(0.4,0,0.2,1), min-width 0.25s cubic-bezier(0.4,0,0.2,1)",
-        background: "var(--sheet)",
-        borderRight: "1px solid var(--rule)",
       }}
     >
+      <div
+        className="flex flex-col h-full w-full overflow-hidden rounded-2xl"
+        style={{
+          background: "var(--sheet)",
+          border: "1px solid var(--rule)",
+          boxShadow: "0 4px 24px rgba(23,20,16,0.06)",
+        }}
+      >
       {/* ── Header ── */}
       <div
         className="flex items-center shrink-0 overflow-hidden"
@@ -89,7 +97,7 @@ export default function Sidebar() {
             whiteSpace: "nowrap",
           }}
         >
-          <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
             style={{ backgroundColor: "var(--ink)" }}>
             <ShieldCheck weight="bold" className="w-[16px] h-[16px]" style={{ color: "var(--sheet)" }} />
           </div>
@@ -99,7 +107,7 @@ export default function Sidebar() {
         <button
           onClick={toggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="w-8 h-8 rounded-md flex items-center justify-center transition-all shrink-0 hover:bg-[var(--paper)]"
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0 hover:bg-[var(--paper)]"
           style={{ color: "var(--ink-muted)" }}
         >
           {collapsed
@@ -117,7 +125,7 @@ export default function Sidebar() {
               key={href}
               href={href}
               title={collapsed ? label : undefined}
-              className="flex items-center rounded-md font-medium transition-all text-sm group overflow-hidden"
+              className="flex items-center rounded-xl font-medium transition-all text-sm group overflow-hidden"
               style={{
                 gap: collapsed ? 0 : "12px",
                 padding: collapsed ? "10px 0" : "10px 12px",
@@ -153,7 +161,7 @@ export default function Sidebar() {
       <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--rule)" }}>
         <Link
           href="/profile"
-          className="flex items-center rounded-md font-medium transition-all text-xs group overflow-hidden"
+          className="flex items-center rounded-xl font-medium transition-all text-xs group overflow-hidden"
           style={{
             gap: collapsed ? 0 : "10px",
             padding: collapsed ? "8px 0" : "8px 10px",
@@ -178,6 +186,7 @@ export default function Sidebar() {
             Doctor Profile
           </span>
         </Link>
+      </div>
       </div>
     </aside>
   );

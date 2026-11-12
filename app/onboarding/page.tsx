@@ -251,7 +251,7 @@ function OnboardingContent() {
                 ConsentGen
               </span>
               <span
-                className="text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
+                className="text-xs font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
                 style={{ backgroundColor: "rgba(190, 61, 42, 0.08)", color: "var(--red)" }}
               >
                 Clinician Onboarding
@@ -307,7 +307,7 @@ function OnboardingContent() {
                         {isPassed ? <CheckCircle weight="fill" className="w-4 h-4 text-emerald-400" /> : item.s}
                       </div>
                       <span
-                        className="text-[10px] font-mono uppercase tracking-[0.08em] mt-1.5 font-semibold"
+                        className="text-xs font-mono uppercase tracking-[0.08em] mt-1.5 font-semibold"
                         style={{ color: isCurrent ? "var(--ink)" : "var(--ink-muted)" }}
                       >
                         {item.label}
@@ -327,7 +327,7 @@ function OnboardingContent() {
             </div>
 
             <div className="text-center max-w-xl mx-auto">
-              <p className="font-mono text-[11px] uppercase tracking-[0.1em] font-semibold mb-1" style={{ color: "var(--red)" }}>
+              <p className="font-mono text-xs uppercase tracking-[0.1em] font-semibold mb-1" style={{ color: "var(--red)" }}>
                 Step {step} of 3 • Medico-Legal Registration
               </p>
               <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -368,7 +368,7 @@ function OnboardingContent() {
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div>
-                  <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Full Legal Clinician Name <span style={{ color: "var(--red)" }}>*</span>
                   </label>
                   <div className="relative">
@@ -387,13 +387,13 @@ function OnboardingContent() {
                       }}
                     />
                   </div>
-                  <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs mt-1 font-mono" style={{ color: "var(--ink-muted)" }}>
                     Include prefix (Dr.) and postgraduate qualifications as registered with the Council.
                   </p>
                 </div>
 
                 <div>
-                  <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Medical Registration Number <span style={{ color: "var(--red)" }}>*</span>
                   </label>
                   <div className="relative">
@@ -412,14 +412,14 @@ function OnboardingContent() {
                       }}
                     />
                   </div>
-                  <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs mt-1 font-mono" style={{ color: "var(--ink-muted)" }}>
                     Mandatory for medico-legal admissibility under Section 26 of the BNS 2023.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                       Medical Council
                     </label>
                     <select
@@ -441,7 +441,7 @@ function OnboardingContent() {
                   </div>
 
                   <div>
-                    <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                       Primary Specialty
                     </label>
                     <select
@@ -486,10 +486,10 @@ function OnboardingContent() {
                 }}
               >
                 <div className="flex items-center justify-between pb-3 mb-4 border-b" style={{ borderColor: "var(--rule)" }}>
-                  <span className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                     Document Stamp Preview
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700">
+                  <span className="inline-flex items-center gap-1 text-xs font-mono text-emerald-700">
                     <SealCheck weight="fill" className="w-3.5 h-3.5" /> IMC Compliant
                   </span>
                 </div>
@@ -510,21 +510,21 @@ function OnboardingContent() {
                   <p className="text-xs mt-1" style={{ color: "var(--ink-muted)" }}>
                     Specialist in {formData.specialty}
                   </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                     {formData.medicalCouncil}
                   </p>
 
                   <div className="mt-4 pt-3 border-t flex items-center justify-between" style={{ borderColor: "var(--rule-soft)" }}>
-                    <span className="font-mono text-[9px] uppercase tracking-wider opacity-60" style={{ color: "var(--ink)" }}>
+                    <span className="font-mono text-xs uppercase tracking-wider opacity-60" style={{ color: "var(--ink)" }}>
                       ConsentGen Digital Seal
                     </span>
-                    <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-600 font-bold">
+                    <span className="font-mono text-xs uppercase tracking-wider text-emerald-600 font-bold">
                       Verified Practitioner
                     </span>
                   </div>
                 </div>
 
-                <p className="text-[11px] mt-4 leading-relaxed font-sans" style={{ color: "var(--ink-muted)" }}>
+                <p className="text-xs mt-4 leading-relaxed font-sans" style={{ color: "var(--ink-muted)" }}>
                   This official clinical identity is automatically attached to the authorization clause of all consent forms you generate.
                 </p>
               </div>
@@ -542,7 +542,7 @@ function OnboardingContent() {
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div>
-                  <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Hospital / Clinical Practice Name <span style={{ color: "var(--red)" }}>*</span>
                   </label>
                   <div className="relative">
@@ -564,7 +564,7 @@ function OnboardingContent() {
                 </div>
 
                 <div>
-                  <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Hospital Physical Address <span style={{ color: "var(--red)" }}>*</span>
                   </label>
                   <div className="relative">
@@ -602,7 +602,7 @@ function OnboardingContent() {
 
                 {!formData.sameAddress && (
                   <div>
-                    <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                       Separate Billing Address
                     </label>
                     <textarea
@@ -653,10 +653,10 @@ function OnboardingContent() {
                 }}
               >
                 <div className="flex items-center justify-between pb-3 mb-4 border-b" style={{ borderColor: "var(--rule)" }}>
-                  <span className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                     Institution Preview
                   </span>
-                  <span className="font-mono text-[10px] uppercase font-bold text-amber-700">
+                  <span className="font-mono text-xs uppercase font-bold text-amber-700">
                     Jurisdiction Check
                   </span>
                 </div>
@@ -677,10 +677,10 @@ function OnboardingContent() {
                 </div>
 
                 <div className="mt-4 p-3.5 rounded text-xs space-y-1.5" style={{ backgroundColor: "rgba(23, 20, 16, 0.04)" }}>
-                  <p className="font-bold font-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>
+                  <p className="font-bold font-mono text-xs uppercase tracking-wider" style={{ color: "var(--ink)" }}>
                     Legal Significance
                   </p>
-                  <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                     Consumer Protection Act (CPA 2019) mandates that the healthcare establishment where treatment is rendered be clearly identified on all consent documentation.
                   </p>
                 </div>
@@ -699,7 +699,7 @@ function OnboardingContent() {
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div>
-                  <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-2" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-2" style={{ color: "var(--ink)" }}>
                     Default Consent Type for Your Practice
                   </label>
                   <div className="space-y-2">
@@ -726,7 +726,7 @@ function OnboardingContent() {
                             <p className="font-serif font-bold text-xs" style={{ color: "var(--ink)" }}>
                               {t.label}
                             </p>
-                            <p className="text-[11px] mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                            <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>
                               {t.desc}
                             </p>
                           </div>
@@ -738,7 +738,7 @@ function OnboardingContent() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div>
-                    <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                       Primary Counseling Language
                     </label>
                     <select
@@ -760,7 +760,7 @@ function OnboardingContent() {
                   </div>
 
                   <div>
-                    <label className="font-mono text-[11px] uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                    <label className="font-mono text-xs uppercase font-bold tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                       Comprehension Level
                     </label>
                     <select
@@ -788,7 +788,7 @@ function OnboardingContent() {
                     border: "1px solid var(--rule)",
                   }}
                 >
-                  <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink)" }}>
+                  <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink)" }}>
                     Clinician Attestation
                   </p>
                   <p style={{ color: "var(--ink-muted)" }}>
@@ -836,10 +836,10 @@ function OnboardingContent() {
                 }}
               >
                 <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: "var(--rule)" }}>
-                  <span className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                     Full Medico-Legal Dossier
                   </span>
-                  <span className="font-mono text-[10px] uppercase font-bold text-emerald-700">
+                  <span className="font-mono text-xs uppercase font-bold text-emerald-700">
                     Ready to Seal
                   </span>
                 </div>
@@ -852,7 +852,7 @@ function OnboardingContent() {
                   }}
                 >
                   <div>
-                    <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-400 block">Attending Clinician</span>
+                    <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block">Attending Clinician</span>
                     <p className="font-serif font-bold text-base" style={{ color: "var(--ink)" }}>{formData.doctorName}</p>
                     <p className="font-mono text-xs font-bold" style={{ color: "var(--red)" }}>
                       Reg: {formData.doctorRegistrationNo} • {formData.medicalCouncil}
@@ -860,23 +860,23 @@ function OnboardingContent() {
                   </div>
 
                   <div className="pt-2 border-t" style={{ borderColor: "var(--rule-soft)" }}>
-                    <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-400 block">Hospital / Center</span>
+                    <span className="text-xs font-mono uppercase tracking-wider text-neutral-400 block">Hospital / Center</span>
                     <p className="font-medium text-xs" style={{ color: "var(--ink)" }}>{formData.hospitalName}</p>
-                    <p className="text-[11px] font-mono leading-relaxed mt-0.5" style={{ color: "var(--ink-muted)" }}>{formData.hospitalAddress}</p>
+                    <p className="text-xs font-mono leading-relaxed mt-0.5" style={{ color: "var(--ink-muted)" }}>{formData.hospitalAddress}</p>
                   </div>
 
                   <div className="pt-2 border-t flex items-center justify-between" style={{ borderColor: "var(--rule-soft)" }}>
-                    <span className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>Default Framework</span>
-                    <span className="text-[10px] font-mono uppercase font-bold" style={{ color: "var(--ink)" }}>{formData.defaultConsentType}</span>
+                    <span className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>Default Framework</span>
+                    <span className="text-xs font-mono uppercase font-bold" style={{ color: "var(--ink)" }}>{formData.defaultConsentType}</span>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded text-xs" style={{ backgroundColor: "rgba(13, 148, 136, 0.08)", border: "1px solid rgba(13, 148, 136, 0.2)" }}>
-                  <div className="flex items-center gap-1.5 font-bold text-emerald-800 text-[11px] mb-1">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-800 text-xs mb-1">
                     <Sparkle weight="fill" className="w-3.5 h-3.5" />
                     <span>Auto-Fill Enabled</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-emerald-900">
+                  <p className="text-xs leading-relaxed text-emerald-900">
                     Your consent generation wizard will automatically populate with these verified details on every procedure.
                   </p>
                 </div>

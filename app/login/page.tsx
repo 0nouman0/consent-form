@@ -194,7 +194,7 @@ function LoginContent() {
                 <ShieldCheck weight="bold" className="w-5 h-5" style={{ color: "var(--sheet)" }} />
               </div>
               <span className="font-serif font-semibold text-base tracking-tight" style={{ color: "var(--sheet)" }}>
-                ConsentGen<span className="text-[10px] font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
+                ConsentGen<span className="text-xs font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
               </span>
             </Link>
 
@@ -216,7 +216,7 @@ function LoginContent() {
               {TRUST_BADGES.map((badge) => (
                 <span
                   key={badge}
-                  className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] font-semibold px-2.5 py-1 rounded"
+                  className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.06em] font-semibold px-2.5 py-1 rounded"
                   style={{
                     backgroundColor: "rgba(252,251,247,0.07)",
                     color: "rgba(252,251,247,0.85)",
@@ -243,10 +243,10 @@ function LoginContent() {
               of the condition, proposed treatment, alternatives, and substantial risks.&rdquo;
             </p>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] font-semibold" style={{ color: "var(--sheet)" }}>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] font-semibold" style={{ color: "var(--sheet)" }}>
                 Supreme Court of India
               </p>
-              <p className="font-mono text-[9px] tracking-wide" style={{ color: "rgba(252,251,247,0.45)" }}>
+              <p className="font-mono text-xs tracking-wide" style={{ color: "rgba(252,251,247,0.45)" }}>
                 Samira Kohli v. Dr. Prabha Manchanda (2008) 2 SCC 1
               </p>
             </div>
@@ -269,7 +269,7 @@ function LoginContent() {
               <ShieldCheck weight="bold" className="w-5 h-5" style={{ color: "var(--sheet)" }} />
             </div>
             <span className="font-serif font-semibold text-base tracking-tight" style={{ color: "var(--ink)" }}>
-              ConsentGen<span className="text-[10px] font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
+              ConsentGen<span className="text-xs font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
             </span>
           </Link>
 
@@ -286,7 +286,7 @@ function LoginContent() {
               </div>
 
               <span
-                className="inline-block font-mono text-[10.5px] uppercase tracking-[0.12em] font-semibold px-2.5 py-1 rounded mb-3"
+                className="inline-block font-mono text-xs uppercase tracking-[0.12em] font-semibold px-2.5 py-1 rounded mb-3"
                 style={{
                   backgroundColor: "rgba(63,122,78,0.1)",
                   color: "#2f6b3e",
@@ -416,7 +416,7 @@ function LoginContent() {
                 <div>
                   <label
                     htmlFor={nameId}
-                    className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                    className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                     style={{ color: "var(--ink-soft)" }}
                   >
                     Doctor&apos;s Full Name
@@ -449,7 +449,7 @@ function LoginContent() {
                 <div>
                   <label
                     htmlFor={regId}
-                    className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                    className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                     style={{ color: "var(--ink-soft)" }}
                   >
                     Medical Registration Number
@@ -484,7 +484,7 @@ function LoginContent() {
             <div>
               <label
                 htmlFor={emailId}
-                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                 style={{ color: "var(--ink-soft)" }}
               >
                 Email Address
@@ -519,7 +519,7 @@ function LoginContent() {
                 <div className="flex items-center justify-between mb-1.5">
                   <label
                     htmlFor={passwordId}
-                    className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold"
+                    className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                     style={{ color: "var(--ink-soft)" }}
                   >
                     Password
@@ -570,7 +570,7 @@ function LoginContent() {
                         }}
                       />
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-mono">
+                    <div className="flex justify-between items-center text-xs font-mono">
                       <span style={{ color: strength.color }}>{strength.label}</span>
                       <span style={{ color: "var(--ink-muted)" }}>Min 8 characters</span>
                     </div>
@@ -583,7 +583,7 @@ function LoginContent() {
               <div>
                 <label
                   htmlFor={confirmPasswordId}
-                  className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                  className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                   style={{ color: "var(--ink-soft)" }}
                 >
                   Confirm Password

@@ -36,12 +36,16 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-64 shrink-0 flex flex-col h-screen sticky top-0 font-body select-none transition-colors duration-150"
-      style={{
-        background: "var(--sheet)",
-        borderRight: "1px solid var(--rule)",
-      }}
+      className="w-72 shrink-0 h-screen sticky top-0 p-4 pr-0 font-body select-none"
     >
+      <div
+        className="flex flex-col h-full w-full overflow-hidden rounded-2xl transition-colors duration-150"
+        style={{
+          background: "var(--sheet)",
+          border: "1px solid var(--rule)",
+          boxShadow: "0 4px 24px rgba(23,20,16,0.06)",
+        }}
+      >
       {/* Brand Header */}
       <div
         className="h-16 px-5 flex items-center justify-between shrink-0"
@@ -60,7 +64,7 @@ export default function Sidebar() {
                 ConsentGen
               </span>
               <span
-                className="text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
+                className="text-xs font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
                 style={{
                   backgroundColor: "var(--badge-light-bg)",
                   color: "var(--ink)",
@@ -70,7 +74,7 @@ export default function Sidebar() {
                 Ops
               </span>
             </div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.08em] leading-none mt-0.5" style={{ color: "var(--ink-muted)" }}>
+            <p className="font-mono text-xs uppercase tracking-[0.08em] leading-none mt-0.5" style={{ color: "var(--ink-muted)" }}>
               Luffy Monitor
             </p>
           </div>
@@ -79,7 +83,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+        <p className="px-3 pb-2 font-mono text-xs uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
           Navigation
         </p>
         {NAV_ITEMS.map((item) => {
@@ -90,7 +94,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{
                 backgroundColor: isActive ? "var(--nav-active-bg)" : "transparent",
                 color: isActive ? "var(--nav-active-text)" : "var(--ink-muted)",
@@ -145,7 +149,7 @@ export default function Sidebar() {
             )}
           </span>
           <span
-            className="text-[9px] font-mono uppercase font-bold px-1.5 py-0.5 rounded transition-colors"
+            className="text-xs font-mono uppercase font-bold px-1.5 py-0.5 rounded transition-colors"
             style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--ink-muted)" }}
           >
             Toggle
@@ -171,6 +175,7 @@ export default function Sidebar() {
           <SignOut className="w-3.5 h-3.5" weight="bold" />
           <span>Sign Out</span>
         </button>
+      </div>
       </div>
     </aside>
   );

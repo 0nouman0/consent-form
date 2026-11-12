@@ -25,7 +25,7 @@ export default function TermsPage() {
         </Link>
         <Link href="/" className="flex items-baseline gap-1">
           <span className="font-serif font-semibold text-lg tracking-tight" style={{ color: INK }}>ConsentGen</span>
-          <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+          <span className="text-xs align-super" style={{ color: RED }}>®</span>
         </Link>
         <PublicNavActions label="Sign In" loggedInLabel="Dashboard" loggedInHref="/dashboard" />
       </header>
@@ -35,7 +35,7 @@ export default function TermsPage() {
         <div className="mb-10 pb-6 border-b" style={{ borderColor: RULE }}>
           <div className="flex items-center gap-2 mb-3">
             <Scales className="w-5 h-5" style={{ color: RED }} />
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: RED }}>
+            <span className="font-mono text-xs uppercase tracking-[0.18em]" style={{ color: RED }}>
               Practitioner Agreement & Legal Terms
             </span>
           </div>
@@ -47,7 +47,7 @@ export default function TermsPage() {
           </p>
         </div>
 
-        <div className="space-y-10 text-[15px] leading-relaxed" style={{ color: "#3A362D" }}>
+        <div className="space-y-10 text-base leading-relaxed" style={{ color: "#3A362D" }}>
           {/* Section 1 */}
           <section className="space-y-3">
             <h2 className="font-serif font-bold text-xl sm:text-2xl" style={{ color: INK }}>

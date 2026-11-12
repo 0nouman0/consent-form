@@ -26,9 +26,9 @@ export default function SidebarNav({ isMobile = false }: { isMobile?: boolean })
           const Icon = link.icon;
           return (
             <Link key={link.href} href={link.href}
-              className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-md transition-all">
+              className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-xl transition-all">
               <div
-                className="p-1.5 rounded-md transition-all"
+                className="p-1.5 rounded-xl transition-all"
                 style={isActive ? { backgroundColor: "var(--ink)" } : {}}
               >
                 <Icon
@@ -37,7 +37,7 @@ export default function SidebarNav({ isMobile = false }: { isMobile?: boolean })
                 />
               </div>
               <span
-                className="text-[10px] font-semibold"
+                className="text-xs font-semibold"
                 style={{ color: isActive ? "var(--ink)" : "var(--ink-muted)" }}
               >
                 {link.label}

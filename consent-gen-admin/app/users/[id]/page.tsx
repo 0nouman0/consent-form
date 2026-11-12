@@ -654,7 +654,7 @@ export default function UserDetailPage() {
             </Link>
 
             <span
-              className="text-[11px] font-mono px-2.5 py-1 rounded"
+              className="text-xs font-mono px-2.5 py-1 rounded"
               style={{
                 backgroundColor: "var(--sheet)",
                 border: "1px solid var(--rule)",
@@ -689,7 +689,7 @@ export default function UserDetailPage() {
                       {userProfile.doctor_name || "Doctor Name Not Set"}
                     </h2>
                     <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                       style={{
                         backgroundColor: userProfile.is_active !== false ? "var(--status-success-bg)" : "var(--status-fail-bg)",
                         color: userProfile.is_active !== false ? "var(--status-success-text)" : "var(--status-fail-text)",
@@ -707,7 +707,7 @@ export default function UserDetailPage() {
                       )}
                     </span>
                     <span
-                      className="inline-block px-2.5 py-1 text-[10px] font-mono uppercase font-bold rounded"
+                      className="inline-block px-2.5 py-1 text-xs font-mono uppercase font-bold rounded"
                       style={{
                         backgroundColor: userProfile.role === "admin" ? "var(--badge-dark-bg)" : "var(--badge-light-bg)",
                         color: userProfile.role === "admin" ? "var(--badge-dark-text)" : "var(--badge-light-text)",
@@ -718,7 +718,7 @@ export default function UserDetailPage() {
 
                     <button
                       onClick={() => setSubModalOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono uppercase font-bold rounded transition-all hover:opacity-85 cursor-pointer shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase font-bold rounded transition-all hover:opacity-85 cursor-pointer shadow-xs"
                       style={{
                         backgroundColor:
                           (userProfile.subscription_tier || "free") === "enterprise"
@@ -756,7 +756,7 @@ export default function UserDetailPage() {
                     >
                       <Crown weight="fill" className="w-3 h-3" />
                       <span>{userProfile.subscription_tier || "free"} Plan</span>
-                      <span className="opacity-60 text-[9px]">({userProfile.subscription_status || "active"})</span>
+                      <span className="opacity-60 text-xs">({userProfile.subscription_status || "active"})</span>
                       <PencilSimple className="w-2.5 h-2.5 ml-0.5 opacity-60" />
                     </button>
                   </div>
@@ -779,19 +779,19 @@ export default function UserDetailPage() {
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Subscription
                     </p>
                     <p className="font-serif text-lg font-bold mt-0.5 truncate capitalize" style={{ color: "var(--ink)" }}>
                       {userProfile.subscription_tier || "Free"}
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5 capitalize" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-mono mt-0.5 capitalize" style={{ color: "var(--ink-muted)" }}>
                       {userProfile.subscription_status || "Active"}
                     </p>
                   </div>
                   <button
                     onClick={() => setSubModalOpen(true)}
-                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    className="mt-2 text-xs font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
                     style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
                   >
                     Change Plan
@@ -804,14 +804,14 @@ export default function UserDetailPage() {
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Credits
                     </p>
                     <p className="font-serif text-xl font-bold mt-0.5 flex items-center justify-center gap-1" style={{ color: "var(--ink)" }}>
                       <Coins weight="fill" className="w-4 h-4" />
                       <span>{userProfile.credits ?? 0}</span>
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                       Available Balance
                     </p>
                   </div>
@@ -822,7 +822,7 @@ export default function UserDetailPage() {
                       setDeltaCreditInput(5);
                       setCreditModalOpen(true);
                     }}
-                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    className="mt-2 text-xs font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
                     style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
                   >
                     Edit Credits
@@ -835,19 +835,19 @@ export default function UserDetailPage() {
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Consents
                     </p>
                     <p className="font-serif text-xl font-bold mt-0.5" style={{ color: "var(--ink)" }}>
                       {unifiedConsents.length}
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "#0f766e" }}>
+                    <p className="text-xs font-mono mt-0.5" style={{ color: "#0f766e" }}>
                       {unifiedConsents.filter((c) => c.status === "success").length} ok
                     </p>
                   </div>
                   <button
                     onClick={() => setActiveTab("consents")}
-                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    className="mt-2 text-xs font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
                     style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
                   >
                     View All
@@ -860,19 +860,19 @@ export default function UserDetailPage() {
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Total Paid
                     </p>
                     <p className="font-serif text-base font-bold mt-0.5 truncate" style={{ color: "var(--ink)" }}>
                       ₹{totalPaidRevenue.toLocaleString("en-IN")}
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                       {paidTxs.length} orders
                     </p>
                   </div>
                   <button
                     onClick={() => setActiveTab("subscriptions")}
-                    className="mt-2 text-[10px] font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                    className="mt-2 text-xs font-mono uppercase font-semibold px-2 py-1 rounded transition-opacity hover:opacity-85 cursor-pointer"
                     style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
                   >
                     Ledger
@@ -885,17 +885,17 @@ export default function UserDetailPage() {
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Joined
                     </p>
                     <p className="font-mono text-xs font-bold mt-1.5" style={{ color: "var(--ink)" }}>
                       {userProfile.created_at ? formatDateTime(userProfile.created_at).datePart : "N/A"}
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
                       {getRelativeTime(userProfile.created_at)}
                     </p>
                   </div>
-                  <span className="mt-2 text-[9px] font-mono uppercase text-neutral-400 py-1">
+                  <span className="mt-2 text-xs font-mono uppercase text-neutral-400 py-1">
                     Verified
                   </span>
                 </div>
@@ -917,7 +917,7 @@ export default function UserDetailPage() {
               <FileText className="w-4 h-4" weight={activeTab === "consents" ? "fill" : "regular"} />
               <span>Consent Forms</span>
               <span
-                className="px-1.5 py-0.5 text-[9px] rounded font-mono"
+                className="px-1.5 py-0.5 text-xs rounded font-mono"
                 style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--badge-light-text)" }}
               >
                 {unifiedConsents.length}
@@ -936,7 +936,7 @@ export default function UserDetailPage() {
               <Receipt className="w-4 h-4" weight={activeTab === "subscriptions" ? "fill" : "regular"} />
               <span>Billing & Orders</span>
               <span
-                className="px-1.5 py-0.5 text-[9px] rounded font-mono"
+                className="px-1.5 py-0.5 text-xs rounded font-mono"
                 style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--badge-light-text)" }}
               >
                 {transactions.length}
@@ -955,7 +955,7 @@ export default function UserDetailPage() {
               <ClockCounterClockwise className="w-4 h-4" weight={activeTab === "credits" ? "fill" : "regular"} />
               <span>Credit Ledger</span>
               <span
-                className="px-1.5 py-0.5 text-[9px] rounded font-mono"
+                className="px-1.5 py-0.5 text-xs rounded font-mono"
                 style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--badge-light-text)" }}
               >
                 {creditLogs.length}
@@ -1058,7 +1058,7 @@ export default function UserDetailPage() {
                               </p>
                               <div className="flex items-center gap-1.5 mt-1">
                                 <span
-                                  className="inline-block px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded"
+                                  className="inline-block px-1.5 py-0.5 text-xs font-mono uppercase font-bold rounded"
                                   style={{
                                     backgroundColor: "var(--badge-light-bg)",
                                     color: "var(--badge-light-text)",
@@ -1070,21 +1070,21 @@ export default function UserDetailPage() {
                             </td>
 
                             <td className="py-4 px-6 font-medium" style={{ color: "var(--ink)" }}>
-                              {item.patient_name || <span className="italic opacity-60 font-mono text-[11px]">Encrypted / Logged</span>}
+                              {item.patient_name || <span className="italic opacity-60 font-mono text-xs">Encrypted / Logged</span>}
                             </td>
 
-                            <td className="py-4 px-6 font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                            <td className="py-4 px-6 font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                               <div>{timeInfo.datePart}</div>
                               <div className="opacity-70">{timeInfo.timePart} {relTime && `(${relTime})`}</div>
                             </td>
 
-                            <td className="py-4 px-6 font-mono text-[11px]" style={{ color: "var(--ink-soft)" }}>
+                            <td className="py-4 px-6 font-mono text-xs" style={{ color: "var(--ink-soft)" }}>
                               {item.model}
                             </td>
 
                             <td className="py-4 px-6 text-center">
                               <span
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                                 style={{
                                   backgroundColor: isSuccess ? "var(--status-success-bg)" : "var(--status-fail-bg)",
                                   color: isSuccess ? "var(--status-success-text)" : "var(--status-fail-text)",
@@ -1111,7 +1111,7 @@ export default function UserDetailPage() {
                                     <span>Preview</span>
                                   </button>
                                 ) : (
-                                  <span className="text-[10px] font-mono opacity-50 px-2 py-1">No Doc</span>
+                                  <span className="text-xs font-mono opacity-50 px-2 py-1">No Doc</span>
                                 )}
 
                                 {item.auditId && (
@@ -1182,7 +1182,7 @@ export default function UserDetailPage() {
                             {currentPlan.name}
                           </h3>
                           <span
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-mono text-[10px] uppercase font-bold tracking-wider"
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-mono text-xs uppercase font-bold tracking-wider"
                             style={{
                               backgroundColor:
                                 subStatus === "active"
@@ -1251,7 +1251,7 @@ export default function UserDetailPage() {
                   <h3 className="font-serif text-3xl font-bold tracking-tight mt-1" style={{ color: "var(--ink)" }}>
                     ₹{totalPaidRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
                     Total revenue collected from doctor
                   </p>
                 </div>
@@ -1266,7 +1266,7 @@ export default function UserDetailPage() {
                   <h3 className="font-serif text-3xl font-bold tracking-tight mt-1" style={{ color: "#0f766e" }}>
                     +{totalCreditsPurchased}
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
                     Cumulative credits via payments
                   </p>
                 </div>
@@ -1281,7 +1281,7 @@ export default function UserDetailPage() {
                   <h3 className="font-serif text-3xl font-bold tracking-tight mt-1" style={{ color: "var(--ink)" }}>
                     {transactions.length}
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "#0f766e" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "#0f766e" }}>
                     {paidTxs.length} paid successfully
                   </p>
                 </div>
@@ -1322,13 +1322,13 @@ export default function UserDetailPage() {
                             <td className="py-4 px-6">
                               <p className="font-mono" style={{ color: "var(--ink)" }}>{tx.payment_id || "Pending"}</p>
                               {tx.metadata?.method && (
-                                <p className="text-[10px] font-mono uppercase tracking-[0.08em] mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                                <p className="text-xs font-mono uppercase tracking-[0.08em] mt-0.5" style={{ color: "var(--ink-muted)" }}>
                                   {tx.metadata.method}
                                 </p>
                               )}
                             </td>
 
-                            <td className="py-4 px-6 font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                            <td className="py-4 px-6 font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                               {timeInfo.datePart}
                             </td>
 
@@ -1342,7 +1342,7 @@ export default function UserDetailPage() {
 
                             <td className="py-4 px-6 text-center">
                               <span
-                                className="inline-block text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded"
+                                className="inline-block text-xs font-mono uppercase font-bold px-2 py-0.5 rounded"
                                 style={{
                                   backgroundColor: tx.status === "paid" ? "var(--status-success-bg)" : "var(--status-warn-bg)",
                                   color: tx.status === "paid" ? "var(--status-success-text)" : "var(--status-warn-text)",
@@ -1403,7 +1403,7 @@ export default function UserDetailPage() {
                     <span>{userProfile.credits ?? 0}</span>
                   </h3>
                   <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t" style={{ borderColor: "var(--rule-soft)" }}>
-                    <p className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>
                       Usable for queries
                     </p>
                     <button
@@ -1413,7 +1413,7 @@ export default function UserDetailPage() {
                         setDeltaCreditInput(5);
                         setCreditModalOpen(true);
                       }}
-                      className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded transition-opacity hover:opacity-85 cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs font-mono uppercase font-bold px-2 py-0.5 rounded transition-opacity hover:opacity-85 cursor-pointer"
                       style={{ backgroundColor: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                     >
                       <Coins className="w-3 h-3" />
@@ -1432,7 +1432,7 @@ export default function UserDetailPage() {
                   <h3 className="font-serif text-3xl font-bold tracking-tight mt-1" style={{ color: "#0f766e" }}>
                     +{creditLogs.filter((l) => l.amount > 0).reduce((sum, l) => sum + (l.amount || 0), 0)}
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
                     Purchased or granted
                   </p>
                 </div>
@@ -1447,7 +1447,7 @@ export default function UserDetailPage() {
                   <h3 className="font-serif text-3xl font-bold tracking-tight mt-1" style={{ color: "var(--red)" }}>
                     {creditLogs.filter((l) => l.amount < 0).reduce((sum, l) => sum + (l.amount || 0), 0)}
                   </h3>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
                     Spent on document generation
                   </p>
                 </div>
@@ -1487,7 +1487,7 @@ export default function UserDetailPage() {
                               {log.reference_id || "N/A"}
                             </td>
 
-                            <td className="py-4 px-6 font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                            <td className="py-4 px-6 font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                               {timeInfo.datePart} {timeInfo.timePart}
                             </td>
 
@@ -1533,7 +1533,7 @@ export default function UserDetailPage() {
 
                 <div className="space-y-3.5 text-xs">
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Full Name
                     </p>
                     <p className="font-serif text-base font-bold mt-0.5" style={{ color: "var(--ink)" }}>
@@ -1542,7 +1542,7 @@ export default function UserDetailPage() {
                   </div>
 
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Registration Number
                     </p>
                     <p className="font-mono font-bold mt-0.5" style={{ color: "var(--ink)" }}>
@@ -1551,7 +1551,7 @@ export default function UserDetailPage() {
                   </div>
 
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       Hospital / Clinic
                     </p>
                     <p className="font-medium mt-0.5" style={{ color: "var(--ink)" }}>
@@ -1561,7 +1561,7 @@ export default function UserDetailPage() {
 
                   {userProfile.hospital_address && (
                     <div>
-                      <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                         Hospital Address
                       </p>
                       <p className="mt-0.5 leading-relaxed" style={{ color: "var(--ink-soft)" }}>
@@ -1572,7 +1572,7 @@ export default function UserDetailPage() {
 
                   {userProfile.billing_address && (
                     <div>
-                      <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                      <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                         Billing Address
                       </p>
                       <p className="mt-0.5 leading-relaxed" style={{ color: "var(--ink-soft)" }}>
@@ -1582,11 +1582,11 @@ export default function UserDetailPage() {
                   )}
 
                   <div>
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase font-bold tracking-wider" style={{ color: "var(--ink-muted)" }}>
                       System Role
                     </p>
                     <span
-                      className="inline-block px-2.5 py-0.5 text-[10px] font-mono uppercase font-bold rounded mt-1"
+                      className="inline-block px-2.5 py-0.5 text-xs font-mono uppercase font-bold rounded mt-1"
                       style={{
                         backgroundColor: userProfile.role === "admin" ? "var(--badge-dark-bg)" : "var(--badge-light-bg)",
                         color: userProfile.role === "admin" ? "var(--badge-dark-text)" : "var(--badge-light-text)",
@@ -1622,7 +1622,7 @@ export default function UserDetailPage() {
                       <Crown weight="fill" className="w-3.5 h-3.5 text-amber-500" />
                       <span>Subscription Plan Override</span>
                     </p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                       Current: <strong className="capitalize" style={{ color: "var(--ink)" }}>{userProfile.subscription_tier || "Free"}</strong> ({userProfile.subscription_status || "Active"})
                     </p>
                     <div className="space-y-1.5">
@@ -1680,7 +1680,7 @@ export default function UserDetailPage() {
                       <Coins weight="fill" className="w-3.5 h-3.5" style={{ color: "var(--ink)" }} />
                       <span>Credit Balance Controls</span>
                     </p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                       Current: <strong className="font-mono" style={{ color: "var(--ink)" }}>{userProfile.credits ?? 0} credits</strong>. Delta adjust or set exact total.
                     </p>
                     <div className="space-y-1.5">
@@ -1716,7 +1716,7 @@ export default function UserDetailPage() {
                           setDeltaCreditInput(5);
                           setCreditModalOpen(true);
                         }}
-                        className="w-full py-1 text-[10px] font-mono uppercase tracking-wider font-semibold rounded transition-opacity hover:opacity-85 cursor-pointer"
+                        className="w-full py-1 text-xs font-mono uppercase tracking-wider font-semibold rounded transition-opacity hover:opacity-85 cursor-pointer"
                         style={{
                           backgroundColor: "var(--sheet)",
                           border: "1px solid var(--rule)",
@@ -1734,7 +1734,7 @@ export default function UserDetailPage() {
                       <Shield weight="fill" className="w-3.5 h-3.5" style={{ color: "var(--ink)" }} />
                       <span>Access Restriction</span>
                     </p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
                       Instantly toggle whether this user can log in and generate legal consents.
                     </p>
                     <div>
@@ -1756,7 +1756,7 @@ export default function UserDetailPage() {
 
                 {/* Audit action note */}
                 <div>
-                  <label className="font-mono text-[10px] uppercase font-bold tracking-wider block mb-1.5" style={{ color: "var(--ink-muted)" }}>
+                  <label className="font-mono text-xs uppercase font-bold tracking-wider block mb-1.5" style={{ color: "var(--ink-muted)" }}>
                     Audit Log Justification (Permanent Record)
                   </label>
                   <textarea
@@ -1793,7 +1793,7 @@ export default function UserDetailPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className="px-2 py-0.5 text-[9px] font-mono uppercase font-bold rounded"
+                    className="px-2 py-0.5 text-xs font-mono uppercase font-bold rounded"
                     style={{ backgroundColor: "var(--badge-light-bg)", color: "var(--badge-light-text)" }}
                   >
                     {previewItem.consent_type}
@@ -1805,7 +1805,7 @@ export default function UserDetailPage() {
                 <h3 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                   {previewItem.procedure_name}
                 </h3>
-                <p className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                <p className="font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                   Timestamp: {formatDateTime(previewItem.created_at).full}
                   {previewItem.patient_name && ` • Patient: ${previewItem.patient_name}`}
                 </p>
@@ -1844,7 +1844,7 @@ export default function UserDetailPage() {
 
             {/* Modal Footer */}
             <div className="flex items-center justify-between pt-3 border-t shrink-0" style={{ borderColor: "var(--rule)" }}>
-              <span className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+              <span className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>
                 Model: {previewItem.model} {previewItem.tokens_used > 0 && `(${previewItem.tokens_used} tokens)`}
               </span>
 
@@ -1922,7 +1922,7 @@ export default function UserDetailPage() {
               <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                 Payment Invoice
               </h2>
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+              <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                 ConsentGen Medico-Legal Platform
               </p>
             </div>
@@ -2072,7 +2072,7 @@ export default function UserDetailPage() {
                             {plan.name}
                           </span>
                           <span
-                            className="px-2 py-0.5 rounded font-mono text-[10px] font-bold uppercase tracking-wider"
+                            className="px-2 py-0.5 rounded font-mono text-xs font-bold uppercase tracking-wider"
                             style={{
                               backgroundColor: plan.badgeBg,
                               color: plan.badgeText,
@@ -2082,10 +2082,10 @@ export default function UserDetailPage() {
                             {plan.price}
                           </span>
                         </div>
-                        <p className="text-[11px] leading-relaxed mb-1.5" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs leading-relaxed mb-1.5" style={{ color: "var(--ink-muted)" }}>
                           {plan.description}
                         </p>
-                        <div className="flex items-center justify-between text-[10px] font-mono" style={{ color: "var(--ink-soft)" }}>
+                        <div className="flex items-center justify-between text-xs font-mono" style={{ color: "var(--ink-soft)" }}>
                           <span>{plan.billing}</span>
                           {plan.includedCredits > 0 ? (
                             <span className="font-bold text-emerald-600 dark:text-emerald-400">
@@ -2104,7 +2104,7 @@ export default function UserDetailPage() {
               {/* Status and Credit Grant */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div>
-                  <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Subscription Status
                   </label>
                   <select
@@ -2125,7 +2125,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div>
-                  <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                  <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                     Grant Plan Credits (Optional)
                   </label>
                   <div className="flex items-center gap-2">
@@ -2147,7 +2147,7 @@ export default function UserDetailPage() {
                         const plan = SUBSCRIPTION_PLANS.find((p) => p.tier === selectedTier);
                         setGrantCredits(plan?.includedCredits || 0);
                       }}
-                      className="text-[10px] font-mono uppercase px-2 py-2 rounded shrink-0 border"
+                      className="text-xs font-mono uppercase px-2 py-2 rounded shrink-0 border"
                       style={{
                         backgroundColor: "var(--paper)",
                         borderColor: "var(--rule)",
@@ -2158,7 +2158,7 @@ export default function UserDetailPage() {
                       Default
                     </button>
                   </div>
-                  <p className="text-[10px] font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="text-xs font-mono mt-1" style={{ color: "var(--ink-muted)" }}>
                     Will increase current balance ({userProfile.credits ?? 0}) by +{grantCredits}.
                   </p>
                 </div>
@@ -2166,7 +2166,7 @@ export default function UserDetailPage() {
 
               {/* Justification Note */}
               <div>
-                <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                   Audit Justification Note
                 </label>
                 <textarea
@@ -2315,7 +2315,7 @@ export default function UserDetailPage() {
                     }}
                   />
                   <div className="flex flex-wrap gap-1.5 items-center">
-                    <span className="text-[10px] font-mono uppercase text-neutral-400 mr-1">Presets:</span>
+                    <span className="text-xs font-mono uppercase text-neutral-400 mr-1">Presets:</span>
                     {[0, 5, 10, 25, 50, 100].map((preset) => (
                       <button
                         key={preset}
@@ -2352,7 +2352,7 @@ export default function UserDetailPage() {
                     }}
                   />
                   <div className="flex flex-wrap gap-1.5 items-center">
-                    <span className="text-[10px] font-mono uppercase text-neutral-400 mr-1">Quick:</span>
+                    <span className="text-xs font-mono uppercase text-neutral-400 mr-1">Quick:</span>
                     {[
                       { label: "+1", val: 1 },
                       { label: "+5", val: 5 },
@@ -2397,7 +2397,7 @@ export default function UserDetailPage() {
                     }}
                   >
                     <div>
-                      <p className="text-[10px] font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                      <p className="text-xs font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                         Current Balance
                       </p>
                       <p className="font-mono text-sm font-bold" style={{ color: "var(--ink)" }}>
@@ -2410,7 +2410,7 @@ export default function UserDetailPage() {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-[10px] font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                      <p className="text-xs font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                         New Resulting Balance
                       </p>
                       <p
@@ -2426,7 +2426,7 @@ export default function UserDetailPage() {
 
               {/* Justification Note */}
               <div>
-                <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
+                <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink)" }}>
                   Audit Justification Note
                 </label>
                 <textarea

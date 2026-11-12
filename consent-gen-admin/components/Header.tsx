@@ -32,7 +32,7 @@ export default function Header({ title, subtitle }: { title: string; subtitle?: 
         <h1 className="font-serif font-semibold text-base sm:text-lg tracking-tight leading-tight" style={{ color: "var(--ink)" }}>
           {title}
         </h1>
-        <p className="font-mono text-[10px] uppercase tracking-[0.08em] mt-0.5 leading-tight" style={{ color: "var(--ink-muted)" }}>
+        <p className="font-mono text-xs uppercase tracking-[0.08em] mt-0.5 leading-tight" style={{ color: "var(--ink-muted)" }}>
           {subtitle || "ConsentGen Internal Operations"}
         </p>
       </div>
@@ -41,7 +41,7 @@ export default function Header({ title, subtitle }: { title: string; subtitle?: 
       <div className="flex items-center gap-3">
         {/* System status pill */}
         <div
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-[11px] uppercase tracking-[0.08em] font-semibold transition-colors"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-[0.08em] font-semibold transition-colors"
           style={{
             background: "var(--header-pill-bg)",
             border: "1px solid var(--header-pill-border)",
@@ -71,7 +71,7 @@ export default function Header({ title, subtitle }: { title: string; subtitle?: 
               Luffy Admin
             </p>
             <p
-              className="text-[10px] font-mono leading-tight truncate max-w-[130px] sm:max-w-[180px]"
+              className="text-xs font-mono leading-tight truncate max-w-[130px] sm:max-w-[180px]"
               style={{ color: "var(--ink-muted)" }}
             >
               {adminEmail}

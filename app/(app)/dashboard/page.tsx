@@ -38,7 +38,7 @@ export default async function DashboardPage() {
       <div className="max-w-screen-xl mx-auto space-y-4">
 
         {/* Page Header Card */}
-        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        <div className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Overview</p>
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {/* Total */}
-          <div className="rounded-md p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--ink)" }}>
               <Files weight="duotone" className="w-5 h-5" style={{ color: "var(--sheet)" }} />
             </div>
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Most Common */}
-          <div className="rounded-md p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--paper)" }}>
               <TrendUp weight="duotone" className="w-5 h-5" style={{ color: "var(--ink-muted)" }} />
             </div>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Last Generated */}
-          <div className="rounded-md p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl p-6 flex items-center gap-5" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--paper)" }}>
               <Timer weight="duotone" className="w-5 h-5" style={{ color: "var(--ink-muted)" }} />
             </div>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Consents */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           {/* Section header */}
           <div className="flex items-center justify-between px-6 sm:px-8 py-5" style={{ borderBottom: "1px solid var(--rule)" }}>
             <h2 className="font-serif text-lg font-bold tracking-tight" style={{ color: "var(--ink)" }}>Recent Consents</h2>
@@ -140,23 +140,23 @@ export default async function DashboardPage() {
                   key={entry.id}
                   className="px-6 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-[var(--paper)]"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-4 min-w-0">
                     <div className="w-9 h-9 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--paper)" }}>
                       <Stethoscope weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold mb-1" style={{ color: "var(--ink)" }}>
+                      <h3 className="text-sm font-semibold mb-1.5 line-clamp-2" style={{ color: "var(--ink)" }}>
                         {entry.patient_name || "Unknown Patient"} — {entry.procedure_name || "Unknown Procedure"}
                       </h3>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
+                        <span className="px-2 py-0.5 font-mono text-xs font-semibold uppercase tracking-[0.06em] rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
                           {(entry.consent_type || "unknown").replace(/_/g, " ")}
                         </span>
                         <span className="text-xs flex items-center gap-1" style={{ color: "var(--ink-muted)" }}>
                           <CalendarBlank weight="regular" className="w-3 h-3" />
-                          {entry.procedure_date || "No date"}
+                          {entry.procedure_date ? `Procedure ${entry.procedure_date}` : "No procedure date"}
                         </span>
-                        <span className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>#{entry.consent_id?.slice(0, 8)}</span>
+                        <span className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>#{entry.consent_id}</span>
                       </div>
                       {entry.hospital_name && (
                         <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: "var(--ink-muted)" }}>
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0 w-full sm:w-auto" style={{ borderColor: "var(--rule)" }}>
                     <span className="text-xs hidden sm:block whitespace-nowrap" style={{ color: "var(--ink-muted)" }}>
-                      {new Date(entry.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      Generated {new Date(entry.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                     <Link
                       href={`/history?id=${entry.id}`}

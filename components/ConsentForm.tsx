@@ -1,5 +1,6 @@
 "use client";
 
+import { Warning as WarningIcon } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
@@ -329,7 +330,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 <div>
                   <label htmlFor="patient.aadhaarLast4" className={LABEL_CLASSES}>Aadhaar Last 4 Digits</label>
                   <input id="patient.aadhaarLast4" type="text" maxLength={4} {...form.register("patient.aadhaarLast4")} className={INPUT_CLASSES} placeholder="e.g. 1234" />
-                  <p className="text-xs text-amber-600 mt-1.5 font-medium">⚠ Only last 4 digits — full Aadhaar storage prohibited (Aadhaar Act 2016)</p>
+                  <p className="text-xs text-amber-600 mt-1.5 font-medium"><WarningIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="fill" />Only last 4 digits — full Aadhaar storage prohibited (Aadhaar Act 2016)</p>
                 </div>
 
                 {/* Insurance */}
@@ -468,7 +469,7 @@ export default function ConsentForm({ form, onSubmit, status }: ConsentFormProps
                 <div>
                   <label htmlFor="clinical.procedureName" className={LABEL_CLASSES}>Procedure Name <span className="text-red-400">*</span></label>
                   <input id="clinical.procedureName" type="text" {...form.register("clinical.procedureName")} className={INPUT_CLASSES} placeholder="e.g. Laparoscopic Cholecystectomy" />
-                  <p className="text-xs text-amber-600 mt-1.5 font-medium">⚠ Be specific — blanket consent is legally void in India</p>
+                  <p className="text-xs text-amber-600 mt-1.5 font-medium"><WarningIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="fill" />Be specific — blanket consent is legally void in India</p>
                   {form.formState.errors.clinical?.procedureName && (
                     <p className={ERROR_CLASSES}>{form.formState.errors.clinical.procedureName.message as string}</p>
                   )}

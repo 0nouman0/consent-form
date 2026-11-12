@@ -22,7 +22,7 @@ export function NetworkErrorBanner({ message, onRetry }: { message: string; onRe
         <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--ink-muted)" }}>
           {message}
         </p>
-        <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
           This is typically caused by an ISP or network restriction on{" "}
           <code className="font-mono px-1 py-0.5 rounded bg-black/5" style={{ color: "var(--ink)" }}>
             *.supabase.co

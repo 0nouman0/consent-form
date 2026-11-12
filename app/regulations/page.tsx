@@ -77,7 +77,7 @@ export default function RegulationsPage() {
         </Link>
         <Link href="/" className="flex items-baseline gap-1">
           <span className="font-serif font-semibold text-lg tracking-tight" style={{ color: INK }}>ConsentGen</span>
-          <span className="text-[10px] align-super" style={{ color: RED }}>®</span>
+          <span className="text-xs align-super" style={{ color: RED }}>®</span>
         </Link>
         <PublicNavActions label="Practitioner Portal" loggedInLabel="Dashboard" loggedInHref="/dashboard" />
       </header>
@@ -87,7 +87,7 @@ export default function RegulationsPage() {
         <div className="mb-12 pb-6 border-b" style={{ borderColor: RULE }}>
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="w-5 h-5" style={{ color: RED }} />
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: RED }}>
+            <span className="font-mono text-xs uppercase tracking-[0.18em]" style={{ color: RED }}>
               Public Statutory Directory
             </span>
           </div>
@@ -119,14 +119,14 @@ export default function RegulationsPage() {
                     {statute.clauses}
                   </span>
                 </div>
-                <span className="font-mono text-[11px] text-neutral-400">§ 0{i + 1}</span>
+                <span className="font-mono text-xs text-neutral-400">§ 0{i + 1}</span>
               </div>
 
               <h2 className="font-serif font-bold text-xl sm:text-2xl mb-3" style={{ color: INK }}>
                 {statute.title}
               </h2>
 
-              <p className="text-[14.5px] leading-relaxed mb-4" style={{ color: "#3A362D" }}>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "#3A362D" }}>
                 {statute.summary}
               </p>
 

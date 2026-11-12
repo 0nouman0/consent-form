@@ -110,7 +110,7 @@ export function LoginForm() {
                 ConsentGen
               </span>
               <span
-                className="text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
+                className="text-xs font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
                 style={{ backgroundColor: "rgba(252,251,247,0.15)", color: "#FCFBF7" }}
               >
                 Luffy Ops
@@ -134,7 +134,7 @@ export function LoginForm() {
               {TRUST_BADGES.map((b) => (
                 <span
                   key={b}
-                  className="font-mono text-[10px] uppercase tracking-[0.08em] font-semibold px-2.5 py-1 rounded"
+                  className="font-mono text-xs uppercase tracking-[0.08em] font-semibold px-2.5 py-1 rounded"
                   style={{
                     backgroundColor: "rgba(252,251,247,0.08)",
                     border: "1px solid rgba(252,251,247,0.12)",
@@ -149,7 +149,7 @@ export function LoginForm() {
 
           {/* Footer note */}
           <div className="pt-6" style={{ borderTop: "1px solid rgba(252,251,247,0.1)" }}>
-            <p className="text-[11px] font-mono opacity-50" style={{ color: "#FCFBF7" }}>
+            <p className="text-xs font-mono opacity-50" style={{ color: "#FCFBF7" }}>
               Authorized personnel only. All access attempts are recorded.
             </p>
           </div>
@@ -182,7 +182,7 @@ export function LoginForm() {
           >
             {/* Header */}
             <div className="mb-6">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
                 Restricted Terminal
               </p>
               <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -211,7 +211,7 @@ export function LoginForm() {
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink-muted)" }}>
+                <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink-muted)" }}>
                   Admin Email
                 </label>
                 <div className="relative">
@@ -233,7 +233,7 @@ export function LoginForm() {
               </div>
 
               <div>
-                <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink-muted)" }}>
+                <label className="font-mono text-xs font-semibold uppercase tracking-[0.08em] block mb-1.5" style={{ color: "var(--ink-muted)" }}>
                   Security Password
                 </label>
                 <div className="relative">
@@ -287,8 +287,8 @@ export function LoginForm() {
 
             {/* Footer */}
             <div className="mt-6 pt-5 text-center" style={{ borderTop: "1px solid var(--rule)" }}>
-              <p className="text-[10px] font-mono leading-normal" style={{ color: "var(--ink-muted)" }}>
-                Luffy Operations Console • Multi-factor & RBAC Protected
+              <p className="text-xs font-mono leading-normal" style={{ color: "var(--ink-muted)" }}>
+                Luffy Operations Console • Role-based access · all sign-ins are recorded
               </p>
             </div>
           </div>

@@ -6,6 +6,12 @@ import UserMenu from "@/components/UserMenu";
 import Link from "next/link";
 import { Coins } from "@phosphor-icons/react/dist/ssr";
 
+function firstName(full: string) {
+  const parts = full.replace(/^dr\.?\s+/i, "").trim().split(/\s+/);
+  const n = parts[0] || full;
+  return /^dr\.?\s/i.test(full) ? `Dr. ${n}` : n;
+}
+
 interface ProfileSnap {
   doctorName: string;
   hospitalName: string;
@@ -47,7 +53,7 @@ export default function AppHeader() {
 
   return (
     <header
-      className="hidden md:flex items-center justify-between px-6 py-2.5 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-md shrink-0"
+      className="hidden md:flex items-center justify-between px-5 py-2.5 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-xl shrink-0"
       style={{
         background: "rgba(252,251,247,0.9)",
         backdropFilter: "blur(16px)",
@@ -55,27 +61,16 @@ export default function AppHeader() {
         border: "1px solid var(--rule)",
       }}
     >
-      {/* Left — greeting / doctor info */}
-      <div className="pl-2">
-        {profile?.doctorName ? (
-          <div>
-            <p className="font-serif font-semibold text-sm tracking-tight leading-tight" style={{ color: "var(--ink)" }}>
-              {profile.doctorName}
-            </p>
-            {profile.hospitalName && (
-              <p className="text-[10px] mt-0.5 leading-tight font-mono uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>{profile.hospitalName}</p>
-            )}
-          </div>
-        ) : (
-          <p className="font-serif font-semibold text-sm tracking-tight" style={{ color: "var(--ink)" }}>Welcome back</p>
-        )}
-      </div>
+      {/* Left — greeting (full identity lives in the user menu) */}
+      <p className="pl-2 font-serif font-semibold text-base tracking-tight" style={{ color: "var(--ink)" }}>
+        {profile?.doctorName ? `Welcome back, ${firstName(profile.doctorName)}` : "Welcome back"}
+      </p>
 
       {/* Right — Credits + UserMenu */}
       <div className="flex items-center gap-3">
         <Link
           href="/credits"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-[11px] uppercase tracking-[0.08em] font-semibold transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-[0.08em] font-semibold transition-all"
           style={{ background: "var(--paper)", border: "1px solid var(--rule)", color: "var(--ink)" }}
         >
           <Coins className="w-3.5 h-3.5" weight="fill" style={{ color: "var(--red)" }} />

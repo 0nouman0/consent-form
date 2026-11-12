@@ -182,11 +182,11 @@ export default function GenerationDetailPage() {
                 </div>
 
                 <div className="pt-3" style={{ borderTop: "1px solid var(--rule)" }}>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.08em] font-semibold mb-1" style={{ color: "var(--ink-muted)" }}>
+                  <p className="font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1" style={{ color: "var(--ink-muted)" }}>
                     User Agent
                   </p>
                   <p
-                    className="text-[10px] leading-relaxed break-all font-mono p-2.5 rounded"
+                    className="text-xs leading-relaxed break-all font-mono p-2.5 rounded"
                     style={{
                       backgroundColor: "var(--paper)",
                       border: "1px solid var(--rule)",
@@ -209,7 +209,7 @@ export default function GenerationDetailPage() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                       Doctor Name
                     </p>
                     <p className="font-serif font-bold text-sm mt-0.5" style={{ color: "var(--ink)" }}>
@@ -221,7 +221,7 @@ export default function GenerationDetailPage() {
                   </div>
 
                   <div className="pt-2" style={{ borderTop: "1px solid var(--rule-soft)" }}>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                       Hospital / Institution
                     </p>
                     <p className="text-xs font-medium mt-0.5" style={{ color: "var(--ink)" }}>
@@ -230,7 +230,7 @@ export default function GenerationDetailPage() {
                   </div>
 
                   <div className="pt-2" style={{ borderTop: "1px solid var(--rule-soft)" }}>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                    <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                       Patient Name (Decrypted via KMS)
                     </p>
                     <p className="font-serif font-bold text-sm mt-0.5" style={{ color: "var(--red)" }}>
@@ -276,7 +276,7 @@ export default function GenerationDetailPage() {
                       <h3 className="font-serif text-base font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                         Generated Document Output
                       </h3>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                      <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                         Consent Form ID: {auditDetail.consent_history_id?.slice(0, 8)}
                       </p>
                     </div>

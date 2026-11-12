@@ -1,5 +1,6 @@
 "use client";
 
+import { Check as CheckIcon, X as XIcon } from "@phosphor-icons/react";
 import { useState, useEffect, Suspense, useId } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -223,7 +224,7 @@ function ResetPasswordContent() {
             <ShieldCheck weight="bold" className="w-5 h-5 text-white" />
           </div>
           <span className="font-serif font-semibold text-base tracking-tight" style={{ color: INK }}>
-            ConsentGen<span className="text-[10px] font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
+            ConsentGen<span className="text-xs font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
           </span>
         </Link>
 
@@ -284,7 +285,7 @@ function ResetPasswordContent() {
               <div>
                 <label
                   htmlFor={passwordId}
-                  className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                  className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                   style={{ color: "var(--ink-soft)" }}
                 >
                   New Password
@@ -334,13 +335,13 @@ function ResetPasswordContent() {
                         }}
                       />
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-mono">
+                    <div className="flex justify-between items-center text-xs font-mono">
                       <span style={{ color: strength.color }}>{strength.label}</span>
                       <span style={{ color: "var(--ink-muted)" }}>Min 8 chars</span>
                     </div>
 
                     {/* Criteria checklist */}
-                    <div className="pt-2 grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+                    <div className="pt-2 grid grid-cols-2 gap-1.5 text-xs font-mono">
                       <span className={`inline-flex items-center gap-1 ${hasMinLength ? "text-emerald-700 font-medium" : "text-stone-400"}`}>
                         {hasMinLength ? <Check size={12} weight="bold" /> : <X size={12} />} 8+ chars
                       </span>
@@ -361,7 +362,7 @@ function ResetPasswordContent() {
               <div>
                 <label
                   htmlFor={confirmPasswordId}
-                  className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                  className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                   style={{ color: "var(--ink-soft)" }}
                 >
                   Confirm New Password
@@ -400,8 +401,8 @@ function ResetPasswordContent() {
                 </div>
 
                 {confirmPassword && (
-                  <p className={`mt-1.5 text-[11px] font-mono ${passwordsMatch ? "text-emerald-700" : "text-rose-700"}`}>
-                    {passwordsMatch ? "✓ Passwords match" : "✗ Passwords do not match"}
+                  <p className={`mt-1.5 text-xs font-mono ${passwordsMatch ? "text-emerald-700" : "text-rose-700"}`}>
+                    {passwordsMatch ? <><CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />Passwords match</> : <><XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />Passwords do not match</>}
                   </p>
                 )}
               </div>

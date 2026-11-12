@@ -350,7 +350,7 @@ export default function UsersList() {
                               {user.doctor_name || "Doctor Name Unset"}
                             </p>
                             <span
-                              className="inline-block text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded mt-1"
+                              className="inline-block text-xs font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded mt-1"
                               style={{
                                 backgroundColor: user.role === "admin" ? "var(--badge-dark-bg)" : "var(--badge-light-bg)",
                                 color: user.role === "admin" ? "var(--badge-dark-text)" : "var(--ink)",
@@ -374,7 +374,7 @@ export default function UsersList() {
                       <td className="py-4 px-6 text-center">
                         <div className="inline-flex flex-col items-center gap-0.5">
                           <span
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded font-mono text-[10px] uppercase font-bold tracking-wider"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded font-mono text-xs uppercase font-bold tracking-wider"
                             style={{
                               backgroundColor:
                                 planTier === "enterprise"
@@ -413,7 +413,7 @@ export default function UsersList() {
                             <span>{planTier}</span>
                           </span>
                           {subStatus !== "active" && (
-                            <span className="text-[9px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
+                            <span className="text-xs font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
                               {subStatus}
                             </span>
                           )}
@@ -426,7 +426,7 @@ export default function UsersList() {
 
                       <td className="py-4 px-6 text-center">
                         <span
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                           style={{
                             backgroundColor: user.is_active !== false ? "var(--status-success-bg)" : "var(--status-fail-bg)",
                             color: user.is_active !== false ? "var(--status-success-text)" : "var(--status-fail-text)",

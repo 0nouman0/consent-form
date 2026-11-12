@@ -1,5 +1,6 @@
 "use client";
 
+import { Check as CheckIcon, X as XIcon } from "@phosphor-icons/react";
 import { useState, Suspense, useId } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -160,7 +161,7 @@ function ForgotPasswordContent() {
             <ShieldCheck weight="bold" className="w-5 h-5 text-white" />
           </div>
           <span className="font-serif font-semibold text-base tracking-tight" style={{ color: INK }}>
-            ConsentGen<span className="text-[10px] font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
+            ConsentGen<span className="text-xs font-mono align-super ml-0.5" style={{ color: RED }}>®</span>
           </span>
         </Link>
 
@@ -244,7 +245,7 @@ function ForgotPasswordContent() {
             <div>
               <label
                 htmlFor={emailId}
-                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1"
+                className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1"
                 style={{ color: "var(--ink-soft)" }}
               >
                 Registered Email
@@ -277,7 +278,7 @@ function ForgotPasswordContent() {
             <div>
               <label
                 htmlFor={verifId}
-                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1"
+                className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1"
                 style={{ color: "var(--ink-soft)" }}
               >
                 Medical Reg. No. or Doctor Name
@@ -305,7 +306,7 @@ function ForgotPasswordContent() {
                   }}
                 />
               </div>
-              <p className="mt-1 text-[10.5px] font-mono" style={{ color: "var(--ink-muted)" }}>
+              <p className="mt-1 text-xs font-mono" style={{ color: "var(--ink-muted)" }}>
                 Verified against your clinician profile · No email wait time
               </p>
             </div>
@@ -313,7 +314,7 @@ function ForgotPasswordContent() {
             <div>
               <label
                 htmlFor={passId}
-                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1"
+                className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1"
                 style={{ color: "var(--ink-soft)" }}
               >
                 New Password
@@ -352,18 +353,18 @@ function ForgotPasswordContent() {
               </div>
 
               {newPassword && (
-                <div className="pt-2 grid grid-cols-2 gap-1 text-[10.5px] font-mono">
+                <div className="pt-2 grid grid-cols-2 gap-1 text-xs font-mono">
                   <span className={hasMinLength ? "text-emerald-700" : "text-stone-400"}>
-                    {hasMinLength ? "✓" : "✗"} 8+ characters
+                    {hasMinLength ? <CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" /> : <XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />}8+ characters
                   </span>
                   <span className={hasNumber ? "text-emerald-700" : "text-stone-400"}>
-                    {hasNumber ? "✓" : "✗"} At least 1 number
+                    {hasNumber ? <CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" /> : <XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />}At least 1 number
                   </span>
                   <span className={hasMixedCase ? "text-emerald-700" : "text-stone-400"}>
-                    {hasMixedCase ? "✓" : "✗"} Mixed case
+                    {hasMixedCase ? <CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" /> : <XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />}Mixed case
                   </span>
                   <span className={hasSpecial ? "text-emerald-700" : "text-stone-400"}>
-                    {hasSpecial ? "✓" : "✗"} Special symbol
+                    {hasSpecial ? <CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" /> : <XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />}Special symbol
                   </span>
                 </div>
               )}
@@ -372,7 +373,7 @@ function ForgotPasswordContent() {
             <div>
               <label
                 htmlFor={confirmPassId}
-                className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1"
+                className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1"
                 style={{ color: "var(--ink-soft)" }}
               >
                 Confirm New Password
@@ -411,8 +412,8 @@ function ForgotPasswordContent() {
               </div>
 
               {confirmPassword && (
-                <p className={`mt-1 text-[11px] font-mono ${passwordsMatch ? "text-emerald-700" : "text-rose-700"}`}>
-                  {passwordsMatch ? "✓ Passwords match" : "✗ Passwords do not match"}
+                <p className={`mt-1 text-xs font-mono ${passwordsMatch ? "text-emerald-700" : "text-rose-700"}`}>
+                  {passwordsMatch ? <><CheckIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />Passwords match</> : <><XIcon className="inline w-3.5 h-3.5 -mt-0.5 mr-1" weight="bold" />Passwords do not match</>}
                 </p>
               )}
             </div>
@@ -471,7 +472,7 @@ function ForgotPasswordContent() {
                 <div>
                   <label
                     htmlFor={emailId}
-                    className="block font-mono text-[11px] uppercase tracking-[0.08em] font-semibold mb-1.5"
+                    className="block font-mono text-xs uppercase tracking-[0.08em] font-semibold mb-1.5"
                     style={{ color: "var(--ink-soft)" }}
                   >
                     Practitioner Email

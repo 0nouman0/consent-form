@@ -131,14 +131,14 @@ export default function ProfilePage() {
     + " text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
     + " focus:ring-2 focus:ring-[rgba(23,20,16,0.08)] focus:border-[var(--ink)]"
     + " border border-[var(--rule)] bg-[var(--sheet)]";
-  const labelCls = "font-mono text-[11px] font-semibold text-[var(--ink-muted)] uppercase tracking-[0.06em] mb-2 block";
+  const labelCls = "font-mono text-xs font-semibold text-[var(--ink-muted)] uppercase tracking-[0.06em] mb-2 block";
 
   return (
     <div className="flex-1 overflow-y-auto p-3 sm:p-4 font-body" style={{ backgroundColor: "var(--paper)" }}>
       <div className="max-w-screen-md mx-auto space-y-4">
 
         {/* Page Header Card */}
-        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7"
+        <div className="rounded-xl px-6 sm:px-8 py-6 sm:py-7"
           style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Account</p>
           <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -148,7 +148,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Account Info Card */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div className="px-6 sm:px-8 py-5 flex items-start gap-5">
             <div className="w-16 h-16 rounded-md flex items-center justify-center shrink-0"
               style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
@@ -167,25 +167,25 @@ export default function ProfilePage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {/* Verified badge */}
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs uppercase tracking-[0.06em] font-semibold"
                   style={{ color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }}>
                   <ShieldCheck weight="fill" className="w-3.5 h-3.5" /> Verified
                 </span>
                 {/* Role badge */}
                 {userRole === "admin" && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs uppercase tracking-[0.06em] font-semibold"
                     style={{ color: "var(--red)", backgroundColor: "rgba(190,61,42,0.08)", border: "1px solid rgba(190,61,42,0.2)" }}>
                     <Crown weight="fill" className="w-3.5 h-3.5" /> Admin
                   </span>
                 )}
                 {userRole === "doctor" && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs uppercase tracking-[0.06em] font-semibold"
                     style={{ color: "var(--ink)", backgroundColor: "rgba(23,20,16,0.06)", border: "1px solid rgba(23,20,16,0.12)" }}>
                     <Stethoscope weight="fill" className="w-3.5 h-3.5" /> Doctor
                   </span>
                 )}
                 {userRole === "viewer" && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs uppercase tracking-[0.06em] font-semibold"
                     style={{ color: "var(--ink-muted)", backgroundColor: "rgba(122,116,102,0.1)", border: "1px solid rgba(122,116,102,0.25)" }}>
                     <Eye weight="fill" className="w-3.5 h-3.5" /> Viewer
                   </span>
@@ -202,7 +202,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Clinical Details Card */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div className="px-6 sm:px-8 py-5 flex items-center justify-between gap-3" style={{ borderBottom: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
@@ -223,7 +223,7 @@ export default function ProfilePage() {
               const complete = filled === 4;
               return (
                 <span
-                  className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-[11px] uppercase tracking-[0.06em] font-semibold"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs uppercase tracking-[0.06em] font-semibold"
                   style={
                     complete
                       ? { color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)", border: "1px solid rgba(63,122,78,0.2)" }
@@ -289,7 +289,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Payment & Billing History Card */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div className="px-6 sm:px-8 py-5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--rule)" }}>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
@@ -307,7 +307,7 @@ export default function ProfilePage() {
           </div>
           <div className="px-6 sm:px-8 py-6 space-y-6">
             <div>
-              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>Recent Transactions</h4>
+              <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>Recent Transactions</h4>
               {txs.length === 0 ? (
                 <p className="text-xs" style={{ color: "var(--ink-muted)" }}>No payment transaction records found.</p>
               ) : (
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                     <div key={tx.id} className="py-2.5 flex items-center justify-between text-xs">
                       <div>
                         <p className="font-mono font-bold" style={{ color: "var(--ink)" }}>{tx.order_id}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           {tx.payment_id ? `ID: ${tx.payment_id}` : 'Pending'} • {new Date(tx.created_at).toLocaleDateString("en-IN")}
                         </p>
                       </div>
@@ -324,7 +324,7 @@ export default function ProfilePage() {
                         <div className="text-right">
                           <p className="font-bold" style={{ color: "var(--ink)" }}>₹{(tx.amount / 100).toFixed(0)}</p>
                           <span
-                            className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-md mt-0.5"
+                            className="inline-block text-xs font-bold px-2 py-0.5 rounded-md mt-0.5"
                             style={
                               tx.status === "paid"
                                 ? { color: "#3f7a4e", backgroundColor: "rgba(63,122,78,0.08)" }
@@ -350,7 +350,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="pt-4 border-t border-[var(--rule-soft)]">
-              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>Credit History</h4>
+              <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>Credit History</h4>
               {logs.length === 0 ? (
                 <p className="text-xs" style={{ color: "var(--ink-muted)" }}>No credit usage logs found.</p>
               ) : (
@@ -359,7 +359,7 @@ export default function ProfilePage() {
                     <div key={log.id} className="py-2.5 flex items-center justify-between text-xs">
                       <div>
                         <p className="font-bold capitalize" style={{ color: "var(--ink)" }}>{log.action.replace(/_/g, " ")}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           {new Date(log.created_at).toLocaleDateString("en-IN", {
                             day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                           })}
@@ -369,7 +369,7 @@ export default function ProfilePage() {
                         <p className="font-bold" style={{ color: log.amount < 0 ? "var(--red)" : "#3f7a4e" }}>
                           {log.amount > 0 ? `+${log.amount}` : log.amount}
                         </p>
-                        <p className="text-[9px] mt-0.5" style={{ color: "var(--ink-muted)" }}>Bal: {log.balance_after}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>Bal: {log.balance_after}</p>
                       </div>
                     </div>
                   ))}
@@ -380,7 +380,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Account Actions Card */}
-        <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div className="px-6 sm:px-8 py-5 flex items-center gap-3" style={{ borderBottom: "1px solid var(--rule)" }}>
             <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: "var(--paper)" }}>
               <Gear weight="duotone" className="w-4 h-4" style={{ color: "var(--ink-muted)" }} />
@@ -429,12 +429,12 @@ export default function ProfilePage() {
               }
             }
           `}} />
-          <div id="printable-invoice-modal" className="w-full max-w-[500px] rounded-md p-6 sm:p-8 relative"
+          <div id="printable-invoice-modal" className="w-full max-w-[500px] rounded-xl p-6 sm:p-8 relative"
             style={{ backgroundColor: "var(--sheet)", color: "var(--ink)", border: "1px solid var(--rule)", boxShadow: "0 16px 48px rgba(23,20,16,0.14)" }}>
             {/* Header */}
             <div className="text-center pb-5 mb-5" style={{ borderBottom: "1px solid var(--rule-soft)" }}>
               <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>Payment Invoice</h2>
-              <p className="font-mono text-[11px] mt-1 uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>Consent Form Generator</p>
+              <p className="font-mono text-xs mt-1 uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>Consent Form Generator</p>
             </div>
 
             {/* Info details */}

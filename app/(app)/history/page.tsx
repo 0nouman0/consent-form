@@ -82,7 +82,7 @@ function HistoryContent() {
 
   const getAgeBadge = (createdAt: string) => {
     const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000);
-    if (days < 30) return { label: `${days}d ago`, color: "#3f7a4e", bg: "rgba(63,122,78,0.08)", border: "rgba(63,122,78,0.2)" };
+    if (days < 30) return { label: days === 0 ? "Today" : days === 1 ? "Yesterday" : `${days}d ago`, color: "#3f7a4e", bg: "rgba(63,122,78,0.08)", border: "rgba(63,122,78,0.2)" };
     if (days < 90) return { label: `${Math.floor(days / 7)}w ago`, color: "#92400e", bg: "rgba(146,64,14,0.08)", border: "rgba(146,64,14,0.2)" };
     return { label: `${Math.floor(days / 30)}mo ago`, color: "var(--red)", bg: "rgba(190,61,42,0.08)", border: "rgba(190,61,42,0.25)" };
   };
@@ -148,7 +148,7 @@ function HistoryContent() {
       <div className="max-w-screen-xl mx-auto space-y-4">
 
         {/* Page Header Card */}
-        <div className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        <div className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
           <div>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>Records</p>
@@ -227,7 +227,7 @@ function HistoryContent() {
             )}
           </div>
         ) : (
-          <div className="rounded-md overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
+          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}>
             <div className="divide-y divide-[var(--rule)]">
               {filtered.map((entry, i) => (
                 <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
@@ -241,18 +241,18 @@ function HistoryContent() {
                           {entry.patient_name || "Unknown Patient"} — {entry.procedure_name || "Unknown Procedure"}
                         </h3>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
+                          <span className="px-2 py-0.5 font-mono text-xs font-semibold uppercase tracking-[0.06em] rounded-md" style={{ backgroundColor: "var(--paper)", color: "var(--ink-muted)" }}>
                             {(entry.consent_type || "unknown").replace(/_/g, " ")}
                           </span>
                           <span className="text-xs flex items-center gap-1" style={{ color: "var(--ink-muted)" }}>
                             <CalendarBlank weight="regular" className="w-3 h-3" /> {entry.procedure_date || "No date"}
                           </span>
-                          <span className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>#{entry.consent_id?.slice(0, 8)}</span>
+                          <span className="text-xs font-mono" style={{ color: "var(--ink-muted)" }}>#{entry.consent_id?.slice(0, 8)}</span>
                           {(() => {
                             const badge = getAgeBadge(entry.created_at);
                             return (
                               <span
-                                className="px-2 py-0.5 text-[11px] font-semibold rounded-md"
+                                className="px-2 py-0.5 text-xs font-semibold rounded-md"
                                 style={{ color: badge.color, backgroundColor: badge.bg, border: `1px solid ${badge.border}` }}
                               >
                                 {badge.label}
@@ -453,7 +453,7 @@ function HistoryContent() {
                   return (
                     <div
                       id="history-doc-body"
-                      className="rounded-md p-6 sm:p-8 max-w-3xl mx-auto"
+                      className="rounded-xl p-6 sm:p-8 max-w-3xl mx-auto"
                       style={{
                         backgroundColor: "var(--sheet)",
                         border: "1px solid var(--rule)",
@@ -468,12 +468,12 @@ function HistoryContent() {
                             {(isResearch ? fd?.study?.institutionName : fd?.clinical?.hospitalName) || selectedEntry.hospital_name || "Hospital"}
                           </p>
                           {(isResearch ? fd?.study?.institutionAddress : fd?.clinical?.hospitalAddress) && (
-                            <p className="text-[11px] leading-tight text-left mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                            <p className="text-xs leading-tight text-left mt-0.5" style={{ color: "var(--ink-muted)" }}>
                               {isResearch ? fd.study.institutionAddress : fd.clinical.hospitalAddress}
                             </p>
                           )}
                         </div>
-                        <div className="text-right text-[11px] space-y-0.5 shrink-0" style={{ color: "var(--ink-muted)" }}>
+                        <div className="text-right text-xs space-y-0.5 shrink-0" style={{ color: "var(--ink-muted)" }}>
                           <p>Consent ID: <span className="font-semibold font-mono" style={{ color: "var(--ink)" }}>{selectedEntry.consent_id}</span></p>
                           <p>Date &amp; Time: <span className="font-medium" style={{ color: "var(--ink)" }}>{generatedAt}</span></p>
                         </div>
@@ -484,7 +484,7 @@ function HistoryContent() {
                         className="rounded py-1.5 px-3 mb-2.5 text-center"
                         style={{ backgroundColor: "#1e293b", color: "#ffffff", border: "1px solid #0f172a" }}
                       >
-                        <p className="font-sans text-xs sm:text-[13px] font-bold tracking-wider uppercase text-white">
+                        <p className="font-sans text-xs sm:text-sm font-bold tracking-wider uppercase text-white">
                           {isResearch
                             ? `INFORMED CONSENT FOR RESEARCH: ${(fd?.study?.studyTitle || selectedEntry.procedure_name || "VOLUNTARY PARTICIPATION").toUpperCase()}`
                             : `INFORMED CONSENT FORM — ${(fd?.clinical?.procedureName || selectedEntry.procedure_name || selectedEntry.consent_type || "PROCEDURE").toUpperCase()}`}
@@ -496,40 +496,40 @@ function HistoryContent() {
                         <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
                           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Patient Name</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Patient Name</span>
                               <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.patient?.patientName || selectedEntry.patient_name || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
                               <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.age || "—"} Yrs / {fd.patient?.sex || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>OPD/IPD No.</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>OPD/IPD No.</span>
                               <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.hospitalOpdIpdNo || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Aadhaar (Last 4)</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Aadhaar (Last 4)</span>
                               <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.aadhaarLast4 ? `XXXX-XXXX-${fd.patient.aadhaarLast4}` : "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Treating Clinician</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Treating Clinician</span>
                               <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>
                                 Dr. {fd.clinical?.doctorName || "—"}
                                 {fd.clinical?.doctorRegistrationNo && (
-                                  <span className="font-normal text-[10px]" style={{ color: "var(--ink-muted)" }}> (Reg: {fd.clinical.doctorRegistrationNo})</span>
+                                  <span className="font-normal text-xs" style={{ color: "var(--ink-muted)" }}> (Reg: {fd.clinical.doctorRegistrationNo})</span>
                                 )}
                               </span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Proposed Procedure</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Proposed Procedure</span>
                               <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.clinical?.procedureName || selectedEntry.procedure_name || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Scheduled Date</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Scheduled Date</span>
                               <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.clinical?.procedureDate || selectedEntry.procedure_date || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
                               <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{fd.clinical?.counselingLanguage || "English"}</span>
                             </div>
                           </div>
@@ -540,31 +540,31 @@ function HistoryContent() {
                         <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
                           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant Name</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant Name</span>
                               <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.participant?.participantName || selectedEntry.patient_name || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant ID</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant ID</span>
                               <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.participant?.participantId || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
                               <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.participant?.age || "—"} Yrs / {fd.participant?.sex || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
                               <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{fd.study?.counselingLanguage || "English"}</span>
                             </div>
                             <div className="p-1.5 col-span-2">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Study Title</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Study Title</span>
                               <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.studyTitle || selectedEntry.procedure_name || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Principal Investigator</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Principal Investigator</span>
                               <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.principalInvestigator || "—"}</span>
                             </div>
                             <div className="p-1.5">
-                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Department</span>
+                              <span className="block font-mono text-xs uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Department</span>
                               <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.department || "—"}</span>
                             </div>
                           </div>
@@ -583,7 +583,7 @@ function HistoryContent() {
                               </h1>
                             ),
                             h2: ({ children }) => (
-                              <h2 className="text-[11px] font-bold uppercase tracking-wider mt-3 mb-1.5 px-2 py-0.5 border-l-[3px] border-[#1e293b] bg-[#f8fafc] text-[#0f172a]">
+                              <h2 className="text-xs font-bold uppercase tracking-wider mt-3 mb-1.5 px-2 py-0.5 border-l-[3px] border-[#1e293b] bg-[#f8fafc] text-[#0f172a]">
                                 {children}
                               </h2>
                             ),
@@ -615,7 +615,7 @@ function HistoryContent() {
                               </div>
                             ),
                             th: ({ children }) => (
-                              <th className="px-2 py-1.5 font-semibold bg-[var(--paper)] border-b border-[var(--rule)] text-[11px] uppercase" style={{ color: "var(--ink)" }}>
+                              <th className="px-2 py-1.5 font-semibold bg-[var(--paper)] border-b border-[var(--rule)] text-xs uppercase" style={{ color: "var(--ink)" }}>
                                 {children}
                               </th>
                             ),
@@ -647,7 +647,7 @@ function HistoryContent() {
             onClick={() => setDeleteId(null)}>
             <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }} transition={{ duration: 0.2 }}
-              className="max-w-sm w-full p-8 rounded-md text-center"
+              className="max-w-sm w-full p-8 rounded-xl text-center"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", boxShadow: "0 8px 24px rgba(23,20,16,0.10)" }}
               onClick={(e) => e.stopPropagation()}>
               <div className="w-14 h-14 rounded-md flex items-center justify-center mx-auto mb-5"

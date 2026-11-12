@@ -144,11 +144,11 @@ export default function PaymentsList() {
 
             <div className="flex items-center gap-6 text-xs font-mono">
               <div className="text-left sm:text-right">
-                <p className="text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>Total Orders</p>
+                <p className="text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>Total Orders</p>
                 <p className="font-bold text-sm mt-0.5" style={{ color: "var(--ink)" }}>{filteredTxs.length}</p>
               </div>
               <div className="text-left sm:text-right">
-                <p className="text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>Paid Status</p>
+                <p className="text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>Paid Status</p>
                 <p className="font-bold text-sm mt-0.5 text-emerald-500">
                   {filteredTxs.filter((t) => t.status === "paid").length}
                 </p>
@@ -240,7 +240,7 @@ export default function PaymentsList() {
                         >
                           {tx.profiles?.doctor_name || "Doctor Account"}
                         </Link>
-                        <span className="text-[10px] font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                        <span className="text-xs font-mono block mt-0.5" style={{ color: "var(--ink-muted)" }}>
                           {tx.user_id.slice(0, 8)}
                         </span>
                       </td>
@@ -254,7 +254,7 @@ export default function PaymentsList() {
                           {tx.payment_id || "Pending"}
                         </p>
                         {tx.metadata?.method && (
-                          <p className="text-[10px] font-mono uppercase tracking-[0.08em] mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                          <p className="text-xs font-mono uppercase tracking-[0.08em] mt-0.5" style={{ color: "var(--ink-muted)" }}>
                             {tx.metadata.method} {tx.metadata.vpa ? `(${tx.metadata.vpa})` : tx.metadata.bank ? `(${tx.metadata.bank})` : ""}
                           </p>
                         )}
@@ -268,7 +268,7 @@ export default function PaymentsList() {
                         +{tx.credits}
                       </td>
 
-                      <td className="py-4 px-6 font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                      <td className="py-4 px-6 font-mono text-xs" style={{ color: "var(--ink-muted)" }}>
                         {new Date(tx.created_at).toLocaleDateString("en-IN", {
                           dateStyle: "medium",
                         })}
@@ -276,7 +276,7 @@ export default function PaymentsList() {
 
                       <td className="py-4 px-6 text-center">
                         <span
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-xs uppercase tracking-[0.08em] font-semibold"
                           style={{
                             backgroundColor:
                               tx.status === "paid"
@@ -383,7 +383,7 @@ export default function PaymentsList() {
                 <h2 className="font-serif text-xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
                   Tax Invoice & Receipt
                 </h2>
-                <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   ConsentGen Medico-Legal Platform
                 </p>
               </div>
