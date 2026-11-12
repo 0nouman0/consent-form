@@ -2,19 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  MessageCircle,
-  Send,
+  ArrowUp,
   Loader2,
   Plus,
   Trash2,
   Menu,
   X,
-  Gavel,
-  Stethoscope,
-  FileText,
-  ShieldCheck,
   Copy,
   Check,
+  ArrowRight,
+  MessageSquare,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -34,27 +31,23 @@ interface ChatSession {
 
 const DEFAULT_MESSAGE: Message = {
   role: "assistant",
-  content: "Hi Doctor, I'm ConsentGen AI. How can I help you with medico-legal or procedural questions today?",
+  content: "How can I help with medico-legal or procedural questions today, Doctor?",
 };
 
 const SUGGESTED_PROMPTS = [
   {
-    icon: Gavel,
     title: "Consent law basics",
     prompt: "What are the essential elements of valid informed consent under Indian law?",
   },
   {
-    icon: Stethoscope,
     title: "Emergency treatment",
     prompt: "Can I treat an unconscious road accident victim without consent? What does BNS Section 29 say?",
   },
   {
-    icon: FileText,
     title: "Minor patients",
     prompt: "Who can give consent for a surgical procedure on a 15-year-old patient?",
   },
   {
-    icon: ShieldCheck,
     title: "Telemedicine rules",
     prompt: "What consent requirements apply to telemedicine consultations under the 2020 guidelines?",
   },
@@ -64,40 +57,20 @@ function relativeDate(iso: string) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
+  if (days < 7) return `${days}d ago`;
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-/**
- * Aggressively cleans up AI-generated markdown so remark-gfm can parse tables
- * and lists correctly even when the model puts everything on one line.
- */
 function repairMarkdown(raw: string): string {
   if (!raw) return "";
-  let s = raw;
-
-  // 1. Normalize Windows line endings
-  s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  // 2. Strip literal <br> and <br/> tags — replace with newline
+  let s = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   s = s.replace(/<br\s*\/?>/gi, "\n");
-
-  // 3. If the entire response looks like a flattened single-line table
-  //    (pipe-separated, no real newlines between rows), split it out.
-  //    Pattern: "| cell | cell | ... | | cell |" => split on " | |" or " || "
-  s = s.replace(/\|\s*\|\s*\|/g, "|\n|");   // "| ... | | ..." -> newline before next row
-  s = s.replace(/\|\s{2,}\|/g, "|\n|");     // "| ...  |" with extra spaces
-
-  // 4. Ensure separator row (|---|---|) is on its own line
+  s = s.replace(/\|\s*\|\s*\|/g, "|\n|");
+  s = s.replace(/\|\s{2,}\|/g, "|\n|");
   s = s.replace(/(\|[^|]+\|)(\s*\|[-: ]+\|)/g, "$1\n$2");
   s = s.replace(/(\|[-: ]+\|)(\s*\|[^|]+\|)/g, "$1\n$2");
-
-  // 5. Ensure a blank line before any table so remark-gfm treats it as a block
   s = s.replace(/([^\n])(\n\|)/g, "$1\n\n|");
-
-  // 6. Ensure blank line before headings (#, ##, ###)
   s = s.replace(/([^\n])(\n#{1,4} )/g, "$1\n\n$2");
-
   return s;
 }
 
@@ -160,7 +133,7 @@ export default function ChatPage() {
       currentSessionId = uuidv4();
       const newSession: ChatSession = {
         id: currentSessionId,
-        title: userMessage.content.slice(0, 42) + (userMessage.content.length > 42 ? "…" : ""),
+        title: userMessage.content.slice(0, 44) + (userMessage.content.length > 44 ? "…" : ""),
         date: new Date().toISOString(),
         messages: [DEFAULT_MESSAGE, userMessage],
       };
@@ -200,7 +173,7 @@ export default function ChatPage() {
                 ...s,
                 messages: [
                   ...s.messages,
-                  { role: "assistant", content: "Sorry, I'm having trouble connecting right now. Please try again." },
+                  { role: "assistant", content: "Unable to reach the assistant right now. Please try again." },
                 ],
               }
             : s
@@ -225,20 +198,19 @@ export default function ChatPage() {
 
   const isNewChat = !activeSession;
 
-  /* ─── Markdown component overrides ─── */
   const mdComponents = {
     h1: ({ children }: any) => (
-      <h1 className="font-serif text-[15px] font-bold text-[var(--ink)] mt-5 mb-2 pb-1.5 border-b border-[var(--rule)]">
+      <h1 className="font-serif text-base font-semibold text-[var(--ink)] mt-5 mb-2 pb-1.5 border-b border-[var(--rule)]">
         {children}
       </h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="font-serif text-[14px] font-bold text-[var(--ink)] mt-4 mb-1.5 pb-1 border-b border-[var(--rule)]">
+      <h2 className="font-serif text-[15px] font-semibold text-[var(--ink)] mt-4 mb-1.5 pb-1 border-b border-[var(--rule)]">
         {children}
       </h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-[13.5px] font-bold text-[var(--ink)] mt-3.5 mb-1">
+      <h3 className="text-[13.5px] font-semibold text-[var(--ink)] mt-3.5 mb-1">
         {children}
       </h3>
     ),
@@ -248,22 +220,22 @@ export default function ChatPage() {
       </h4>
     ),
     p: ({ children }: any) => (
-      <p className="text-[13.5px] leading-relaxed my-2 text-[var(--ink-soft)]">
+      <p className="text-[14px] leading-[1.7] my-2 text-[var(--ink-soft)]">
         {children}
       </p>
     ),
     ul: ({ children }: any) => (
-      <ul className="list-disc pl-5 my-2.5 space-y-1.5 marker:text-[var(--red)]">
+      <ul className="list-disc pl-5 my-2.5 space-y-1.5 marker:text-[var(--ink-muted)]">
         {children}
       </ul>
     ),
     ol: ({ children }: any) => (
-      <ol className="list-decimal pl-5 my-2.5 space-y-1.5 marker:font-semibold marker:text-[var(--ink)]">
+      <ol className="list-decimal pl-5 my-2.5 space-y-1.5 marker:font-medium marker:text-[var(--ink-muted)]">
         {children}
       </ol>
     ),
     li: ({ children }: any) => (
-      <li className="text-[13.5px] leading-relaxed text-[var(--ink-soft)] pl-0.5">
+      <li className="text-[14px] leading-[1.65] text-[var(--ink-soft)] pl-0.5">
         {children}
       </li>
     ),
@@ -274,26 +246,25 @@ export default function ChatPage() {
       <em className="italic text-[var(--ink-soft)]">{children}</em>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="my-3 pl-3.5 pr-3 py-2.5 rounded-r-md border-l-[3px] border-[var(--red)] bg-[var(--paper)] text-[13px] text-[var(--ink-soft)] leading-relaxed">
+      <blockquote className="my-3 pl-3.5 py-0.5 border-l-2 border-[var(--rule)] text-[13.5px] text-[var(--ink-muted)] leading-relaxed">
         {children}
       </blockquote>
     ),
     code: ({ children }: any) => (
-      <code className="px-1.5 py-0.5 rounded bg-[var(--paper)] border border-[var(--rule)] font-mono text-[11.5px] text-[var(--ink)]">
+      <code className="px-1.5 py-0.5 rounded bg-[var(--paper)] border border-[var(--rule)] font-mono text-[12px] text-[var(--ink)]">
         {children}
       </code>
     ),
     hr: () => <hr className="my-4 border-[var(--rule)]" />,
-    // ── Tables ──
     table: ({ children }: any) => (
-      <div className="my-4 overflow-x-auto rounded-md border border-[var(--rule)]">
-        <table className="w-full border-collapse text-left text-[12.5px] min-w-[480px]">
+      <div className="my-4 overflow-x-auto rounded border border-[var(--rule)] bg-[var(--sheet)]">
+        <table className="w-full border-collapse text-left text-[13px] min-w-[460px]">
           {children}
         </table>
       </div>
     ),
     thead: ({ children }: any) => (
-      <thead style={{ backgroundColor: "var(--paper)", borderBottom: "1.5px solid var(--rule)" }}>
+      <thead style={{ backgroundColor: "var(--paper)", borderBottom: "1px solid var(--rule)" }}>
         {children}
       </thead>
     ),
@@ -301,17 +272,15 @@ export default function ChatPage() {
       <tbody className="divide-y divide-[var(--rule)]">{children}</tbody>
     ),
     tr: ({ children }: any) => (
-      <tr className="even:bg-[rgba(23,20,16,0.02)] hover:bg-[rgba(23,20,16,0.03)] transition-colors">
-        {children}
-      </tr>
+      <tr className="even:bg-[rgba(23,20,16,0.015)]">{children}</tr>
     ),
     th: ({ children }: any) => (
-      <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-[var(--ink)] whitespace-nowrap font-mono">
+      <th className="px-3.5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] whitespace-nowrap">
         {children}
       </th>
     ),
     td: ({ children }: any) => (
-      <td className="px-3 py-2.5 align-top text-[var(--ink-soft)] leading-relaxed text-[12.5px]">
+      <td className="px-3.5 py-2.5 align-top text-[var(--ink-soft)] leading-relaxed text-[13px]">
         {children}
       </td>
     ),
@@ -320,7 +289,7 @@ export default function ChatPage() {
   return (
     <div
       className="flex-1 flex w-full font-body overflow-hidden relative"
-      style={{ backgroundColor: "var(--paper)" }}
+      style={{ backgroundColor: "var(--sheet)" }}
     >
       {/* Mobile overlay */}
       {isSidebarOpen && (
@@ -331,263 +300,204 @@ export default function ChatPage() {
         />
       )}
 
-      {/* ── Sidebar ── */}
+      {/* ── History Sidebar ── */}
       <aside
-        className={`absolute md:static top-0 left-0 h-full w-72 flex flex-col transition-transform duration-300 z-50 ${
+        className={`absolute md:static top-0 left-0 h-full w-64 flex flex-col transition-transform duration-200 z-50 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
-        style={{ backgroundColor: "var(--sheet)", borderRight: "1px solid var(--rule)" }}
+        style={{ backgroundColor: "var(--paper)", borderRight: "1px solid var(--rule)" }}
       >
-        <div className="p-5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--rule)" }}>
-          <h2 className="font-serif text-sm font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
-            Chat History
-          </h2>
-          <button
-            className="md:hidden p-1.5 rounded-md transition-all text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--paper)]"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <X className="w-4 h-4" />
-          </button>
+        <div className="px-4 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--rule)" }}>
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
+            Conversations
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleNewChat}
+              title="New conversation"
+              className="p-1.5 rounded transition-colors text-[var(--ink)] hover:bg-[var(--sheet)]"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              className="md:hidden p-1.5 rounded transition-colors text-[var(--ink-muted)] hover:text-[var(--ink)]"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        <div className="p-4">
-          <button
-            onClick={handleNewChat}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all hover:opacity-90"
-            style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
-          >
-            <Plus className="w-4 h-4" /> New Chat
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1">
+        <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {sessions.length === 0 ? (
-            <div className="text-center text-xs mt-10 px-4" style={{ color: "var(--ink-muted)" }}>
-              No previous chats found.
-            </div>
+            <p className="text-xs px-3 py-8 text-center" style={{ color: "var(--ink-muted)" }}>
+              No conversations yet.
+            </p>
           ) : (
-            sessions.map((session) => (
-              <div
-                key={session.id}
-                onClick={() => {
-                  setActiveSessionId(session.id);
-                  if (window.innerWidth < 768) setIsSidebarOpen(false);
-                }}
-                className={`group flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors ${
-                  activeSessionId === session.id
-                    ? "bg-[var(--paper)] text-[var(--ink)]"
-                    : "text-[var(--ink-muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-                }`}
-              >
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-xs font-medium truncate block">{session.title}</span>
-                    <span className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
-                      {relativeDate(session.date)}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={(e) => handleDeleteSession(session.id, e)}
-                  className="opacity-0 group-hover:opacity-100 p-1 transition-all text-[var(--ink-muted)] hover:text-[var(--red)]"
+            sessions.map((session) => {
+              const active = activeSessionId === session.id;
+              return (
+                <div
+                  key={session.id}
+                  onClick={() => {
+                    setActiveSessionId(session.id);
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded cursor-pointer transition-colors ${
+                    active
+                      ? "bg-[var(--sheet)] text-[var(--ink)]"
+                      : "text-[var(--ink-muted)] hover:bg-[var(--sheet)]/60 hover:text-[var(--ink)]"
+                  }`}
+                  style={active ? { border: "1px solid var(--rule)" } : { border: "1px solid transparent" }}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="text-[12.5px] font-medium truncate">{session.title}</p>
+                    <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                      {relativeDate(session.date)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteSession(session.id, e)}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity text-[var(--ink-muted)] hover:text-[var(--red)]"
+                    title="Delete conversation"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       </aside>
 
-      {/* ── Main Chat ── */}
+      {/* ── Main Thread Area ── */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
-        {/* Header */}
-        <header
-          className="px-5 py-4 flex items-center gap-3 shrink-0"
-          style={{ backgroundColor: "var(--sheet)", borderBottom: "1px solid var(--rule)" }}
+        {/* Compact bar on mobile / active thread title */}
+        <div
+          className="px-4 sm:px-6 py-3 flex items-center justify-between shrink-0"
+          style={{ borderBottom: "1px solid var(--rule)", backgroundColor: "var(--sheet)" }}
         >
-          <button
-            className="md:hidden p-2 -ml-1 rounded-md transition-all text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--paper)]"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-md flex items-center justify-center"
-              style={{ backgroundColor: "var(--ink)" }}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              className="md:hidden p-1.5 -ml-1 rounded text-[var(--ink-muted)] hover:text-[var(--ink)]"
+              onClick={() => setIsSidebarOpen(true)}
             >
-              <MessageCircle className="w-4 h-4" style={{ color: "var(--sheet)" }} />
-            </div>
-            <div>
-              <h1 className="font-serif text-sm font-semibold" style={{ color: "var(--ink)" }}>
-                ConsentGen{" "}
-                <span className="font-serif font-semibold" style={{ color: "var(--red)" }}>
-                  assistant
-                </span>
-              </h1>
-              <p className="text-xs hidden md:block" style={{ color: "var(--ink-muted)" }}>
-                Medical law and procedure assistant
-              </p>
-            </div>
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-xs font-medium truncate" style={{ color: "var(--ink-soft)" }}>
+              {activeSession ? activeSession.title : "Medico-Legal Assistant"}
+            </span>
           </div>
-        </header>
+          {activeSession && (
+            <button
+              type="button"
+              onClick={handleNewChat}
+              className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded transition-colors hover:bg-[var(--paper)]"
+              style={{ color: "var(--ink-muted)" }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New
+            </button>
+          )}
+        </div>
 
         {/* Messages */}
-        <div
-          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6"
-          style={{ backgroundColor: "var(--paper)" }}
-        >
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           {isNewChat ? (
-            /* Welcome state */
-            <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto px-4">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
-                style={{ backgroundColor: "var(--ink)" }}
-              >
-                <MessageCircle className="w-7 h-7" style={{ color: "var(--sheet)" }} strokeWidth={1.5} />
-              </div>
-              <h2
-                className="font-serif text-2xl font-semibold tracking-tight mb-2 text-center"
-                style={{ color: "var(--ink)" }}
-              >
-                How can I help,{" "}
-                <span style={{ color: "var(--red)" }}>Doctor?</span>
-              </h2>
-              <p className="text-sm text-center mb-8 max-w-sm" style={{ color: "var(--ink-muted)" }}>
-                Ask about consent law, medico-legal documentation, NMC regulations, or clinical procedures in India.
+            <div className="h-full flex flex-col justify-center max-w-2xl mx-auto">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] mb-2" style={{ color: "var(--red)" }}>
+                Medico-Legal Desk
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {SUGGESTED_PROMPTS.map(({ icon: Icon, title, prompt }) => (
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight mb-2" style={{ color: "var(--ink)" }}>
+                Ask about Indian medical law &amp; consent.
+              </h2>
+              <p className="text-sm mb-8" style={{ color: "var(--ink-muted)" }}>
+                Guidance grounded in BNS §§24–30, IMC 2002, NMC 2023, and PM RAHAT 2025.
+              </p>
+
+              <div className="divide-y rounded-md border overflow-hidden" style={{ borderColor: "var(--rule)", backgroundColor: "var(--paper)" }}>
+                {SUGGESTED_PROMPTS.map(({ title, prompt }) => (
                   <button
                     key={title}
+                    type="button"
                     onClick={() => sendMessage(prompt)}
-                    className="text-left p-4 rounded-lg hover:-translate-y-0.5 hover:shadow-sm transition-all group"
-                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+                    className="w-full text-left px-4 py-3.5 flex items-center justify-between gap-4 transition-colors hover:bg-[var(--sheet)] group"
                   >
-                    <div className="w-8 h-8 rounded-md flex items-center justify-center mb-2.5 transition-colors bg-[var(--paper)] group-hover:bg-[var(--ink)]">
-                      <Icon
-                        className="w-4 h-4 transition-colors text-[var(--ink-muted)] group-hover:text-[var(--sheet)]"
-                        strokeWidth={1.75}
-                      />
+                    <div className="min-w-0">
+                      <span className="text-xs font-semibold block mb-0.5" style={{ color: "var(--ink)" }}>
+                        {title}
+                      </span>
+                      <span className="text-xs block truncate" style={{ color: "var(--ink-muted)" }}>
+                        {prompt}
+                      </span>
                     </div>
-                    <p className="text-sm font-semibold mb-1" style={{ color: "var(--ink)" }}>
-                      {title}
-                    </p>
-                    <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--ink-muted)" }}>
-                      {prompt}
-                    </p>
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: "var(--ink-muted)" }} />
                   </button>
                 ))}
               </div>
             </div>
           ) : (
             <div className="max-w-3xl mx-auto w-full space-y-6">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-start gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {/* AI avatar */}
-                  {msg.role === "assistant" && (
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: "var(--ink)" }}
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" style={{ color: "var(--sheet)" }} strokeWidth={2} />
+              {messages.slice(1).map((msg, i) => {
+                const idx = i + 1;
+                if (msg.role === "user") {
+                  return (
+                    <div key={idx} className="flex justify-end">
+                      <div
+                        className="max-w-[82%] sm:max-w-[70%] px-4 py-2.5 rounded-lg text-[14px] leading-relaxed whitespace-pre-wrap"
+                        style={{ backgroundColor: "var(--paper)", color: "var(--ink)", border: "1px solid var(--rule)" }}
+                      >
+                        {msg.content}
+                      </div>
                     </div>
-                  )}
+                  );
+                }
 
-                  <div
-                    className={`group relative ${
-                      msg.role === "user"
-                        ? "max-w-[78%] md:max-w-[65%]"
-                        : "max-w-[91%] md:max-w-[85%] min-w-0 flex-1"
-                    }`}
-                  >
-                    <div
-                      className={`rounded-xl text-sm ${
-                        msg.role === "user"
-                          ? "px-4 py-3 rounded-tr-sm"
-                          : "px-5 py-4 rounded-tl-sm"
-                      }`}
-                      style={
-                        msg.role === "user"
-                          ? { backgroundColor: "var(--ink)", color: "var(--sheet)" }
-                          : {
-                              backgroundColor: "var(--sheet)",
-                              color: "var(--ink-soft)",
-                              border: "1px solid var(--rule)",
-                              boxShadow: "0 1px 4px rgba(23,20,16,0.05)",
-                            }
-                      }
-                    >
-                      {msg.role === "assistant" ? (
-                        <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={mdComponents}
-                          >
-                            {repairMarkdown(msg.content)}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        <span className="leading-relaxed whitespace-pre-wrap">{msg.content}</span>
-                      )}
+                return (
+                  <div key={idx} className="group">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" style={{ color: "var(--red)" }} />
+                      <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--ink-muted)" }}>
+                        ConsentGen
+                      </span>
                     </div>
-
-                    {/* Copy button */}
-                    {msg.role === "assistant" && idx > 0 && (
+                    <div className="pl-0.5 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                        {repairMarkdown(msg.content)}
+                      </ReactMarkdown>
+                    </div>
+                    <div className="mt-2">
                       <button
+                        type="button"
                         onClick={() => handleCopyMessage(msg.content, idx)}
-                        title="Copy response"
-                        className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity py-0.5"
                         style={{ color: "var(--ink-muted)" }}
                       >
                         {copiedIdx === idx ? (
                           <>
-                            <Check className="w-3 h-3" style={{ color: "#3f7a4e" }} strokeWidth={2.5} />
+                            <Check className="w-3 h-3" style={{ color: "#3f7a4e" }} />
                             <span style={{ color: "#3f7a4e" }}>Copied</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3 h-3" strokeWidth={2} />
+                            <Copy className="w-3 h-3" />
                             Copy
                           </>
                         )}
                       </button>
-                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              {/* Typing indicator */}
               {isLoading && (
-                <div className="flex items-start gap-3 justify-start">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ backgroundColor: "var(--ink)" }}
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" style={{ color: "var(--sheet)" }} strokeWidth={2} />
-                  </div>
-                  <div
-                    className="rounded-xl px-5 py-4 flex items-center gap-1.5"
-                    style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: "var(--ink-muted)", animationDelay: "0ms" }}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: "var(--ink-muted)", animationDelay: "150ms" }}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: "var(--ink-muted)", animationDelay: "300ms" }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2 text-xs py-2" style={{ color: "var(--ink-muted)" }}>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Drafting response…</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -595,12 +505,13 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Input */}
-        <div
-          className="p-4 shrink-0"
-          style={{ backgroundColor: "var(--sheet)", borderTop: "1px solid var(--rule)" }}
-        >
-          <form onSubmit={handleSend} className="flex items-end gap-3 max-w-3xl mx-auto">
+        {/* Unified Composer */}
+        <div className="px-4 sm:px-6 pb-4 pt-2 shrink-0" style={{ backgroundColor: "var(--sheet)" }}>
+          <form
+            onSubmit={handleSend}
+            className="max-w-3xl mx-auto relative rounded-lg border transition-colors focus-within:border-[var(--ink)]"
+            style={{ backgroundColor: "var(--paper)", borderColor: "var(--rule)" }}
+          >
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -610,25 +521,22 @@ export default function ChatPage() {
                   handleSend();
                 }
               }}
-              placeholder="Ask a medical or legal question…"
-              className="flex-1 max-h-32 min-h-[48px] resize-none rounded-lg px-4 py-3 text-sm outline-none transition-all border border-[var(--rule)] focus:border-[var(--ink)] text-[var(--ink)] placeholder:text-[var(--ink-muted)] bg-[var(--paper)] focus:bg-[var(--sheet)]"
+              placeholder="Ask a medico-legal or procedural question…"
+              className="w-full max-h-36 min-h-[52px] resize-none bg-transparent pl-4 pr-14 py-3.5 text-sm outline-none text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
               rows={1}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="w-12 h-12 shrink-0 rounded-lg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-85 transition-opacity"
+              aria-label="Send message"
+              className="absolute right-2.5 bottom-2.5 w-8 h-8 rounded-md flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-85 transition-opacity"
               style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
             >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" strokeWidth={2} />
-              )}
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
             </button>
           </form>
-          <p className="text-[11px] text-center mt-2.5" style={{ color: "var(--ink-muted)" }}>
-            ConsentGen AI can make mistakes. Verify critical information.
+          <p className="text-[11px] text-center mt-2" style={{ color: "var(--ink-muted)" }}>
+            Verify statutory citations against institutional guidelines.
           </p>
         </div>
       </main>

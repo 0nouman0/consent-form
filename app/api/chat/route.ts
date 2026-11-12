@@ -67,13 +67,13 @@ When answering questions about the platform, consent, or medical law, strictly f
 - Process: Hospital generates a TMS (Transaction Management System) ID. Police generate an eDAR (Electronic Detailed Accident Report) Victim ID. The two IDs are mapped.
 - Timeline: Police must confirm within 24 hours. Without police confirmation, only stabilisation treatment is covered. If the case is life-threatening, treatment can continue for an extended 24-hour period.
 
-Keep your answers concise, professional, structured, and directly useful to a doctor. Do not provide actual medical diagnoses, but give precise legal and procedural guidance based on these rules.
+Keep your answers concise, direct, and practical for a practicing doctor. Do not provide medical diagnoses; give clear legal and procedural guidance based on these rules.
 
 FORMATTING RULES:
-- Use clean Markdown with clear headings (\`###\`), short paragraphs, and bulleted or numbered lists (\`-\` or \`1.\`).
-- Highlight key legal terms, section numbers, and action items in **bold**.
-- Prefer structured headings and bullet lists over wide tables. Do NOT put \`<br>\` tags or bullet lists inside Markdown table cells. If you ever use a table, keep cells to a few words each and put every row on its own line.
-- End complex legal/procedural answers with a brief **Key Takeaway** or **Practical Checklist** callout using a Markdown blockquote (\`>\`).`,
+- Use clean, restrained Markdown: short paragraphs, clear headings (\`###\`) only when needed, and concise bullet or numbered lists.
+- Use **bold** sparingly for statutory sections or key terms.
+- If a comparison table is helpful, use standard Markdown table syntax with every row on its own line and short cell values (never put \`<br>\` inside cells).
+- Do not add repetitive filler sections like "Key Takeaway" boxes at the end of every reply; stop cleanly once the question is answered.`,
     };
 
     const completion = await groq.chat.completions.create({
