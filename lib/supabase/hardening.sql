@@ -30,6 +30,9 @@ revoke execute on function public.deduct_credit(uuid, text) from public, anon, a
 -- (adjust the verify_and_add_credits signature to match your live DB — repo ddl.sql is out of date:
 --  it has 6 args, code passes p_metadata as a 7th.)
 
--- 4) reset_password_direct (unauthenticated password reset by email + registration no) is not in
---    this repo's ddl.sql. Recommended: drop it and use Supabase's email reset flow only.
--- drop function if exists public.reset_password_direct(text, text, text);
+-- 4) REQUIRED — run this first. The /api/auth/direct-reset route was removed from the app, but the
+--    database function behind it is still callable by ANYONE with the public anon key straight through
+--    Supabase's REST API (verified: POST /rest/v1/rpc/reset_password_direct returns a normal response).
+--    It resets a password from an email + registration number, so it is an account-takeover primitive.
+--    Password reset now uses only Supabase's email link flow (/forgot-password -> /auth/reset-password).
+drop function if exists public.reset_password_direct(text, text, text);
