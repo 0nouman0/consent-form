@@ -191,6 +191,7 @@ export default function GenerationsList() {
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Audit UUID / ID</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Doctor Name</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Consent Type</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Date &amp; Time</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Latency</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Tokens</th>
                     <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-center">Status</th>
@@ -239,6 +240,19 @@ export default function GenerationsList() {
                               {audit.sub_type}
                             </span>
                           )}
+                        </td>
+
+                        <td className="py-4 px-6 font-mono text-[11px] whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>
+                          {audit.created_at
+                            ? new Date(audit.created_at).toLocaleString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                            : "—"}
                         </td>
 
                         <td className="py-4 px-6 font-mono text-center" style={{ color: "var(--ink-muted)" }}>

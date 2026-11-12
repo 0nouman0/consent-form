@@ -374,22 +374,49 @@ function HistoryContent() {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 overflow-auto p-6 sm:p-10" style={{ backgroundColor: "var(--paper)" }}>
-                {selectedEntry.form_data?.clinical?.counselingLanguage &&
-                  selectedEntry.form_data.clinical.counselingLanguage !== "English" && (
-                    <div className="flex border-b mb-6" style={{ borderColor: "var(--rule)" }}>
-                      <button type="button" onClick={() => setActiveTab("english")}
-                        className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${activeTab === "english" ? "border-[var(--ink)] text-[var(--ink)]" : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-soft)]"}`}>
-                        English Form
-                      </button>
-                      <button type="button"
-                        onClick={() => { if (selectedEntry.markdown?.includes("__LANG_SEPARATOR__")) setActiveTab("other"); }}
-                        disabled={!selectedEntry.markdown?.includes("__LANG_SEPARATOR__")}
-                        className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${!selectedEntry.markdown?.includes("__LANG_SEPARATOR__") ? "opacity-50 cursor-not-allowed border-transparent text-[var(--ink-muted)]" : activeTab === "other" ? "border-[var(--ink)] text-[var(--ink)]" : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-soft)]"}`}>
-                        {selectedEntry.form_data.clinical.counselingLanguage} Form
-                      </button>
-                    </div>
-                  )}
+              <div className="flex-1 overflow-auto p-6 sm:p-8" style={{ backgroundColor: "var(--paper)" }}>
+                {(() => {
+                  const fd: any = selectedEntry.form_data;
+                  const isResearch = selectedEntry.consent_type === "research" || Boolean(fd?.study);
+                  const lang = isResearch
+                    ? fd?.study?.counselingLanguage
+                    : fd?.clinical?.counselingLanguage;
+
+                  return (
+                    lang &&
+                    lang !== "English" && (
+                      <div className="flex border-b mb-5 max-w-3xl mx-auto" style={{ borderColor: "var(--rule)" }}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("english")}
+                          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                            activeTab === "english"
+                              ? "border-[var(--ink)] text-[var(--ink)]"
+                              : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-soft)]"
+                          }`}
+                        >
+                          English Form
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (selectedEntry.markdown?.includes("__LANG_SEPARATOR__")) setActiveTab("other");
+                          }}
+                          disabled={!selectedEntry.markdown?.includes("__LANG_SEPARATOR__")}
+                          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                            !selectedEntry.markdown?.includes("__LANG_SEPARATOR__")
+                              ? "opacity-50 cursor-not-allowed border-transparent text-[var(--ink-muted)]"
+                              : activeTab === "other"
+                              ? "border-[var(--ink)] text-[var(--ink)]"
+                              : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-soft)]"
+                          }`}
+                        >
+                          {lang} Form
+                        </button>
+                      </div>
+                    )
+                  );
+                })()}
                 {/* Print: show only the history document body */}
                 <style dangerouslySetInnerHTML={{ __html: `
                   @media print {
@@ -401,44 +428,210 @@ function HistoryContent() {
                       top: 0;
                       width: 100%;
                       margin: 0 !important;
-                      padding: 24px !important;
+                      padding: 16px !important;
                       border: none !important;
                       box-shadow: none !important;
                       background: #fff !important;
                     }
                   }
                 ` }} />
-                <div
-                  id="history-doc-body"
-                  className="rounded-md p-6 sm:p-10 max-w-3xl mx-auto"
-                  style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", boxShadow: "0 1px 2px rgba(23,20,16,0.06)" }}
-                >
-                  {/* Document header */}
-                  <div className="text-center pb-4 mb-6" style={{ borderBottom: "1px solid var(--rule)" }}>
-                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: "var(--ink-muted)" }}>
-                      {selectedEntry.consent_type === "research"
-                        ? "Research Consent Form"
-                        : "Standard Informed Consent Form"}
-                    </p>
-                    <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight" style={{ color: "var(--ink)" }}>
-                      {selectedEntry.hospital_name || "Hospital"}
-                    </h1>
-                    <div className="mt-2 text-xs font-medium space-y-0.5" style={{ color: "var(--ink-muted)" }}>
-                      <p>Consent ID: <span className="font-mono">{selectedEntry.consent_id}</span></p>
-                      <p>
-                        Generated:{" "}
-                        {new Date(selectedEntry.created_at).toLocaleDateString("en-IN", {
-                          day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
-                        })}
-                      </p>
+                {(() => {
+                  const fd: any = selectedEntry.form_data;
+                  const isResearch = selectedEntry.consent_type === "research" || Boolean(fd?.study);
+                  const lang = isResearch
+                    ? fd?.study?.counselingLanguage
+                    : fd?.clinical?.counselingLanguage;
+                  const isRtl = activeTab === "other" && lang === "Urdu";
+                  const generatedAt = new Date(selectedEntry.created_at).toLocaleString("en-IN", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  return (
+                    <div
+                      id="history-doc-body"
+                      className="rounded-md p-6 sm:p-8 max-w-3xl mx-auto"
+                      style={{
+                        backgroundColor: "var(--sheet)",
+                        border: "1px solid var(--rule)",
+                        boxShadow: "0 1px 2px rgba(23,20,16,0.06)",
+                        color: "var(--ink)",
+                      }}
+                    >
+                      {/* Masthead Header (matches ConsentDocument.tsx) */}
+                      <div className="flex justify-between items-start mb-2.5 pb-2 border-b border-[var(--rule)]">
+                        <div>
+                          <p className="font-serif text-base sm:text-lg font-bold leading-tight text-left" style={{ color: "var(--ink)" }}>
+                            {(isResearch ? fd?.study?.institutionName : fd?.clinical?.hospitalName) || selectedEntry.hospital_name || "Hospital"}
+                          </p>
+                          {(isResearch ? fd?.study?.institutionAddress : fd?.clinical?.hospitalAddress) && (
+                            <p className="text-[11px] leading-tight text-left mt-0.5" style={{ color: "var(--ink-muted)" }}>
+                              {isResearch ? fd.study.institutionAddress : fd.clinical.hospitalAddress}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right text-[11px] space-y-0.5 shrink-0" style={{ color: "var(--ink-muted)" }}>
+                          <p>Consent ID: <span className="font-semibold font-mono" style={{ color: "var(--ink)" }}>{selectedEntry.consent_id}</span></p>
+                          <p>Date &amp; Time: <span className="font-medium" style={{ color: "var(--ink)" }}>{generatedAt}</span></p>
+                        </div>
+                      </div>
+
+                      {/* Dark Title Banner (matches ConsentDocument.tsx) */}
+                      <div
+                        className="rounded py-1.5 px-3 mb-2.5 text-center"
+                        style={{ backgroundColor: "#1e293b", color: "#ffffff", border: "1px solid #0f172a" }}
+                      >
+                        <p className="font-sans text-xs sm:text-[13px] font-bold tracking-wider uppercase text-white">
+                          {isResearch
+                            ? `INFORMED CONSENT FOR RESEARCH: ${(fd?.study?.studyTitle || selectedEntry.procedure_name || "VOLUNTARY PARTICIPATION").toUpperCase()}`
+                            : `INFORMED CONSENT FORM — ${(fd?.clinical?.procedureName || selectedEntry.procedure_name || selectedEntry.consent_type || "PROCEDURE").toUpperCase()}`}
+                        </p>
+                      </div>
+
+                      {/* Compact 4-Column Identification Grid (matches ConsentDocument.tsx) */}
+                      {fd && !isResearch && (
+                        <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Patient Name</span>
+                              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.patient?.patientName || selectedEntry.patient_name || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+                              <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.age || "—"} Yrs / {fd.patient?.sex || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>OPD/IPD No.</span>
+                              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.hospitalOpdIpdNo || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Aadhaar (Last 4)</span>
+                              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.patient?.aadhaarLast4 ? `XXXX-XXXX-${fd.patient.aadhaarLast4}` : "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Treating Clinician</span>
+                              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>
+                                Dr. {fd.clinical?.doctorName || "—"}
+                                {fd.clinical?.doctorRegistrationNo && (
+                                  <span className="font-normal text-[10px]" style={{ color: "var(--ink-muted)" }}> (Reg: {fd.clinical.doctorRegistrationNo})</span>
+                                )}
+                              </span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Proposed Procedure</span>
+                              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.clinical?.procedureName || selectedEntry.procedure_name || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Scheduled Date</span>
+                              <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.clinical?.procedureDate || selectedEntry.procedure_date || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+                              <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{fd.clinical?.counselingLanguage || "English"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {fd && isResearch && (
+                        <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant Name</span>
+                              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.participant?.participantName || selectedEntry.patient_name || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant ID</span>
+                              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{fd.participant?.participantId || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+                              <span className="text-xs" style={{ color: "var(--ink)" }}>{fd.participant?.age || "—"} Yrs / {fd.participant?.sex || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+                              <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{fd.study?.counselingLanguage || "English"}</span>
+                            </div>
+                            <div className="p-1.5 col-span-2">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Study Title</span>
+                              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.studyTitle || selectedEntry.procedure_name || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Principal Investigator</span>
+                              <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.principalInvestigator || "—"}</span>
+                            </div>
+                            <div className="p-1.5">
+                              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Department</span>
+                              <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{fd.study?.department || "—"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Markdown Body (matches ConsentDocument.tsx section styling) */}
+                      <div dir={isRtl ? "rtl" : "ltr"} style={{ textAlign: isRtl ? "right" : "left" }}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="font-serif text-sm sm:text-base font-bold mt-3 mb-2 pb-1.5 text-center tracking-tight border-b border-[var(--rule)] uppercase" style={{ color: "var(--ink)" }}>
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-[11px] font-bold uppercase tracking-wider mt-3 mb-1.5 px-2 py-0.5 border-l-[3px] border-[#1e293b] bg-[#f8fafc] text-[#0f172a]">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-xs font-bold mt-2 mb-1" style={{ color: "var(--ink)" }}>
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => (
+                              <p className="text-xs leading-[1.45] mb-1.5" style={{ color: "var(--ink-soft)" }}>
+                                {children}
+                              </p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc pl-4 space-y-0.5 mb-1.5 text-xs" style={{ color: "var(--ink-soft)" }}>
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal pl-4 space-y-0.5 mb-1.5 text-xs" style={{ color: "var(--ink-soft)" }}>
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => <li className="leading-[1.4]">{children}</li>,
+                            strong: ({ children }) => <strong className="font-semibold" style={{ color: "var(--ink)" }}>{children}</strong>,
+                            table: ({ children }) => (
+                              <div className="overflow-x-auto my-2 rounded border border-[var(--rule)]">
+                                <table className="w-full text-left border-collapse text-xs">{children}</table>
+                              </div>
+                            ),
+                            th: ({ children }) => (
+                              <th className="px-2 py-1.5 font-semibold bg-[var(--paper)] border-b border-[var(--rule)] text-[11px] uppercase" style={{ color: "var(--ink)" }}>
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children }) => (
+                              <td className="px-2 py-1.5 border-b border-[var(--rule)] align-top" style={{ color: "var(--ink-soft)" }}>
+                                {children}
+                              </td>
+                            ),
+                          }}
+                        >
+                          {getActiveMarkdown(selectedEntry)}
+                        </ReactMarkdown>
+                      </div>
                     </div>
-                  </div>
-                  <div className="prose prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-headings:text-[var(--ink)] prose-headings:tracking-tight prose-h1:text-xl prose-h1:border-b prose-h1:border-[var(--rule)] prose-h1:pb-2 prose-h2:text-lg prose-h2:mt-6 prose-p:text-[var(--ink-soft)] prose-p:leading-[1.8] prose-li:text-[var(--ink-soft)] prose-strong:text-[var(--ink)] prose-hr:border-[var(--rule)]">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                      {getActiveMarkdown(selectedEntry)}
-                    </ReactMarkdown>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
             </motion.div>
           </motion.div>

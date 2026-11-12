@@ -1,7 +1,6 @@
 "use client";
 
 import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
-import { REQUIRED_CLAUSES } from "@/lib/clauses";
 
 const CONSENT_TYPE_LABELS: Record<string, string> = {
   surgical: "SURGICAL",
@@ -16,50 +15,41 @@ const CONSENT_TYPE_LABELS: Record<string, string> = {
   road_accident_emergency: "ROAD ACCIDENT / EMERGENCY",
 };
 
-function ShimmerBlock({ label, sublabel, compact = false }: { label: string; sublabel?: string; compact?: boolean }) {
-  return (
-    <div className={compact ? "mb-4" : "mb-6"}>
-      <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em]" style={{ color: "var(--ink-muted)" }}>{label}</h4>
-        {sublabel && (
-          <span className="text-[10px] font-medium" style={{ color: "var(--ink-muted)" }}>{sublabel}</span>
-        )}
-        <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-md" style={{ backgroundColor: "rgba(190,61,42,0.08)", color: "var(--red)" }}>
-          AI generated
-        </span>
-      </div>
-      <div className={`rounded-md p-3 space-y-2 ${compact ? "" : "p-4 space-y-2.5"}`} style={{ backgroundColor: "var(--paper)" }}>
-        <div className="h-2.5 rounded-md w-full" style={{ backgroundColor: "var(--rule)" }} />
-        <div className="h-2.5 rounded-md w-11/12" style={{ backgroundColor: "var(--rule)" }} />
-        {!compact && <div className="h-2.5 rounded-md w-4/5" style={{ backgroundColor: "var(--rule)" }} />}
-        <div className="h-2.5 rounded-md w-3/4" style={{ backgroundColor: "var(--rule)" }} />
-      </div>
-    </div>
-  );
-}
-
 function InfoBanner() {
   return (
     <div
       role="note"
-      className="mb-6 rounded-md px-5 py-4 flex gap-3 items-start"
+      className="mb-5 rounded-md px-4 py-3.5 flex gap-3 items-start"
       style={{ backgroundColor: "rgba(190,61,42,0.06)", border: "1px solid rgba(190,61,42,0.25)" }}
     >
-      <span className="text-xl leading-none mt-0.5" style={{ color: "var(--red)" }}>&#9888;</span>
-      <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
-        <strong style={{ color: "var(--ink)" }}>This preview shows your entered data.</strong> The AI will generate all legal consent
-        clauses during generation. Review your details carefully before spending 1 credit.
+      <span className="text-lg leading-none mt-0.5" style={{ color: "var(--red)" }}>&#9888;</span>
+      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+        <strong style={{ color: "var(--ink)" }}>Live Structural Preview:</strong> This matches the exact layout of your generated consent form.
+        AI will populate the full medico-legal clauses in the sections below when you click Generate.
       </p>
     </div>
   );
 }
 
-function SignatureLine({ label }: { label: string }) {
+function SectionHeading({ title }: { title: string }) {
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="w-36 border-b" style={{ borderColor: "var(--ink-muted)" }} />
-      <p className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>{label}</p>
-      <p className="text-xs" style={{ color: "var(--ink-muted)" }}>Date: ________ Time: ______</p>
+    <div className="text-[11px] font-bold uppercase tracking-wider mt-3 mb-1.5 px-2 py-0.5 border-l-[3px] border-[#1e293b] bg-[#f8fafc] text-[#0f172a]">
+      {title}
+    </div>
+  );
+}
+
+function AiPlaceholderLines({ lines = 3 }: { lines?: number }) {
+  const widths = ["w-full", "w-11/12", "w-4/5", "w-3/4"];
+  return (
+    <div className="space-y-1.5 py-1">
+      {Array.from({ length: lines }).map((_, idx) => (
+        <div
+          key={idx}
+          className={`h-2.5 rounded ${widths[idx % widths.length]}`}
+          style={{ backgroundColor: "var(--rule)" }}
+        />
+      ))}
     </div>
   );
 }
@@ -78,160 +68,146 @@ export function ConsentPreview({ data }: ConsentPreviewProps) {
   const consentTypeLabel =
     CONSENT_TYPE_LABELS[data.clinical?.consentType ?? "surgical"] ?? "SURGICAL";
 
+  const titleProcedure = data.clinical?.procedureName?.trim()
+    ? data.clinical.procedureName.toUpperCase()
+    : `${consentTypeLabel} PROCEDURE`;
+
   const aadhaar = data.patient?.aadhaarLast4
-    ? `****\u00A0****\u00A0****\u00A0${data.patient.aadhaarLast4}`
+    ? `XXXX-XXXX-${data.patient.aadhaarLast4}`
     : "—";
 
   return (
     <div>
       <InfoBanner />
-      <div className="max-w-2xl mx-auto rounded-md p-8 font-serif" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}>
-        {/* Header */}
-        <div className="flex justify-between items-start mb-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
+      <div
+        className="max-w-3xl mx-auto rounded-md p-6 sm:p-8"
+        style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
+      >
+        {/* Hospital Masthead Header (matches ConsentDocument.tsx) */}
+        <div className="flex justify-between items-start mb-2.5 pb-2 border-b border-[var(--rule)]">
           <div>
-            <p className="text-lg font-bold leading-tight">
-              {data.clinical?.hospitalName || "Hospital Name"}
+            <p className="font-serif text-base sm:text-lg font-bold leading-tight text-left" style={{ color: "var(--ink)" }}>
+              {data.clinical?.hospitalName || "Hospital / Clinic Name"}
             </p>
-            <p className="text-xs mt-1 leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
-              {data.clinical?.hospitalAddress || "Hospital Address"}
+            <p className="text-[11px] leading-tight text-left mt-0.5" style={{ color: "var(--ink-muted)" }}>
+              {data.clinical?.hospitalAddress || "Hospital Address (from Profile)"}
             </p>
           </div>
-          <div className="text-right text-xs space-y-0.5" style={{ color: "var(--ink-muted)" }}>
-            <p>Consent ID: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>AUTO-GENERATED</span></p>
-            <p>Date: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>{today}</span></p>
+          <div className="text-right text-[11px] space-y-0.5 shrink-0" style={{ color: "var(--ink-muted)" }}>
+            <p>Consent ID: <span className="font-semibold font-mono" style={{ color: "var(--ink)" }}>AUTO-GENERATED</span></p>
+            <p>Date & Time: <span className="font-medium" style={{ color: "var(--ink)" }}>{today}</span></p>
           </div>
         </div>
 
-        {/* Title bar */}
-        <div className="rounded-md py-2.5 px-4 mb-6 text-center" style={{ backgroundColor: "var(--paper)" }}>
-          <p className="text-sm font-bold tracking-widest uppercase">
-            INFORMED CONSENT FORM &mdash; {consentTypeLabel} PROCEDURE
+        {/* Dark Title Banner (matches ConsentDocument.tsx) */}
+        <div
+          className="rounded py-1.5 px-3 mb-2.5 text-center"
+          style={{ backgroundColor: "#1e293b", color: "#ffffff", border: "1px solid #0f172a" }}
+        >
+          <p className="font-sans text-xs sm:text-[13px] font-bold tracking-wider uppercase text-white">
+            INFORMED CONSENT FORM &mdash; {titleProcedure}
           </p>
         </div>
 
-        {/* Patient info table */}
-        <div className="mb-6">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-            Patient Information
-          </h3>
-          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
-            <tbody>
-              {[
-                ["Patient Name", data.patient?.patientName || "—"],
-                ["Age / Sex", `${data.patient?.age || "—"} / ${data.patient?.sex || "—"}`],
-                ["Hospital OPD/IPD No.", data.patient?.hospitalOpdIpdNo || "—"],
-                ["Aadhaar (last 4)", aadhaar],
-                ...(data.patient?.insuranceProvider
-                  ? [
-                      ["Insurance Provider", data.patient.insuranceProvider],
-                      ["Insurance Policy No.", data.patient.insurancePolicyNo || "—"],
-                    ]
-                  : []),
-                ...(!data.patient?.patientCompetent && data.patient?.guardianName
-                  ? [
-                      ["Guardian Name", data.patient.guardianName],
-                      ["Guardian Relationship", data.patient.guardianRelationship || "—"],
-                    ]
-                  : []),
-              ].map(([label, value], i) => (
-                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
-                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
-                    {label}
-                  </td>
-                  <td className="py-1.5 px-3 text-sm">{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Clinical info table */}
-        <div className="mb-6">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-            Clinical Details
-          </h3>
-          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
-            <tbody>
-              {[
-                ["Physician", `${data.clinical?.doctorName || "—"} (Reg. ${data.clinical?.doctorRegistrationNo || "—"})`],
-                ["Procedure", data.clinical?.procedureName || "—"],
-                ["Scheduled Date", data.clinical?.procedureDate || "—"],
-                ["Counseling Language", data.clinical?.counselingLanguage || "—"],
-              ].map(([label, value], i) => (
-                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
-                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
-                    {label}
-                  </td>
-                  <td className="py-1.5 px-3 text-sm">{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Specific risks entered by user */}
-        {data.clinical?.specificRisks && (
-          <div className="mb-6">
-            <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-              Specific Risks (Entered)
-            </h4>
-            <div className="rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
-              {data.clinical.specificRisks}
+        {/* Compact 4-Column Identification Grid (matches ConsentDocument.tsx) */}
+        <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Patient Name</span>
+              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{data.patient?.patientName || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+              <span className="text-xs" style={{ color: "var(--ink)" }}>{data.patient?.age || "—"} Yrs / {data.patient?.sex || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>OPD/IPD No.</span>
+              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{data.patient?.hospitalOpdIpdNo || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Aadhaar (Last 4)</span>
+              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{aadhaar}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Treating Clinician</span>
+              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>
+                Dr. {data.clinical?.doctorName || "—"}
+                {data.clinical?.doctorRegistrationNo && (
+                  <span className="font-normal text-[10px]" style={{ color: "var(--ink-muted)" }}> (Reg: {data.clinical.doctorRegistrationNo})</span>
+                )}
+              </span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Proposed Procedure</span>
+              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{data.clinical?.procedureName || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Scheduled Date</span>
+              <span className="text-xs" style={{ color: "var(--ink)" }}>{data.clinical?.procedureDate || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+              <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{data.clinical?.counselingLanguage || "English"}</span>
             </div>
           </div>
+        </div>
+
+        {/* Section 1 */}
+        <SectionHeading title="1. PROCEDURE & PURPOSE OF TREATMENT" />
+        <p className="text-xs leading-relaxed mb-2" style={{ color: "var(--ink-soft)" }}>
+          Procedure: <strong>{data.clinical?.procedureName || "Proposed clinical procedure"}</strong> scheduled on{" "}
+          <strong>{data.clinical?.procedureDate || "—"}</strong>. Counseling conducted in{" "}
+          <strong>{data.clinical?.counselingLanguage || "English"}</strong>.
+        </p>
+        <AiPlaceholderLines lines={2} />
+
+        {/* Section 2 */}
+        <SectionHeading title="2. DISCLOSED RISKS & POTENTIAL COMPLICATIONS" />
+        {data.clinical?.specificRisks ? (
+          <p className="text-xs leading-relaxed mb-1.5 whitespace-pre-wrap" style={{ color: "var(--ink-soft)" }}>
+            {data.clinical.specificRisks}
+          </p>
+        ) : (
+          <AiPlaceholderLines lines={3} />
         )}
 
-        {/* Part B — applicable consent clauses (exact sections the AI will generate) */}
-        <div className="mb-6">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>
-            Part B — Consent Clauses
-          </h3>
-          {REQUIRED_CLAUSES.filter(
-            (c) =>
-              c.id !== "signature_block" &&
-              (c.requiredFor.includes("all") ||
-                c.requiredFor.includes(data.clinical?.consentType ?? "surgical"))
-          ).map((clause) => (
-            <ShimmerBlock
-              key={clause.id}
-              label={clause.title}
-              sublabel={clause.partLabel}
-              compact
-            />
-          ))}
-        </div>
+        {/* Section 3 */}
+        <SectionHeading title="3. ALTERNATIVES & SPECIFIC AUTHORIZATIONS" />
+        <p className="text-xs leading-relaxed mb-1" style={{ color: "var(--ink-soft)" }}>
+          {data.clinical?.alternatives
+            ? `Alternatives: ${data.clinical.alternatives}`
+            : "AI will detail reasonable medical/surgical alternatives and consequences of refusal."}
+        </p>
+        <ul className="list-disc pl-4 text-[11px] space-y-0.5 mb-2" style={{ color: "var(--ink-muted)" }}>
+          <li>Anaesthesia &amp; Blood Transfusion: {data.clauses?.anaesthesia ? "Anaesthesia authorized" : "Standard"} {data.clauses?.bloodTransfusion ? "· Blood transfusion authorized" : ""}</li>
+          <li>Tissue Examination &amp; Disposal: {data.clauses?.tissueDisposal ? "Authorized per hospital protocol" : "Not applicable"}</li>
+          <li>Photography / Academic Use: {data.clauses?.photographyAcademicUse ? "Patient consents (anonymized)" : "Patient does not consent"}</li>
+        </ul>
 
-        {/* Part C — signature block */}
-        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-4" style={{ color: "var(--ink-muted)" }}>
-            Part C — Signatures
-          </h3>
-          <div className="flex justify-around flex-wrap gap-6">
-            <SignatureLine label="Patient Signature" />
-            {data.includeWitnessBlock && <SignatureLine label="Witness Signature" />}
-            {(data.includeGuardianBlock || !data.patient?.patientCompetent) && (
-              <SignatureLine label="Guardian Signature" />
-            )}
+        {/* Section 4 */}
+        <SectionHeading title="4. DECLARATIONS & SIGNATURES" />
+        <div className="space-y-2 text-[11px] mt-1.5" style={{ color: "var(--ink-soft)" }}>
+          <div>
+            <p className="font-semibold" style={{ color: "var(--ink)" }}>4.1 Patient / Authorized Guardian Declaration</p>
+            <p className="italic" style={{ color: "var(--ink-muted)" }}>
+              &ldquo;I confirm the procedure, risks, and alternatives were explained in {data.clinical?.counselingLanguage || "English"}. Signature: ______________ Name: {data.patient?.patientName || "__________"}&rdquo;
+            </p>
           </div>
-        </div>
-
-        {/* Part D — doctor's declaration */}
-        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-3" style={{ color: "var(--ink-muted)" }}>
-            Part D — Doctor&apos;s Declaration
-          </h3>
-          <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--ink-soft)" }}>
-            I, <strong>{data.clinical?.doctorName || "Dr. ____________"}</strong> (Reg. No.{" "}
-            {data.clinical?.doctorRegistrationNo || "________"}), declare that I have personally
-            explained the procedure, its risks, and the alternatives to the patient in{" "}
-            <strong>{data.clinical?.counselingLanguage || "English"}</strong>, and answered all
-            questions to the best of my ability.
-          </p>
-          <div className="flex justify-around flex-wrap gap-6">
-            <SignatureLine label="Doctor / Physician Signature" />
+          <div>
+            <p className="font-semibold" style={{ color: "var(--ink)" }}>4.2 Attending Clinician / Surgeon Declaration</p>
+            <p className="italic" style={{ color: "var(--ink-muted)" }}>
+              &ldquo;I certify I explained all material risks and alternatives. Doctor Signature: ______________ Dr. {data.clinical?.doctorName || "__________"} (Reg: {data.clinical?.doctorRegistrationNo || "____"})&rdquo;
+            </p>
           </div>
+          {data.includeWitnessBlock && (
+            <div>
+              <p className="font-semibold" style={{ color: "var(--ink)" }}>4.3 Witness Declaration</p>
+              <p className="italic" style={{ color: "var(--ink-muted)" }}>
+                &ldquo;I confirm this consent was explained and executed in my presence. Witness Signature: ______________&rdquo;
+              </p>
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );
@@ -251,112 +227,105 @@ export function ResearchConsentPreview({ data }: ResearchConsentPreviewProps) {
   return (
     <div>
       <InfoBanner />
-      <div className="max-w-2xl mx-auto rounded-md p-8 font-serif" style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}>
-        {/* Header */}
-        <div className="flex justify-between items-start mb-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
+      <div
+        className="max-w-3xl mx-auto rounded-md p-6 sm:p-8"
+        style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink)" }}
+      >
+        {/* Institution Masthead Header (matches ConsentDocument.tsx) */}
+        <div className="flex justify-between items-start mb-2.5 pb-2 border-b border-[var(--rule)]">
           <div>
-            <p className="text-lg font-bold leading-tight">
+            <p className="font-serif text-base sm:text-lg font-bold leading-tight text-left" style={{ color: "var(--ink)" }}>
               {data.study?.institutionName || "Institution Name"}
             </p>
-            <p className="text-xs mt-1 leading-relaxed max-w-xs" style={{ color: "var(--ink-muted)" }}>
-              {data.study?.institutionAddress || "Institution Address"}
+            <p className="text-[11px] leading-tight text-left mt-0.5" style={{ color: "var(--ink-muted)" }}>
+              {data.study?.institutionAddress || "Institution Address (from Profile)"}
             </p>
           </div>
-          <div className="text-right text-xs space-y-0.5" style={{ color: "var(--ink-muted)" }}>
-            <p>Consent ID: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>AUTO-GENERATED</span></p>
-            <p>Date: <span className="font-semibold" style={{ color: "var(--ink-soft)" }}>{today}</span></p>
+          <div className="text-right text-[11px] space-y-0.5 shrink-0" style={{ color: "var(--ink-muted)" }}>
+            <p>Consent ID: <span className="font-semibold font-mono" style={{ color: "var(--ink)" }}>AUTO-GENERATED</span></p>
+            <p>Date & Time: <span className="font-medium" style={{ color: "var(--ink)" }}>{today}</span></p>
           </div>
         </div>
 
-        {/* Title bar */}
-        <div className="rounded-md py-2.5 px-4 mb-6 text-center" style={{ backgroundColor: "var(--paper)" }}>
-          <p className="text-sm font-bold tracking-widest uppercase">
-            INFORMED CONSENT FOR RESEARCH PARTICIPATION
+        {/* Dark Title Banner (matches ConsentDocument.tsx) */}
+        <div
+          className="rounded py-1.5 px-3 mb-2.5 text-center"
+          style={{ backgroundColor: "#1e293b", color: "#ffffff", border: "1px solid #0f172a" }}
+        >
+          <p className="font-sans text-xs sm:text-[13px] font-bold tracking-wider uppercase text-white">
+            INFORMED CONSENT FOR RESEARCH: {data.study?.studyTitle?.toUpperCase() || "VOLUNTARY PARTICIPATION"}
           </p>
         </div>
 
-        {/* Study info table */}
-        <div className="mb-6">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-            Study Information
-          </h3>
-          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
-            <tbody>
-              {[
-                ["Study Title", data.study?.studyTitle || "—"],
-                ["Principal Investigator", data.study?.principalInvestigator || "—"],
-                ["Department", data.study?.department || "—"],
-                ["Contact", data.study?.contactMobile || "—"],
-                ["Counseling Language", data.study?.counselingLanguage || "—"],
-              ].map(([label, value], i) => (
-                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
-                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
-                    {label}
-                  </td>
-                  <td className="py-1.5 px-3 text-sm">{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Participant info table */}
-        <div className="mb-6">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-            Participant Information
-          </h3>
-          <table className="w-full text-sm rounded-md overflow-hidden" style={{ border: "1px solid var(--rule)" }}>
-            <tbody>
-              {[
-                ["Participant Name", data.participant?.participantName || "—"],
-                ["Participant ID", data.participant?.participantId || "—"],
-                ["Age / Sex", `${data.participant?.age || "—"} / ${data.participant?.sex || "—"}`],
-                ...(!data.participant?.isCompetent && data.participant?.guardianName
-                  ? [
-                      ["Guardian Name", data.participant.guardianName],
-                      ["Guardian Relationship", data.participant.guardianRelationship || "—"],
-                    ]
-                  : []),
-              ].map(([label, value], i) => (
-                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "var(--sheet)" : "var(--paper)" }}>
-                  <td className="py-1.5 px-3 text-xs font-semibold w-44" style={{ color: "var(--ink-muted)", borderRight: "1px solid var(--rule)" }}>
-                    {label}
-                  </td>
-                  <td className="py-1.5 px-3 text-sm">{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Study purpose entered */}
-        {data.study?.studyPurpose && (
-          <div className="mb-6">
-            <h4 className="font-mono text-xs font-bold uppercase tracking-[0.06em] mb-2" style={{ color: "var(--ink-muted)" }}>
-              Study Purpose (Entered)
-            </h4>
-            <div className="rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}>
-              {data.study.studyPurpose}
+        {/* Compact 4-Column Identification Grid (matches ConsentDocument.tsx) */}
+        <div className="rounded border border-[var(--rule)] text-xs mb-3 overflow-hidden" style={{ backgroundColor: "var(--sheet)" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[var(--rule)]">
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant Name</span>
+              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{data.participant?.participantName || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Participant ID</span>
+              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>{data.participant?.participantId || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Age / Sex</span>
+              <span className="text-xs" style={{ color: "var(--ink)" }}>{data.participant?.age || "—"} Yrs / {data.participant?.sex || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Counseling Language</span>
+              <span className="text-xs font-semibold" style={{ color: "var(--ink)" }}>{data.study?.counselingLanguage || "English"}</span>
+            </div>
+            <div className="p-1.5 col-span-2">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Study Title</span>
+              <span className="font-semibold text-xs truncate block" style={{ color: "var(--ink)" }}>{data.study?.studyTitle || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Principal Investigator</span>
+              <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{data.study?.principalInvestigator || "—"}</span>
+            </div>
+            <div className="p-1.5">
+              <span className="block font-mono text-[9px] uppercase font-semibold" style={{ color: "var(--ink-muted)" }}>Department / Contact</span>
+              <span className="text-xs truncate block" style={{ color: "var(--ink)" }}>{data.study?.department || "—"} · {data.study?.contactMobile || "—"}</span>
             </div>
           </div>
-        )}
-
-        {/* AI placeholder sections */}
-        <ShimmerBlock label="Voluntary Participation & Withdrawal Rights (AI Generated)" />
-        <ShimmerBlock label="Confidentiality & Data Protection (AI Generated)" />
-        <ShimmerBlock label="Participant Consent Declaration (AI Generated)" />
-
-        {/* Signature block */}
-        <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
-          <div className="flex justify-around flex-wrap gap-6">
-            <SignatureLine label="Participant Signature" />
-            {data.includeResearcherDeclaration && (
-              <SignatureLine label="Researcher / Investigator Signature" />
-            )}
-            {data.includeWitnessBlock && <SignatureLine label="Witness Signature" />}
-          </div>
         </div>
 
+        {/* Section 1 */}
+        <SectionHeading title="1. STUDY PURPOSE & PROCEDURES" />
+        <p className="text-xs leading-relaxed mb-1.5" style={{ color: "var(--ink-soft)" }}>
+          {data.study?.studyPurpose || "Study purpose will be generated here."} Time required: <strong>{data.study?.timeRequired || "10-15 minutes"}</strong>.
+        </p>
+
+        {/* Section 2 */}
+        <SectionHeading title="2. DISCLOSED RISKS, BENEFITS & DATA CONFIDENTIALITY" />
+        <p className="text-xs leading-relaxed mb-1.5" style={{ color: "var(--ink-soft)" }}>
+          <strong>Risks:</strong> {data.study?.risks || "—"} <br />
+          <strong>Benefits:</strong> {data.study?.benefits || "—"}
+        </p>
+
+        {/* Section 3 */}
+        <SectionHeading title="3. VOLUNTARY PARTICIPATION & RIGHT TO WITHDRAW" />
+        <AiPlaceholderLines lines={2} />
+
+        {/* Section 4 */}
+        <SectionHeading title="4. DECLARATIONS & SIGNATURES" />
+        <div className="space-y-2 text-[11px] mt-1.5" style={{ color: "var(--ink-soft)" }}>
+          <div>
+            <p className="font-semibold" style={{ color: "var(--ink)" }}>4.1 Participant / Authorized Representative Declaration</p>
+            <p className="italic" style={{ color: "var(--ink-muted)" }}>
+              &ldquo;I voluntarily agree to participate in this study. Signature: ______________ Name: {data.participant?.participantName || "__________"}&rdquo;
+            </p>
+          </div>
+          {data.includeResearcherDeclaration && (
+            <div>
+              <p className="font-semibold" style={{ color: "var(--ink)" }}>4.2 Principal Investigator Declaration</p>
+              <p className="italic" style={{ color: "var(--ink-muted)" }}>
+                &ldquo;I certify I have explained the study in {data.study?.counselingLanguage || "English"}. PI Signature: ______________ {data.study?.principalInvestigator || "__________"}&rdquo;
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

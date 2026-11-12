@@ -22,6 +22,8 @@ export default function ProfilePage() {
     billingAddress: "",
   });
   const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [txs, setTxs] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -78,25 +80,38 @@ export default function ProfilePage() {
   }, [supabase, router]);
 
   const handleSignOut = async () => {
+    try {
+      localStorage.removeItem("consentgen_doctor_profile");
+      document.cookie = "consentgen_onboarded=; path=/; max-age=0; SameSite=Lax";
+    } catch {}
     await supabase.auth.signOut();
     router.push("/login");
   };
 
   const handleSaveProfile = async () => {
-    localStorage.setItem("consentgen_doctor_profile", JSON.stringify(profileData));
-    if (user) {
-      await supabase.from("profiles").upsert({
-        id: user.id,
-        doctor_name: profileData.doctorName,
-        doctor_registration_no: profileData.doctorRegistrationNo,
-        hospital_name: profileData.hospitalName,
-        hospital_address: profileData.hospitalAddress,
-        billing_address: profileData.billingAddress,
-        updated_at: new Date().toISOString(),
-      });
+    setSaving(true);
+    setSaveError(null);
+    try {
+      localStorage.setItem("consentgen_doctor_profile", JSON.stringify(profileData));
+      if (user) {
+        const { error } = await supabase.from("profiles").upsert({
+          id: user.id,
+          doctor_name: profileData.doctorName,
+          doctor_registration_no: profileData.doctorRegistrationNo,
+          hospital_name: profileData.hospitalName,
+          hospital_address: profileData.hospitalAddress,
+          billing_address: profileData.billingAddress,
+          updated_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+      }
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save profile details");
+    } finally {
+      setSaving(false);
     }
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -250,14 +265,23 @@ export default function ProfilePage() {
               <textarea id="billingAddress" name="billingAddress" value={profileData.billingAddress}
                 onChange={handleInputChange} rows={2} placeholder="e.g. 123 Clinic Road, Suite A, Bangalore" className={inputCls} />
             </div>
+            {saveError && (
+              <div className="px-3.5 py-2.5 rounded-md text-xs font-medium"
+                style={{ backgroundColor: "rgba(190,61,42,0.08)", border: "1px solid rgba(190,61,42,0.25)", color: "var(--red)" }}>
+                {saveError}
+              </div>
+            )}
             <div className="pt-1">
               <button
                 onClick={handleSaveProfile}
-                className="inline-flex items-center gap-2 rounded-md text-sm font-medium transition-all pl-5 pr-3 py-2 hover:opacity-90"
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-md text-sm font-medium transition-all px-5 py-2.5 hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
               >
                 {isSaved
                   ? <><Check weight="bold" className="w-4 h-4" /> Saved Successfully</>
+                  : saving
+                  ? <><FloppyDisk weight="bold" className="w-4 h-4" /> Saving...</>
                   : <><FloppyDisk weight="bold" className="w-4 h-4" /> Save Details</>}
               </button>
             </div>

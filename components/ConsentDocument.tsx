@@ -609,12 +609,12 @@ export default function ConsentDocument({
         </div>
 
         {isComplete && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handlePrint}
               title="Print consent form"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:border-[var(--red)] hover:text-[var(--red)]"
-              style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-md transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
             >
               <Printer className="w-3.5 h-3.5" />
               Print
