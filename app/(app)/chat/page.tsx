@@ -152,7 +152,7 @@ export default function ChatPage() {
             const loaded: ChatSession[] = rows.map((r: any) => ({
               id: r.id,
               title: r.title,
-              date: r.updated_at || r.created_at,
+              date: r.created_at || r.updated_at,
               messages: Array.isArray(r.messages) ? r.messages : [DEFAULT_MESSAGE],
             }));
 
@@ -246,7 +246,7 @@ export default function ChatPage() {
           .from("chat_sessions")
           .update({
             messages: session.messages,
-            updated_at: session.date,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", session.id)
           .eq("user_id", userId);
@@ -301,7 +301,7 @@ export default function ChatPage() {
       workingSession = {
         id: currentSessionId,
         title: activeSession?.title || userMessage.content.slice(0, 44),
-        date: nowIso,
+        date: activeSession?.date || nowIso,
         messages: currentMessages,
       };
       setSessions((prev) =>
@@ -338,7 +338,6 @@ export default function ChatPage() {
       const finalMessages = [...workingSession.messages, assistantMessage];
       const updatedSession: ChatSession = {
         ...workingSession,
-        date: replyIso,
         messages: finalMessages,
       };
 
@@ -355,7 +354,6 @@ export default function ChatPage() {
       };
       const updatedSession: ChatSession = {
         ...workingSession,
-        date: errIso,
         messages: [...workingSession.messages, errMessage],
       };
       setSessions((prev) =>
