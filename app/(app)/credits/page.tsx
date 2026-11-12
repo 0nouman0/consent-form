@@ -17,10 +17,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const PACKAGES = [
-  { amount: 150,  credits: 1,  bonusCredits: 0, label: "Starter",      popular: false, description: "Try it out with a single consent form generation." },
-  { amount: 750,  credits: 6,  bonusCredits: 1, label: "Standard",     popular: true,  description: "Great for regular practice — buy 5, get 1 free." },
-  { amount: 1500, credits: 12, bonusCredits: 2, label: "Professional", popular: false, description: "Best value for active clinics — buy 10, get 2 free." },
-  { amount: 3000, credits: 24, bonusCredits: 4, label: "Enterprise",   popular: false, description: "Ideal for hospitals — buy 20, get 4 free." },
+  { amount: 5,   credits: 1,  bonusCredits: 0, label: "Starter",      popular: false, description: "Try it out with a single consent form generation." },
+  { amount: 25,  credits: 6,  bonusCredits: 1, label: "Standard",     popular: true,  description: "Great for regular practice — buy 5, get 1 free." },
+  { amount: 50,  credits: 12, bonusCredits: 2, label: "Professional", popular: false, description: "Best value for active clinics — buy 10, get 2 free." },
+  { amount: 100, credits: 24, bonusCredits: 4, label: "Enterprise",   popular: false, description: "Ideal for hospitals — buy 20, get 4 free." },
 ];
 
 interface CreditLog {
