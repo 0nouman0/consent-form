@@ -1,126 +1,127 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getCashfreeOrder, getCashfreeOrderPayments, getCashfreeConfig } from "@/lib/cashfree";
 import { sendInvoiceEmail } from "@/lib/email";
-
-const CASHFREE_BASE =
-  process.env.CASHFREE_ENV === "production"
-    ? "https://api.cashfree.com/pg"
-    : "https://sandbox.cashfree.com/pg";
 
 export async function POST(req: NextRequest) {
   const user = await getUserWithRole();
   if (!user || !hasPermission(user.role, "generate")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const appId = process.env.CASHFREE_APP_ID;
-  const secretKey = process.env.CASHFREE_SECRET_KEY;
-  if (!appId || !secretKey) {
     return NextResponse.json(
-      { error: "Cashfree integration is not configured on the server" },
-      { status: 500 }
+      { error: "Unauthorized" },
+      { status: 401 }
     );
   }
+  const authResult = user;
 
   try {
-    const { order_id } = await req.json();
+    const body = await req.json();
+    const orderId = body.order_id || body.orderId || body.cf_order_id;
 
-    if (!order_id) {
+    if (!orderId) {
       return NextResponse.json(
-        { error: "Missing order_id parameter" },
+        { error: "Missing required order_id for payment verification" },
         { status: 400 }
       );
     }
 
-    // Fetch payment status from Cashfree
-    const paymentsRes = await fetch(
-      `${CASHFREE_BASE}/orders/${order_id}/payments`,
-      {
-        headers: {
-          "x-api-version": "2023-08-01",
-          "x-client-id": appId,
-          "x-client-secret": secretKey,
-        },
-      }
-    );
-
-    if (!paymentsRes.ok) {
-      const err = await paymentsRes.json();
-      console.error("Cashfree payment fetch failed:", err);
+    const config = getCashfreeConfig();
+    if (!config.isConfigured) {
       return NextResponse.json(
-        { error: err.message ?? "Failed to fetch payment status" },
+        { error: "Cashfree payment gateway is not configured on the server" },
         { status: 500 }
       );
     }
 
-    const payments: any[] = await paymentsRes.json();
+    // 1. Fetch order details from Cashfree directly
+    const cfOrder = await getCashfreeOrder(orderId);
 
-    // Find the successful payment
-    const successfulPayment = payments.find(
-      (p: any) => p.payment_status === "SUCCESS"
-    );
+    // 2. Fetch payment attempts for this order
+    let cfPayments: any[] = [];
+    try {
+      cfPayments = await getCashfreeOrderPayments(orderId);
+    } catch (paymentFetchErr) {
+      console.warn("Could not fetch detailed Cashfree payments list:", paymentFetchErr);
+    }
 
-    if (!successfulPayment) {
+    const successfulPayment = cfPayments.find((p) => p.payment_status === "SUCCESS");
+    const isOrderPaid = cfOrder.order_status === "PAID" || Boolean(successfulPayment);
+
+    if (!isOrderPaid) {
       return NextResponse.json(
-        { error: "No successful payment found for this order" },
+        {
+          error: `Payment verification failed: Order status is ${cfOrder.order_status || "UNKNOWN"}`,
+          order_status: cfOrder.order_status,
+        },
         { status: 400 }
       );
     }
 
-    const cf_payment_id = String(successfulPayment.cf_payment_id);
-    const paymentMethod = successfulPayment.payment_group ?? "cashfree";
+    // 3. Extract payment metadata
+    const paymentId = successfulPayment?.cf_payment_id
+      ? String(successfulPayment.cf_payment_id)
+      : `cf_pay_${orderId}`;
 
+    const paymentGroup = successfulPayment?.payment_group || "cashfree";
+    const paymentMethodName = successfulPayment?.payment_group
+      ? `Cashfree (${successfulPayment.payment_group.toUpperCase()})`
+      : "Cashfree";
+
+    // Connect to Supabase
     const supabase = createClient();
 
-    // Get pending transaction
+    // 4. Get the pending transaction from our DB
     const { data: tx, error: txError } = await supabase
       .from("transactions")
-      .select("credits, amount")
-      .eq("order_id", order_id)
+      .select("credits, amount, status")
+      .eq("order_id", orderId)
       .single();
 
     if (txError || !tx) {
-      console.error("Transaction not found:", txError);
+      console.error("Transaction not found for verification:", txError);
       return NextResponse.json(
-        { error: "Transaction record not found" },
+        { error: "Transaction record not found in system database" },
         { status: 404 }
       );
     }
 
-    // Load user profile for billing snapshot
+    // Retrieve user profile for invoicing & metadata snapshot
     let profile: any = null;
     try {
-      const { data } = await supabase
+      const { data, error: pErr } = await supabase
         .from("profiles")
-        .select(
-          "doctor_name, doctor_registration_no, hospital_name, billing_address, hospital_address"
-        )
-        .eq("id", user.id)
+        .select("doctor_name, doctor_registration_no, hospital_name, billing_address, hospital_address")
+        .eq("id", authResult.id)
         .single();
-      profile = data;
+      if (!pErr) {
+        profile = data;
+      }
     } catch (profileErr) {
-      console.error("Failed to load profile:", profileErr);
+      console.error("Failed to load user profile for snapshot:", profileErr);
     }
 
     const paymentDetails = {
-      method: paymentMethod,
-      cf_payment_id,
-      billing_doctor_name: profile?.doctor_name ?? "",
-      billing_doctor_registration_no: profile?.doctor_registration_no ?? "",
-      billing_hospital_name: profile?.hospital_name ?? "",
-      billing_address:
-        profile?.billing_address ?? profile?.hospital_address ?? "",
+      provider: "cashfree",
+      method: paymentGroup,
+      cf_order_id: cfOrder.cf_order_id,
+      cf_payment_id: paymentId,
+      order_id: orderId,
+      bank_reference: successfulPayment?.bank_reference || "",
+      payment_time: successfulPayment?.payment_time || cfOrder.created_at,
+      billing_doctor_name: profile?.doctor_name || "",
+      billing_doctor_registration_no: profile?.doctor_registration_no || "",
+      billing_hospital_name: profile?.hospital_name || "",
+      billing_address: profile?.billing_address || profile?.hospital_address || "",
     };
 
-    // Credit the account via RPC
+    // 5. Call verify_and_add_credits RPC function
     const { data: newBalance, error: rpcError } = await supabase.rpc(
       "verify_and_add_credits",
       {
-        p_user_id: user.id,
-        p_order_id: order_id,
-        p_payment_id: cf_payment_id,
-        p_signature: cf_payment_id, // Cashfree doesn't use a client-side signature; use payment_id as reference
+        p_user_id: authResult.id,
+        p_order_id: orderId,
+        p_payment_id: paymentId,
+        p_signature: `cashfree_verified_${Date.now()}`,
         p_amount: tx.amount,
         p_credits: tx.credits,
         p_metadata: paymentDetails,
@@ -135,30 +136,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send invoice email asynchronously
-    sendInvoiceEmail(
-      user.email ?? "",
-      profile?.doctor_name ?? "Doctor",
-      {
-        orderId: order_id,
-        paymentId: cf_payment_id,
-        amount: tx.amount / 100,
-        credits: tx.credits,
-        date: new Date().toLocaleDateString("en-IN"),
-        paymentMethod,
-        billingAddress: paymentDetails.billing_address,
-      }
-    ).catch((e) => console.error("Invoice email failed:", e));
+    const userEmail = authResult.email || "doctor@consentgen.in";
+
+    // 6. Send invoice email asynchronously
+    sendInvoiceEmail(userEmail, profile?.doctor_name || "Doctor", {
+      orderId: orderId,
+      paymentId: paymentId,
+      amount: tx.amount / 100,
+      credits: tx.credits,
+      date: new Date().toLocaleDateString("en-IN"),
+      paymentMethod: paymentMethodName,
+      billingAddress: paymentDetails.billing_address,
+    }).catch((emailErr) => {
+      console.error("Failed to trigger email delivery:", emailErr);
+    });
 
     return NextResponse.json({
       success: true,
       message: "Payment verified and credits added successfully",
       balance: newBalance,
+      order_id: orderId,
+      payment_id: paymentId,
     });
   } catch (error: any) {
-    console.error("Verification error:", error);
+    console.error("Cashfree verification error:", error);
     return NextResponse.json(
-      { error: "Internal verification error" },
+      { error: error.message || "Internal verification error" },
       { status: 500 }
     );
   }

@@ -186,12 +186,20 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
   const includeWitnessBlock = watch("includeWitnessBlock");
   const includeGuardianBlock = watch("includeGuardianBlock");
   const clauses = watch("clauses");
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const watchedDoctorName = watch("clinical.doctorName");
+  const watchedRegNo = watch("clinical.doctorRegistrationNo");
+  const watchedHospitalName = watch("clinical.hospitalName");
+  const watchedHospitalAddress = watch("clinical.hospitalAddress");
+
+  const doctorNameVal = watchedDoctorName || getValues("clinical.doctorName");
+  const regNoVal = watchedRegNo || getValues("clinical.doctorRegistrationNo");
+  const hospitalNameVal = watchedHospitalName || getValues("clinical.hospitalName");
+  const hospitalAddressVal = watchedHospitalAddress || getValues("clinical.hospitalAddress");
 
   const profileComplete = Boolean(
-    watch("clinical.doctorName") &&
-    watch("clinical.doctorRegistrationNo") &&
-    watch("clinical.hospitalName") &&
-    watch("clinical.hospitalAddress")
+    doctorNameVal && regNoVal && hospitalNameVal && hospitalAddressVal
   );
 
   useEffect(() => {
@@ -387,11 +395,21 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                   </label>
                   <input
                     id="patient.age"
+                    type="text"
+                    inputMode="numeric"
                     className={inputCls}
                     aria-required="true"
                     aria-invalid={!!getError("patient.age")}
                     aria-describedby={getError("patient.age") ? "err-age" : undefined}
                     placeholder="e.g. 42"
+                    maxLength={3}
+                    onKeyDown={(e) => {
+                      // allow: Backspace, Delete, Tab, Escape, arrows, Home, End
+                      const allowed = ["Backspace","Delete","Tab","Escape","ArrowLeft","ArrowRight","Home","End"];
+                      if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     {...register("patient.age")}
                   />
                   <FieldError id="err-age" message={getError("patient.age")} />
@@ -492,6 +510,14 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
                   aria-describedby={getError("patient.aadhaarLast4") ? "err-aadhaar" : undefined}
                   placeholder="XXXX"
                   maxLength={4}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  onKeyDown={(e) => {
+                    const allowed = ["Backspace","Delete","Tab","Escape","ArrowLeft","ArrowRight","Home","End"];
+                    if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   {...register("patient.aadhaarLast4")}
                 />
                 <FieldError id="err-aadhaar" message={getError("patient.aadhaarLast4")} />
@@ -767,6 +793,23 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
         {/* Step 5: Preview */}
         {step === 5 && (
           <div>
+            {validationError && (
+              <div
+                role="alert"
+                className="mb-5 rounded-md px-5 py-4 flex gap-3 items-start"
+                style={{
+                  backgroundColor: "rgba(190,61,42,0.08)",
+                  border: "1.5px solid rgba(190,61,42,0.35)",
+                  color: "var(--red)",
+                }}
+              >
+                <span className="text-xl leading-none mt-0.5" aria-hidden="true">&#9888;</span>
+                <div className="text-sm leading-relaxed">
+                  <p className="font-semibold mb-0.5">Please correct the following before generating:</p>
+                  <p>{validationError}</p>
+                </div>
+              </div>
+            )}
             {!profileComplete && (
               <div
                 role="alert"
@@ -846,8 +889,27 @@ export default function ConsentWizard({ form, onSubmit, status }: ConsentWizardP
             type="button"
             disabled={isSubmitting || !profileComplete}
             title={!profileComplete ? "Complete your clinician profile first" : undefined}
-            onClick={form.handleSubmit(onSubmit)}
-            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90"
+            onClick={form.handleSubmit(
+              async (data) => {
+                setValidationError(null);
+                await onSubmit(data);
+              },
+              (errors) => {
+                console.error("Consent Form submission errors:", errors);
+                const msgs: string[] = [];
+                const walk = (obj: any) => {
+                  if (!obj || typeof obj !== "object") return;
+                  if (typeof obj.message === "string") {
+                    msgs.push(obj.message);
+                  } else {
+                    Object.values(obj).forEach(walk);
+                  }
+                };
+                walk(errors);
+                setValidationError(msgs[0] || "Please check all required fields before generating.");
+              }
+            )}
+            className="rounded-md px-6 py-2.5 text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
           >
             {isSubmitting ? (

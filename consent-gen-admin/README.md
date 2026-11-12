@@ -8,7 +8,7 @@ Internal admin dashboard for ConsentGen. Provides platform-wide analytics and us
 - **Revenue Charts** — Recharts area and bar charts for generation trends and payment data
 - **User Management** — Browse registered users (`/users`)
 - **Generation Logs** — View all consent generation events (`/generations`)
-- **Payment Records** — Track Razorpay transactions (`/payments`)
+- **Payment Records** — Track Cashfree transactions (`/payments`)
 - **Audit Log** — Platform-wide audit trail (`/audit-log`)
 
 ## Stack

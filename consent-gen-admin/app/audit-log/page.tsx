@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { createClient } from "@/lib/supabase/client";
-import { MagnifyingGlass, CheckCircle, WarningCircle, Gear } from "@phosphor-icons/react";
+import { MagnifyingGlass, Gear, ShieldCheck } from "@phosphor-icons/react";
 
 export default function AuditLogsList() {
   const [loading, setLoading] = useState(true);
@@ -16,8 +16,7 @@ export default function AuditLogsList() {
   useEffect(() => {
     async function fetchAdminLogs() {
       try {
-        // Fetch luffy admin logs with profiles
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("luffy_admin_logs")
           .select("*")
           .order("created_at", { ascending: false });
@@ -38,81 +37,158 @@ export default function AuditLogsList() {
   // Filters
   const filteredLogs = logs.filter((log) => {
     const term = searchTerm.toLowerCase();
-    return (log.action || "").toLowerCase().includes(term) ||
-           (log.target_id || "").toLowerCase().includes(term) ||
-           (log.note || "").toLowerCase().includes(term);
+    return (
+      (log.action || "").toLowerCase().includes(term) ||
+      (log.target_id || "").toLowerCase().includes(term) ||
+      (log.note || "").toLowerCase().includes(term)
+    );
   });
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-y-auto h-screen">
-        <Header title="Luffy Admin Action Trail" />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
+        <Header title="Admin Logs" subtitle="Security & Administrative Governance Trail" />
 
-        <main className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
+          {/* Top Page Banner */}
+          <div
+            className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] mb-1" style={{ color: "var(--ink-muted)" }}>
+                Governance
+              </p>
+              <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
+                Admin <span style={{ color: "var(--red)" }}>action trail</span>
+              </h1>
+              <p className="text-sm mt-1" style={{ color: "var(--ink-muted)" }}>
+                Tamper-evident log of administrator interventions, user status toggles, and manual credit allocations.
+              </p>
+            </div>
+          </div>
+
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div
+            className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
             {/* Search */}
-            <div className="relative w-full sm:max-w-xs">
-              <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+            <div className="relative w-full sm:max-w-md">
+              <MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--ink-muted)" }} />
               <input
                 type="text"
-                placeholder="Search action, target ID, note..."
+                placeholder="Search action, target ID, explanation note..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl text-xs bg-white/5 border border-card-border outline-none focus:border-amber-500 transition-all text-foreground"
+                className="w-full pl-10 pr-3 py-2 rounded-md text-xs outline-none transition-all"
+                style={{
+                  backgroundColor: "var(--input-bg)",
+                  border: "1px solid var(--input-border)",
+                  color: "var(--input-text)",
+                }}
               />
             </div>
           </div>
 
           {/* Table Card */}
-          <div className="glass-card rounded-2xl p-5">
+          <div
+            className="rounded-md overflow-hidden"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-card-border text-muted">
-                    <th className="py-3 font-semibold">Action UUID</th>
-                    <th className="py-3 font-semibold">Admin User</th>
-                    <th className="py-3 font-semibold">Action</th>
-                    <th className="py-3 font-semibold">Target Type</th>
-                    <th className="py-3 font-semibold">Target ID</th>
-                    <th className="py-3 font-semibold">Notes / Explanation</th>
-                    <th className="py-3 font-semibold text-center">Executed At</th>
+                  <tr style={{ borderBottom: "1px solid var(--rule)", color: "var(--ink-muted)" }}>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Action UUID</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Admin Operator</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Action Type</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Target</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em]">Explanation Note</th>
+                    <th className="py-3.5 px-6 font-mono uppercase tracking-[0.08em] text-right">Executed At</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-card-border/50">
+                <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-muted">
-                        <div className="w-6 h-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto" />
+                      <td colSpan={6} className="py-12 text-center">
+                        <div
+                          className="w-6 h-6 border-2 rounded-full animate-spin mx-auto"
+                          style={{ borderColor: "var(--rule)", borderTopColor: "var(--ink)" }}
+                        />
                       </td>
                     </tr>
-                  ) : filteredLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-muted-bg/30 transition-colors">
-                      <td className="py-4 font-mono select-all text-muted">{log.id.slice(0, 8)}...</td>
-                      <td className="py-4 font-mono font-semibold text-foreground">{log.admin_user_id.slice(0, 8)}</td>
-                      <td className="py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          log.action.includes("deactivate") || log.action.includes("block")
-                            ? "bg-red-500/10 text-red-500"
-                            : log.action.includes("activate")
-                            ? "bg-emerald-500/10 text-emerald-500"
-                            : "bg-amber-500/10 text-amber-500"
-                        }`}>
-                          <Gear weight="fill" />
-                          <span className="capitalize">{log.action.replace(/_/g, " ")}</span>
-                        </span>
-                      </td>
-                      <td className="py-4 capitalize font-semibold text-muted">{log.target_type}</td>
-                      <td className="py-4 font-mono select-all text-muted truncate max-w-[120px]">{log.target_id || "N/A"}</td>
-                      <td className="py-4 text-foreground leading-normal max-w-xs">{log.note || "No audit explanation provided."}</td>
-                      <td className="py-4 text-center text-muted">{new Date(log.created_at).toLocaleString("en-IN")}</td>
-                    </tr>
-                  ))}
+                  ) : (
+                    filteredLogs.map((log) => {
+                      const isDanger = log.action.includes("deactivate") || log.action.includes("block");
+                      const isSuccess = log.action.includes("activate");
+
+                      return (
+                        <tr
+                          key={log.id}
+                          className="transition-colors"
+                          style={{ borderBottom: "1px solid var(--rule-soft)" }}
+                        >
+                          <td className="py-4 px-6 font-mono font-medium select-all" style={{ color: "var(--ink)" }}>
+                            {log.id.slice(0, 8)}...
+                          </td>
+                          <td className="py-4 px-6 font-mono" style={{ color: "var(--ink-soft)" }}>
+                            {log.admin_user_id.slice(0, 8)}
+                          </td>
+                          <td className="py-4 px-6">
+                            <span
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-[0.08em] font-semibold"
+                              style={{
+                                backgroundColor: isDanger
+                                  ? "var(--status-fail-bg)"
+                                  : isSuccess
+                                  ? "var(--status-success-bg)"
+                                  : "var(--badge-light-bg)",
+                                color: isDanger
+                                  ? "var(--status-fail-text)"
+                                  : isSuccess
+                                  ? "var(--status-success-text)"
+                                  : "var(--badge-light-text)",
+                                border: `1px solid ${
+                                  isDanger
+                                    ? "var(--status-fail-border)"
+                                    : isSuccess
+                                    ? "var(--status-success-border)"
+                                    : "var(--rule)"
+                                }`,
+                              }}
+                            >
+                              <Gear weight="fill" className="w-3 h-3" />
+                              <span>{log.action.replace(/_/g, " ")}</span>
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 font-medium capitalize" style={{ color: "var(--ink)" }}>
+                            {log.target_type}
+                            {log.target_id && (
+                              <span className="font-mono text-[10px] block opacity-70 mt-0.5">
+                                {log.target_id.slice(0, 10)}...
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-4 px-6 max-w-xs" style={{ color: "var(--ink-soft)" }}>
+                            {log.note || <span className="italic opacity-60">No audit justification recorded</span>}
+                          </td>
+                          <td className="py-4 px-6 text-right font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                            {new Date(log.created_at).toLocaleString("en-IN", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+
                   {!loading && filteredLogs.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-muted">
-                        No admin audit logs recorded.
+                      <td colSpan={6} className="py-16 text-center text-xs font-mono" style={{ color: "var(--ink-muted)" }}>
+                        No administrative audit logs found.
                       </td>
                     </tr>
                   )}

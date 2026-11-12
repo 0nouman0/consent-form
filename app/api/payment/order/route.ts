@@ -1,33 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { createCashfreeOrder, getCashfreeConfig } from "@/lib/cashfree";
 
 const PACKAGES: Record<number, { credits: number; amount: number }> = {
-  200: { credits: 1, amount: 200 },
-  1000: { credits: 5, amount: 1000 },
-  2000: { credits: 10, amount: 2000 },
-  5000: { credits: 25, amount: 5000 },
+  150:  { credits: 1,  amount: 150  }, // Starter: 1 credit
+  750:  { credits: 6,  amount: 750  }, // Standard: buy 5 get 1 free = 6 credits
+  1500: { credits: 12, amount: 1500 }, // Professional: buy 10 get 2 free = 12 credits
+  3000: { credits: 24, amount: 3000 }, // Enterprise: buy 20 get 4 free = 24 credits
 };
 
-const CASHFREE_BASE =
-  process.env.CASHFREE_ENV === "production"
-    ? "https://api.cashfree.com/pg"
-    : "https://sandbox.cashfree.com/pg";
-
 export async function POST(req: NextRequest) {
+  // Require doctor role
   const user = await getUserWithRole();
   if (!user || !hasPermission(user.role, "generate")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const appId = process.env.CASHFREE_APP_ID;
-  const secretKey = process.env.CASHFREE_SECRET_KEY;
-  if (!appId || !secretKey) {
     return NextResponse.json(
-      { error: "Cashfree integration is not configured on the server" },
-      { status: 500 }
+      { error: "Unauthorized" },
+      { status: 401 }
     );
   }
+  const authResult = user;
 
   try {
     const { amount } = await req.json();
@@ -40,54 +32,80 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const orderId = `cg_${user.id.slice(0, 8)}_${Date.now()}`;
-
-    const cashfreeRes = await fetch(`${CASHFREE_BASE}/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-version": "2023-08-01",
-        "x-client-id": appId,
-        "x-client-secret": secretKey,
-      },
-      body: JSON.stringify({
-        order_id: orderId,
-        order_amount: selectedPackage.amount,
-        order_currency: "INR",
-        customer_details: {
-          customer_id: user.id,
-          customer_email: user.email ?? "",
-          customer_phone: "9999999999", // placeholder — Cashfree requires a phone number
-        },
-        order_meta: {
-          return_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/credits?order_id=${orderId}`,
-        },
-      }),
-    });
-
-    if (!cashfreeRes.ok) {
-      const err = await cashfreeRes.json();
-      console.error("Cashfree order creation failed:", err);
+    const config = getCashfreeConfig();
+    if (!config.isConfigured) {
       return NextResponse.json(
-        { error: err.message ?? "Failed to create Cashfree order" },
+        { error: "Cashfree payment gateway is not configured on the server" },
         { status: 500 }
       );
     }
 
-    const cashfreeOrder = await cashfreeRes.json();
-
-    // Persist pending transaction
     const supabase = createClient();
-    const { error: txError } = await supabase.from("transactions").insert({
-      user_id: user.id,
+
+    // Retrieve doctor profile to populate customer details
+    let doctorName = "Doctor";
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("doctor_name")
+        .eq("id", authResult.id)
+        .single();
+      if (profile?.doctor_name) {
+        doctorName = profile.doctor_name;
+      }
+    } catch {
+      // Non-critical, fallback to default
+    }
+
+    // Cashfree order_id: alphanumeric, underscores, hyphens, max 45 chars
+    const cleanUserId = authResult.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+    const orderId = `cf_${cleanUserId}_${Date.now()}`;
+    const amountInPaise = selectedPackage.amount * 100;
+
+    // Detect return URL for fallback redirect
+    // Note: Cashfree Production requires https:// protocol for return_url
+    const customSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+    let siteOrigin = req.headers.get("origin") || req.nextUrl.origin || "http://localhost:3000";
+
+    if (config.env === "production") {
+      if (customSiteUrl && customSiteUrl.startsWith("https://")) {
+        siteOrigin = customSiteUrl;
+      } else if (siteOrigin.startsWith("http://")) {
+        siteOrigin = siteOrigin.replace(/^http:\/\//, "https://");
+      }
+    }
+    const returnUrl = `${siteOrigin.replace(/\/+$/, "")}/credits?order_id={order_id}`;
+
+    // Create Cashfree Order
+    const cfOrder = await createCashfreeOrder({
       order_id: orderId,
-      amount: selectedPackage.amount * 100, // store in paise for consistency
-      credits: selectedPackage.credits,
-      status: "created",
+      order_amount: selectedPackage.amount,
+      order_currency: "INR",
+      customer_details: {
+        customer_id: cleanUserId || "doctor_user",
+        customer_name: doctorName,
+        customer_email: authResult.email || "doctor@consentgen.in",
+        customer_phone: "9999999999",
+      },
+      order_meta: {
+        return_url: returnUrl,
+      },
+      order_note: `ConsentGen: ${selectedPackage.credits} Credits Package (₹${selectedPackage.amount})`,
     });
 
+    // Save pending transaction in database (stored in paise for compatibility)
+    const { error: txError } = await supabase
+      .from("transactions")
+      .insert({
+        user_id: authResult.id,
+        order_id: cfOrder.order_id,
+        amount: amountInPaise,
+        credits: selectedPackage.credits,
+        status: "created",
+      });
+
     if (txError) {
-      console.error("Failed to log transaction:", txError);
+      console.error("Failed to log transaction in database:", txError);
       return NextResponse.json(
         { error: "Failed to initialize checkout transaction" },
         { status: 500 }
@@ -95,15 +113,16 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      order_id: orderId,
-      payment_session_id: cashfreeOrder.payment_session_id,
+      order_id: cfOrder.order_id,
+      payment_session_id: cfOrder.payment_session_id,
       amount: selectedPackage.amount,
       currency: "INR",
+      environment: config.env,
     });
   } catch (error: any) {
-    console.error("Order creation error:", error);
+    console.error("Cashfree order creation error:", error);
     return NextResponse.json(
-      { error: error.message ?? "Failed to initiate payment. Please try again." },
+      { error: error.message || "Failed to initiate payment. Please try again." },
       { status: 500 }
     );
   }

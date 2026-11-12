@@ -4,12 +4,37 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/dashboard";
+  let next = searchParams.get("next");
 
+  // Determine appropriate fallback destination based on auth event
+  if (!next) {
+    if (type === "recovery") {
+      next = "/auth/reset-password";
+    } else {
+      next = "/onboarding";
+    }
+  }
+
+  const supabase = createClient();
+
+  // 1. Handle PKCE code flow (default in browser Supabase client)
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return NextResponse.redirect(new URL(next, request.url));
+    }
+    console.error("PKCE exchange error:", error.message);
+    const failureUrl = next.includes("reset-password")
+      ? `/forgot-password?error=${encodeURIComponent(error.message)}`
+      : `/login?error=verification_failed`;
+    return NextResponse.redirect(new URL(failureUrl, request.url));
+  }
+
+  // 2. Handle token_hash flow (traditional Supabase OTP/Email link)
   if (token_hash && type) {
-    const supabase = createClient();
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
@@ -18,8 +43,16 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(new URL(next, request.url));
     }
+    console.error("OTP verification error:", error.message);
+    const failureUrl = type === "recovery" || next.includes("reset-password")
+      ? `/forgot-password?error=${encodeURIComponent(error.message)}`
+      : `/login?error=verification_failed`;
+    return NextResponse.redirect(new URL(failureUrl, request.url));
   }
 
-  // Return the user to the login page if verification fails
-  return NextResponse.redirect(new URL("/login?error=verification_failed", request.url));
+  // Fallback if neither code nor token_hash was provided
+  const fallbackUrl = next.includes("reset-password")
+    ? `/forgot-password?error=invalid_link`
+    : `/login?error=verification_failed`;
+  return NextResponse.redirect(new URL(fallbackUrl, request.url));
 }

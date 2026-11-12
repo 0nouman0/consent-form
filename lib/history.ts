@@ -52,10 +52,18 @@ export async function saveConsentToHistory(
 
 export async function getHistory(): Promise<HistoryEntry[]> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let query = supabase
     .from(TABLE)
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (user) {
+    query = query.eq("user_id", user.id);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);

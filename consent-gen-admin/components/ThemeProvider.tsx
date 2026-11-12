@@ -12,7 +12,7 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark"); // default to dark ops style
+  const [theme, setTheme] = useState<Theme>("light"); // default to paper & ink style matching user website
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("luffy_theme") as Theme;
@@ -20,11 +20,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
-      // Check system preference
-      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const defaultTheme = systemDark ? "dark" : "light";
-      setTheme(defaultTheme);
-      document.documentElement.classList.toggle("dark", defaultTheme === "dark");
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 

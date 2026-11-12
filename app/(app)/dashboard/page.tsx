@@ -15,6 +15,7 @@ export default async function DashboardPage() {
   const { data: history, error } = await supabase
     .from("consent_history")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(10);
 

@@ -12,6 +12,8 @@ import {
   DownloadSimple, FileDoc, Printer,
 } from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { downloadConsentPDF } from "@/lib/pdf";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
@@ -87,9 +89,16 @@ function HistoryContent() {
 
   const getActiveMarkdown = (entry: HistoryEntry) => {
     const hasMultiple = entry.markdown?.includes("__LANG_SEPARATOR__");
-    if (!hasMultiple) return entry.markdown ?? "";
-    const parts = (entry.markdown ?? "").split("__LANG_SEPARATOR__");
-    return (activeTab === "english" ? parts[0] : parts[1])?.trim() ?? "";
+    let text = "";
+    if (!hasMultiple) text = entry.markdown ?? "";
+    else {
+      const parts = (entry.markdown ?? "").split("__LANG_SEPARATOR__");
+      text = (activeTab === "english" ? parts[0] : parts[1])?.trim() ?? "";
+    }
+    return text
+      .replace(/\|\s*\|\s*(:?---[:\s|]+)\|\s*\|\s*/g, "|\n| $1 |\n| ")
+      .replace(/\|\s*\|\s*(:?---[:\s|]+)/g, "|\n| $1\n")
+      .replace(/\|\s*\|\s*/g, "|\n| ");
   };
 
   const handleModalCopy = (entry: HistoryEntry) => {
@@ -425,7 +434,9 @@ function HistoryContent() {
                     </div>
                   </div>
                   <div className="prose prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-headings:text-[var(--ink)] prose-headings:tracking-tight prose-h1:text-xl prose-h1:border-b prose-h1:border-[var(--rule)] prose-h1:pb-2 prose-h2:text-lg prose-h2:mt-6 prose-p:text-[var(--ink-soft)] prose-p:leading-[1.8] prose-li:text-[var(--ink-soft)] prose-strong:text-[var(--ink)] prose-hr:border-[var(--rule)]">
-                    <ReactMarkdown>{getActiveMarkdown(selectedEntry)}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                      {getActiveMarkdown(selectedEntry)}
+                    </ReactMarkdown>
                   </div>
                 </div>
               </div>

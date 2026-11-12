@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { requireApiAuth, isAuthError } from "@/lib/rbac";
+import { createClient } from "@/lib/supabase/server";
+import { hasPermission } from "@/lib/rbac";
 
 // Initialize the Groq client
 const groq = new Groq({
@@ -8,9 +9,32 @@ const groq = new Groq({
 });
 
 export async function POST(req: Request) {
-  // ── RBAC: all authenticated roles (doctor, admin, viewer) can use chat ──
-  const authResult = await requireApiAuth(req, "chat");
-  if (isAuthError(authResult)) return authResult;
+  // ── RBAC: use the official Supabase SSR client (cookie-based, no manual JWT parsing) ──
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "Unauthorized — no valid session" },
+      { status: 401 }
+    );
+  }
+
+  // Fetch role from profiles
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = (profile?.role as "doctor" | "admin" | "viewer") ?? "doctor";
+
+  if (!hasPermission(role, "chat")) {
+    return NextResponse.json(
+      { error: "Forbidden — your role does not have permission for this action" },
+      { status: 403 }
+    );
+  }
 
   try {
     const { messages } = await req.json();
@@ -48,7 +72,7 @@ Keep your answers concise, professional, structured, and directly useful to a do
 
     const completion = await groq.chat.completions.create({
       messages: [systemPrompt, ...messages],
-      model: "llama-3.1-8b-instant", // Fast and capable model
+      model: "openai/gpt-oss-20b", // Fast and capable model
       temperature: 0.5,
       max_tokens: 1024,
       top_p: 1,

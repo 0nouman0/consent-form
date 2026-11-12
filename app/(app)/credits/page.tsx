@@ -17,10 +17,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const PACKAGES = [
-  { amount: 200, credits: 1, label: "Starter", popular: false, description: "Perfect for trying out the generator." },
-  { amount: 1000, credits: 5, label: "Standard", popular: true, description: "Great for regular practice needs." },
-  { amount: 2000, credits: 10, label: "Professional", popular: false, description: "Best value for active clinics." },
-  { amount: 5000, credits: 25, label: "Enterprise", popular: false, description: "Ideal for hospitals and research teams." }
+  { amount: 150,  credits: 1,  bonusCredits: 0, label: "Starter",      popular: false, description: "Try it out with a single consent form generation." },
+  { amount: 750,  credits: 6,  bonusCredits: 1, label: "Standard",     popular: true,  description: "Great for regular practice — buy 5, get 1 free." },
+  { amount: 1500, credits: 12, bonusCredits: 2, label: "Professional", popular: false, description: "Best value for active clinics — buy 10, get 2 free." },
+  { amount: 3000, credits: 24, bonusCredits: 4, label: "Enterprise",   popular: false, description: "Ideal for hospitals — buy 20, get 4 free." },
 ];
 
 interface CreditLog {
@@ -106,36 +106,92 @@ export default function CreditsPage() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadCashfreeScript = () => {
     return new Promise<boolean>((resolve) => {
       if ((window as any).Cashfree) {
         resolve(true);
         return;
       }
+      const existing = document.getElementById("cashfree-sdk-v3");
+      if (existing) {
+        existing.addEventListener("load", () => resolve(true));
+        existing.addEventListener("error", () => resolve(false));
+        return;
+      }
       const script = document.createElement("script");
+      script.id = "cashfree-sdk-v3";
       script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
   };
 
+  const verifyPayment = async (orderId: string, purchasedCredits?: number) => {
+    setLoading(true);
+    try {
+      const verifyRes = await fetch("/api/payment/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.error ?? "Payment verification failed");
+      }
+
+      setMessage({
+        type: "success",
+        text: purchasedCredits
+          ? `Payment successful! ${purchasedCredits} credits have been added to your balance.`
+          : "Payment verified successfully! Your credits have been updated.",
+      });
+
+      // Dispatch global event for components (e.g. AppHeader) to reload credits
+      window.dispatchEvent(new Event("credits-updated"));
+
+      // Reload user data to update credit balance
+      await loadData();
+    } catch (verifyErr: any) {
+      setMessage({
+        type: "error",
+        text: verifyErr.message || "Failed to verify transaction with payment server.",
+      });
+    } finally {
+      setLoading(false);
+      setBuyingAmount(null);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+
+    // Check if user was redirected back with order_id in query params
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnedOrderId = urlParams.get("order_id");
+      if (returnedOrderId) {
+        verifyPayment(returnedOrderId);
+        // Clear query param cleanly without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
   const handlePurchase = async (amount: number) => {
     setBuyingAmount(amount);
     setMessage(null);
 
     try {
-      // 1. Load Cashfree SDK
+      // 1. Load Cashfree SDK v3
       const scriptLoaded = await loadCashfreeScript();
-      if (!scriptLoaded) {
-        throw new Error("Failed to load Cashfree SDK. Please check your connection.");
+      if (!scriptLoaded || !(window as any).Cashfree) {
+        throw new Error("Failed to load Cashfree checkout SDK. Please check your internet connection.");
       }
 
-      // 2. Create order on backend
+      // 2. Call backend to create Cashfree order
       const orderRes = await fetch("/api/payment/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,59 +203,52 @@ export default function CreditsPage() {
         throw new Error(err.error ?? "Failed to initialize order");
       }
 
-      const { order_id, payment_session_id } = await orderRes.json();
+      const orderData = await orderRes.json();
+      const { order_id, payment_session_id, environment } = orderData;
 
-      // 3. Open Cashfree checkout modal
+      if (!payment_session_id) {
+        throw new Error("Missing Cashfree payment session ID from server.");
+      }
+
+      const selectedPkg = PACKAGES.find((p) => p.amount === amount);
+
+      // 3. Initialize Cashfree instance (sandbox or production)
       const cashfree = (window as any).Cashfree({
-        mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
+        mode: environment || "sandbox",
       });
 
-      const result = await cashfree.checkout({
+      // 4. Open Cashfree checkout modal
+      const checkoutOptions = {
         paymentSessionId: payment_session_id,
         redirectTarget: "_modal",
+      };
+
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {
+        if (result?.error) {
+          console.error("Cashfree Checkout error:", result.error);
+          setMessage({
+            type: "error",
+            text: result.error.message || "Payment cancelled or encountered an error.",
+          });
+          setBuyingAmount(null);
+          return;
+        }
+
+        if (result?.redirect) {
+          // Cashfree handles external redirect
+          return;
+        }
+
+        // Modal closed or payment completed: verify status with server
+        await verifyPayment(order_id, selectedPkg?.credits);
       });
-
-      if (result.error) {
-        throw new Error(result.error.message ?? "Payment failed");
-      }
-
-      // 4. Verify payment on backend
-      setLoading(true);
-      const verifyRes = await fetch("/api/payment/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id }),
-      });
-
-      const verifyData = await verifyRes.json();
-      if (!verifyRes.ok) {
-        throw new Error(verifyData.error ?? "Payment verification failed");
-      }
-
-      setMessage({
-        type: "success",
-        text: `Payment successful! ${PACKAGES.find(p => p.amount === amount)?.credits} credits have been added.`
-      });
-
-      window.dispatchEvent(new Event("credits-updated"));
-      await loadData();
-      setBuyingAmount(null);
-
     } catch (err: any) {
-      // User closed the modal — not an error worth showing
-      if (err?.message?.toLowerCase().includes("modal closed") ||
-          err?.message?.toLowerCase().includes("popup closed")) {
-        setBuyingAmount(null);
-        return;
-      }
-      console.error(err);
+      console.error("Purchase error:", err);
       setMessage({
         type: "error",
-        text: err.message || "An unexpected error occurred during checkout."
+        text: err.message || "An unexpected error occurred during checkout setup.",
       });
       setBuyingAmount(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -257,48 +306,66 @@ export default function CreditsPage() {
 
         {/* Packages Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PACKAGES.map((pkg) => (
-            <div
-              key={pkg.amount}
-              className="rounded-md p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300"
-              style={{
-                backgroundColor: "var(--sheet)",
-                border: pkg.popular ? "1.5px solid var(--ink)" : "1px solid var(--rule)",
-              }}
-            >
-              {pkg.popular && (
-                <div className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1"
-                  style={{ backgroundColor: "var(--red)", color: "var(--sheet)" }}>
-                  <Sparkle weight="fill" className="w-2.5 h-2.5" /> Best Deal
-                </div>
-              )}
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>{pkg.label}</p>
-                <div className="flex items-baseline gap-1 mt-2 mb-2">
-                  <span className="font-serif text-4xl font-bold" style={{ color: "var(--ink)" }}>₹{pkg.amount}</span>
-                </div>
-                <p className="text-sm font-semibold mb-4" style={{ color: "var(--ink-soft)" }}>{pkg.credits} Credit{pkg.credits > 1 ? "s" : ""}</p>
-                <p className="text-xs leading-relaxed mb-6" style={{ color: "var(--ink-muted)" }}>{pkg.description}</p>
-              </div>
-
-              <button
-                onClick={() => handlePurchase(pkg.amount)}
-                disabled={buyingAmount !== null || loading}
-                className="w-full py-2.5 rounded-md text-xs font-bold transition-all text-center flex items-center justify-center hover:opacity-90"
+          {PACKAGES.map((pkg) => {
+            const paidCredits = pkg.credits - pkg.bonusCredits;
+            const perCredit = Math.round(pkg.amount / paidCredits);
+            return (
+              <div
+                key={pkg.amount}
+                className="rounded-md p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300"
                 style={{
-                  backgroundColor: pkg.popular ? "var(--ink)" : "var(--sheet)",
-                  color: pkg.popular ? "var(--sheet)" : "var(--ink)",
-                  border: pkg.popular ? "none" : "1px solid var(--rule)",
+                  backgroundColor: "var(--sheet)",
+                  border: pkg.popular ? "1.5px solid var(--ink)" : "1px solid var(--rule)",
                 }}
               >
-                {buyingAmount === pkg.amount ? (
-                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  `Buy Package`
+                {pkg.popular && (
+                  <div className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1"
+                    style={{ backgroundColor: "var(--red)", color: "var(--sheet)" }}>
+                    <Sparkle weight="fill" className="w-2.5 h-2.5" /> Best Deal
+                  </div>
                 )}
-              </button>
-            </div>
-          ))}
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.06em] font-semibold" style={{ color: "var(--ink-muted)" }}>{pkg.label}</p>
+                  <div className="flex items-baseline gap-1 mt-2 mb-1">
+                    <span className="font-serif text-4xl font-bold" style={{ color: "var(--ink)" }}>₹{pkg.amount.toLocaleString("en-IN")}</span>
+                  </div>
+                  <p className="text-[10px] font-mono mb-3" style={{ color: "var(--ink-muted)" }}>₹{perCredit}/credit</p>
+
+                  {/* Credit count + bonus badge */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm font-bold" style={{ color: "var(--ink-soft)" }}>
+                      {pkg.credits} Credit{pkg.credits > 1 ? "s" : ""}
+                    </span>
+                    {pkg.bonusCredits > 0 && (
+                      <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded"
+                        style={{ backgroundColor: "rgba(63,122,78,0.12)", color: "#3f7a4e" }}>
+                        +{pkg.bonusCredits} FREE
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs leading-relaxed mb-6" style={{ color: "var(--ink-muted)" }}>{pkg.description}</p>
+                </div>
+
+                <button
+                  onClick={() => handlePurchase(pkg.amount)}
+                  disabled={buyingAmount !== null || loading}
+                  className="w-full py-2.5 rounded-md text-xs font-bold transition-all text-center flex items-center justify-center hover:opacity-90"
+                  style={{
+                    backgroundColor: pkg.popular ? "var(--ink)" : "var(--sheet)",
+                    color: pkg.popular ? "var(--sheet)" : "var(--ink)",
+                    border: pkg.popular ? "none" : "1px solid var(--rule)",
+                  }}
+                >
+                  {buyingAmount === pkg.amount ? (
+                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "Buy Package"
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {/* History Tables Section */}

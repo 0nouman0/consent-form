@@ -2,7 +2,13 @@ import { z } from "zod";
 
 const patientSchema = z.object({
   patientName: z.string().min(2, "Patient name is required"),
-  age: z.string().min(1, "Age is required"),
+  age: z
+    .string()
+    .min(1, "Age is required")
+    .refine(
+      (val) => /^\d{1,3}$/.test(val.trim()) && parseInt(val, 10) >= 0 && parseInt(val, 10) <= 120,
+      { message: "Age must be a whole number between 0 and 120" }
+    ),
   sex: z.enum(["Male", "Female", "Other"]),
   hospitalOpdIpdNo: z.string().min(1, "OPD/IPD number is required"),
   aadhaarLast4: z
@@ -21,7 +27,10 @@ const patientSchema = z.object({
 
 const clinicalSchema = z.object({
   doctorName: z.string().min(2, "Doctor name is required"),
-  doctorRegistrationNo: z.string().min(2, "Registration number is required"),
+  doctorRegistrationNo: z
+    .string()
+    .min(2, "Registration number is required")
+    .max(30, "Registration number must be 30 characters or fewer"),
   hospitalName: z.string().min(2, "Hospital name is required"),
   hospitalAddress: z.string().min(5, "Hospital address is required"),
   diagnosis: z.string().default(""),
@@ -112,7 +121,13 @@ export const researchConsentFormSchema = z.object({
   participant: z.object({
     participantName: z.string().min(2, "Participant name is required"),
     participantId: z.string().min(1, "Participant ID or Roll Number is required"),
-    age: z.string().min(1, "Age is required"),
+    age: z
+      .string()
+      .min(1, "Age is required")
+      .refine(
+        (val) => /^\d{1,3}$/.test(val.trim()) && parseInt(val, 10) >= 0 && parseInt(val, 10) <= 120,
+        { message: "Age must be a whole number between 0 and 120" }
+      ),
     sex: z.enum(["Male", "Female", "Other"]),
     isCompetent: z.boolean().default(true),
     guardianName: z.string().default(""),

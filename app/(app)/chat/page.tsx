@@ -405,6 +405,7 @@ export default function ChatPage() {
             />
             <button
               type="submit"
+              onClick={(e) => { e.preventDefault(); handleSend(); }}
               disabled={!input.trim() || isLoading}
               className="w-12 h-12 shrink-0 rounded-md flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
               style={{ backgroundColor: "var(--ink)", color: "var(--sheet)" }}
