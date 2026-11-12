@@ -9,14 +9,13 @@ import {
   DownloadSimple,
   Copy,
   ArrowCounterClockwise,
-  FloppyDisk,
   CheckCircle,
   FileDoc,
   Printer,
 } from "@phosphor-icons/react/dist/ssr";
 import { nowIST } from "@/lib/utils";
 import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
-import { saveConsentToHistory } from "@/lib/history";
+import { saveConsentToHistory, updateHistoryEntry } from "@/lib/history";
 import { downloadConsentPDF } from "@/lib/pdf";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
@@ -63,6 +62,8 @@ export default function ConsentDocument({
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSavedConsentIdRef = useRef<string | null>(null);
+  const savedHistoryRowIdRef = useRef<string | null>(null);
 
   const isResearch = formData && "study" in formData;
   const counselingLanguage = isResearch
@@ -339,51 +340,77 @@ export default function ConsentDocument({
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const handleSave = async () => {
-    if (!formData) return;
-    setSaving(true);
-    setSaveError(null);
+  // Automatically save to history as soon as generation completes
+  useEffect(() => {
+    if (!isComplete || !formData || !englishMarkdown || !consentId) return;
+    if (autoSavedConsentIdRef.current === consentId) return;
 
-    try {
-      const h_name = isResearch
-        ? (formData as ResearchConsentFormSchema).study.institutionName
-        : (formData as ConsentFormSchema).clinical.hospitalName;
-      const p_name = isResearch
-        ? (formData as ResearchConsentFormSchema).participant.participantName
-        : (formData as ConsentFormSchema).patient.patientName;
-      const proc_name = isResearch
-        ? (formData as ResearchConsentFormSchema).study.studyTitle
-        : (formData as ConsentFormSchema).clinical.procedureName;
-      const c_type = isResearch
-        ? "research"
-        : (formData as ConsentFormSchema).clinical.consentType;
-      const proc_date = isResearch
-        ? new Date().toISOString().split("T")[0]
-        : (formData as ConsentFormSchema).clinical.procedureDate;
+    autoSavedConsentIdRef.current = consentId;
 
+    const autoSave = async () => {
+      setSaving(true);
+      setSaveError(null);
+
+      try {
+        const h_name = isResearch
+          ? (formData as ResearchConsentFormSchema).study.institutionName
+          : (formData as ConsentFormSchema).clinical.hospitalName;
+        const p_name = isResearch
+          ? (formData as ResearchConsentFormSchema).participant.participantName
+          : (formData as ConsentFormSchema).patient.patientName;
+        const proc_name = isResearch
+          ? (formData as ResearchConsentFormSchema).study.studyTitle
+          : (formData as ConsentFormSchema).clinical.procedureName;
+        const c_type = isResearch
+          ? "research"
+          : (formData as ConsentFormSchema).clinical.consentType;
+        const proc_date = isResearch
+          ? new Date().toISOString().split("T")[0]
+          : (formData as ConsentFormSchema).clinical.procedureDate;
+
+        const combinedMarkdown = otherMarkdown
+          ? `${englishMarkdown}\n\n__LANG_SEPARATOR__\n\n${otherMarkdown}`
+          : englishMarkdown;
+
+        const inserted = await saveConsentToHistory({
+          consent_id: consentId,
+          hospital_name: h_name || null,
+          patient_name: p_name || null,
+          procedure_name: proc_name || null,
+          consent_type: c_type || null,
+          procedure_date: proc_date || null,
+          markdown: combinedMarkdown,
+          form_data: formData as ConsentFormSchema,
+        });
+        savedHistoryRowIdRef.current = inserted.id;
+        setSaved(true);
+      } catch (err: unknown) {
+        // Allow retry if initial auto-save failed
+        autoSavedConsentIdRef.current = null;
+        const msg = err instanceof Error ? err.message : "Failed to auto-save to history";
+        setSaveError(msg);
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    autoSave();
+  }, [isComplete, formData, englishMarkdown, otherMarkdown, consentId, isResearch]);
+
+  // Keep saved history entry in sync if user edits paragraphs inline after auto-save
+  useEffect(() => {
+    const rowId = savedHistoryRowIdRef.current;
+    if (!rowId || !isComplete || !englishMarkdown) return;
+
+    const timer = setTimeout(() => {
       const combinedMarkdown = otherMarkdown
         ? `${englishMarkdown}\n\n__LANG_SEPARATOR__\n\n${otherMarkdown}`
         : englishMarkdown;
+      updateHistoryEntry(rowId, { markdown: combinedMarkdown }).catch(() => {});
+    }, 600);
 
-      await saveConsentToHistory({
-        consent_id: consentId,
-        hospital_name: h_name || null,
-        patient_name: p_name || null,
-        procedure_name: proc_name || null,
-        consent_type: c_type || null,
-        procedure_date: proc_date || null,
-        markdown: combinedMarkdown,
-        form_data: formData as ConsentFormSchema,
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save";
-      setSaveError(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [englishMarkdown, otherMarkdown, isComplete]);
 
   const components = {
     h1: ({ children }: { children?: React.ReactNode }) => (
@@ -550,15 +577,31 @@ export default function ConsentDocument({
       )}
 
       {/* Compact top toolbar */}
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <button
-          onClick={onReset}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-          style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
-        >
-          <ArrowCounterClockwise className="w-3.5 h-3.5" />
-          New Form
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={onReset}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+            style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)", color: "var(--ink-muted)" }}
+          >
+            <ArrowCounterClockwise className="w-3.5 h-3.5" />
+            New Form
+          </button>
+
+          {isComplete && (saving || saved) && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md"
+              style={{
+                backgroundColor: saved ? "rgba(63,122,78,0.08)" : "var(--sheet)",
+                color: saved ? "#3f7a4e" : "var(--ink-muted)",
+                border: saved ? "1px solid rgba(63,122,78,0.2)" : "1px solid var(--rule)",
+              }}
+            >
+              <CheckCircle className="w-3.5 h-3.5" weight={saved ? "fill" : "regular"} />
+              {saved ? "Saved to History" : "Saving to History..."}
+            </span>
+          )}
+        </div>
 
         {isComplete && (
           <div className="flex items-center gap-2">
@@ -597,36 +640,6 @@ export default function ConsentDocument({
               <DownloadSimple className="w-3.5 h-3.5" />
               {downloadingPdf ? "..." : "PDF"}
             </button>
-            {formData && (
-              <button
-                onClick={handleSave}
-                disabled={saving || saved}
-                className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-md transition-all disabled:opacity-50 ${
-                  saved ? "" : "nq-btn-primary"
-                }`}
-                style={
-                  saved
-                    ? {
-                        backgroundColor: "rgba(63,122,78,0.08)",
-                        color: "#3f7a4e",
-                        border: "1px solid rgba(63,122,78,0.2)",
-                      }
-                    : undefined
-                }
-              >
-                {saved ? (
-                  <>
-                    <CheckCircle className="w-3.5 h-3.5" weight="fill" />
-                    Saved
-                  </>
-                ) : (
-                  <>
-                    <FloppyDisk className="w-3.5 h-3.5" />
-                    {saving ? "Saving..." : "Save"}
-                  </>
-                )}
-              </button>
-            )}
           </div>
         )}
       </div>
