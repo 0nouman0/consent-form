@@ -62,6 +62,7 @@ export default function ConsentDocument({
   const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoSavedConsentIdRef = useRef<string | null>(null);
   const savedHistoryRowIdRef = useRef<string | null>(null);
+  const autoTranslatedConsentIdRef = useRef<string | null>(null);
 
   const isResearch = formData && "study" in formData;
   const counselingLanguage = isResearch
@@ -138,6 +139,18 @@ export default function ConsentDocument({
       setIsSyncing(false);
     }
   };
+
+  // Fallback translation: if generation completed for a non-English language
+  // without outputting __LANG_SEPARATOR__, translate the English form automatically.
+  useEffect(() => {
+    if (!isComplete || !counselingLanguage || counselingLanguage === "English") return;
+    if (!englishMarkdown.trim() || otherMarkdown.trim()) return;
+    if (autoTranslatedConsentIdRef.current === consentId) return;
+
+    autoTranslatedConsentIdRef.current = consentId;
+    syncTranslation(englishMarkdown, counselingLanguage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComplete, counselingLanguage, englishMarkdown, otherMarkdown, consentId]);
 
   const extractMarkdownFromContainer = (): string => {
     const container = document.getElementById("consent-markdown-body-text");
@@ -647,14 +660,17 @@ export default function ConsentDocument({
             <button
               type="button"
               onClick={() => {
-                if (otherMarkdown.trim()) setActiveTab("other");
+                if (!otherMarkdown.trim() && isComplete && englishMarkdown.trim() && !isSyncing) {
+                  syncTranslation(englishMarkdown, counselingLanguage);
+                }
+                setActiveTab("other");
               }}
-              disabled={!otherMarkdown.trim()}
+              disabled={!isComplete && !otherMarkdown.trim()}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
-                !otherMarkdown.trim() ? "opacity-50 cursor-not-allowed" : ""
+                !isComplete && !otherMarkdown.trim() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
               }`}
               style={
-                otherMarkdown.trim() && activeTab === "other"
+                activeTab === "other"
                   ? { borderColor: "var(--ink)", color: "var(--ink)" }
                   : { borderColor: "transparent", color: "var(--ink-muted)" }
               }

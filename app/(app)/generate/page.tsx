@@ -61,10 +61,19 @@ function GenerateContent() {
       const cached = localStorage.getItem("consentgen_doctor_profile");
       if (cached) {
         const p = JSON.parse(cached);
-        if (p.doctorName) form.setValue("clinical.doctorName", p.doctorName);
+        if (p.doctorName) {
+          form.setValue("clinical.doctorName", p.doctorName);
+          researchForm.setValue("study.principalInvestigator", p.doctorName);
+        }
         if (p.doctorRegistrationNo) form.setValue("clinical.doctorRegistrationNo", p.doctorRegistrationNo);
-        if (p.hospitalName) form.setValue("clinical.hospitalName", p.hospitalName);
-        if (p.hospitalAddress) form.setValue("clinical.hospitalAddress", p.hospitalAddress);
+        if (p.hospitalName) {
+          form.setValue("clinical.hospitalName", p.hospitalName);
+          researchForm.setValue("study.institutionName", p.hospitalName);
+        }
+        if (p.hospitalAddress) {
+          form.setValue("clinical.hospitalAddress", p.hospitalAddress);
+          researchForm.setValue("study.institutionAddress", p.hospitalAddress);
+        }
       }
     } catch {
       // ignore corrupt cache
@@ -85,10 +94,19 @@ function GenerateContent() {
           if (data) {
             setCredits(data.credits);
             // Authoritative clinician auto-fill from the server profile
-            if (data.doctor_name) form.setValue("clinical.doctorName", data.doctor_name, { shouldValidate: true, shouldDirty: true });
+            if (data.doctor_name) {
+              form.setValue("clinical.doctorName", data.doctor_name, { shouldValidate: true, shouldDirty: true });
+              researchForm.setValue("study.principalInvestigator", data.doctor_name, { shouldValidate: true, shouldDirty: true });
+            }
             if (data.doctor_registration_no) form.setValue("clinical.doctorRegistrationNo", data.doctor_registration_no, { shouldValidate: true, shouldDirty: true });
-            if (data.hospital_name) form.setValue("clinical.hospitalName", data.hospital_name, { shouldValidate: true, shouldDirty: true });
-            if (data.hospital_address) form.setValue("clinical.hospitalAddress", data.hospital_address, { shouldValidate: true, shouldDirty: true });
+            if (data.hospital_name) {
+              form.setValue("clinical.hospitalName", data.hospital_name, { shouldValidate: true, shouldDirty: true });
+              researchForm.setValue("study.institutionName", data.hospital_name, { shouldValidate: true, shouldDirty: true });
+            }
+            if (data.hospital_address) {
+              form.setValue("clinical.hospitalAddress", data.hospital_address, { shouldValidate: true, shouldDirty: true });
+              researchForm.setValue("study.institutionAddress", data.hospital_address, { shouldValidate: true, shouldDirty: true });
+            }
           }
         }
       } catch (err) {
@@ -185,19 +203,10 @@ function GenerateContent() {
         const template = RESEARCH_TEMPLATES.find((t) => t.id === templateId);
         if (template) {
           researchForm.setValue("study.studyTitle", template.studyTitle, { shouldValidate: true });
-          researchForm.setValue("study.principalInvestigator", template.principalInvestigator, {
-            shouldValidate: true,
-          });
           researchForm.setValue("study.department", template.department, { shouldValidate: true });
-          researchForm.setValue("study.institutionName", template.institutionName, {
-            shouldValidate: true,
-          });
-          researchForm.setValue("study.institutionAddress", template.institutionAddress, {
-            shouldValidate: true,
-          });
-          researchForm.setValue("study.contactMobile", template.contactMobile, {
-            shouldValidate: true,
-          });
+          if (template.contactMobile && !researchForm.getValues("study.contactMobile")) {
+            researchForm.setValue("study.contactMobile", template.contactMobile, { shouldValidate: true });
+          }
           researchForm.setValue("study.studyPurpose", template.studyPurpose, {
             shouldValidate: true,
           });
