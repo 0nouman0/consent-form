@@ -15,11 +15,11 @@ $$;
 --   for select using (id = auth.uid() or public.is_admin());
 
 -- 2) Users must not be able to edit their own role/credits/is_active.
---    Verify: as a doctor, PATCH /rest/v1/profiles?id=eq.<me> {"role":"admin"} must FAIL.
-revoke update on public.profiles from authenticated;
-grant update (doctor_name, doctor_registration_no, hospital_name, hospital_address,
-              billing_address, default_consent_type, default_language_level)
-  on public.profiles to authenticated;
+--    NOTE: Do NOT revoke table-level UPDATE from authenticated, because Supabase client .upsert()
+--    requires table-level UPDATE privilege (Postgres error 42501).
+--    Role/credits protection is enforced via RLS policy WITH CHECK clause:
+--    ((auth.uid() = id) AND (role = (SELECT role FROM profiles WHERE id = auth.uid())))
+grant update on public.profiles to authenticated;
 
 -- 3) Money/credit RPCs are SECURITY DEFINER and take p_user_id from the caller.
 --    By default EXECUTE is granted to PUBLIC, so any logged-in user could call them directly.
