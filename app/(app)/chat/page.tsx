@@ -6,6 +6,8 @@ import {
   Gavel, FirstAid, FileText, ShieldCheck, Copy, Check,
 } from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { v4 as uuidv4 } from "uuid";
 
 interface Message {
@@ -54,6 +56,20 @@ function relativeDate(iso: string) {
   if (days === 1) return "Yesterday";
   if (days < 7) return `${days} days ago`;
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+/**
+ * Repairs flattened single-line Markdown tables and normalizes spacing
+ * so remark-gfm renders tables, lists, and headings cleanly.
+ */
+function formatChatMarkdown(content: string): string {
+  if (!content) return "";
+  let out = content;
+  // Repair flattened single-line table rows: "| a | | b |" -> "| a |\n| b |"
+  out = out.replace(/\|\s+\|/g, "|\n|");
+  // Ensure a blank line before a Markdown table starts if preceded by text
+  out = out.replace(/([^\n])\n(\|[^\n]+\|\n\|[\s:|-]+\|)/g, "$1\n\n$2");
+  return out;
 }
 
 export default function ChatPage() {
@@ -327,12 +343,18 @@ export default function ChatPage() {
                     <ChatCircleText className="w-3.5 h-3.5" style={{ color: "var(--sheet)" }} />
                   </div>
                 )}
-                <div className={`group relative max-w-[85%] md:max-w-[75%] ${msg.role === "user" ? "" : "min-w-0"}`}>
+                <div
+                  className={`group relative ${
+                    msg.role === "user"
+                      ? "max-w-[82%] md:max-w-[70%]"
+                      : "max-w-[92%] md:max-w-[82%] min-w-0"
+                  }`}
+                >
                   <div
-                    className={`rounded-md px-4 py-3 text-sm ${
+                    className={`rounded-lg text-sm ${
                       msg.role === "user"
-                        ? "rounded-br-sm"
-                        : "rounded-bl-sm"
+                        ? "px-4 py-3 rounded-br-sm leading-relaxed"
+                        : "px-5 py-4 rounded-bl-sm shadow-[0_1px_3px_rgba(23,20,16,0.04)]"
                     }`}
                     style={
                       msg.role === "user"
@@ -341,8 +363,105 @@ export default function ChatPage() {
                     }
                   >
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-sm prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-[var(--ink)] text-[var(--ink-soft)]">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <div className="text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2.5 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="font-serif text-base font-bold text-[var(--ink)] mt-4 mb-1.5 pb-1 border-b border-[var(--rule)]">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="font-serif text-[15px] font-bold text-[var(--ink)] mt-3.5 mb-1.5 pb-1 border-b border-[var(--rule)]">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-[13.5px] font-bold text-[var(--ink)] mt-3 mb-1">
+                                {children}
+                              </h3>
+                            ),
+                            h4: ({ children }) => (
+                              <h4 className="text-[13px] font-semibold text-[var(--ink)] mt-2.5 mb-1">
+                                {children}
+                              </h4>
+                            ),
+                            p: ({ children }) => (
+                              <p className="leading-relaxed my-2 text-[var(--ink-soft)]">
+                                {children}
+                              </p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc pl-5 my-2 space-y-1.5 marker:text-[var(--red)]">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal pl-5 my-2 space-y-1.5 marker:font-semibold marker:text-[var(--ink)]">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="leading-relaxed pl-0.5">
+                                {children}
+                              </li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-[var(--ink)]">
+                                {children}
+                              </strong>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="my-3 pl-3.5 pr-3 py-2 rounded-r-md border-l-2 border-[var(--red)] bg-[var(--paper)] text-[13px] text-[var(--ink-soft)]">
+                                {children}
+                              </blockquote>
+                            ),
+                            code: ({ children }) => (
+                              <code className="px-1.5 py-0.5 rounded bg-[var(--paper)] border border-[var(--rule)] font-mono text-[12px] text-[var(--ink)]">
+                                {children}
+                              </code>
+                            ),
+                            hr: () => (
+                              <hr className="my-3 border-[var(--rule)]" />
+                            ),
+                            table: ({ children }) => (
+                              <div className="my-3 overflow-x-auto rounded-md border border-[var(--rule)]">
+                                <table className="w-full border-collapse text-left text-[12.5px]">
+                                  {children}
+                                </table>
+                              </div>
+                            ),
+                            thead: ({ children }) => (
+                              <thead className="bg-[var(--paper)] border-b border-[var(--rule)] text-[11px] uppercase tracking-wider font-mono text-[var(--ink)]">
+                                {children}
+                              </thead>
+                            ),
+                            tbody: ({ children }) => (
+                              <tbody className="divide-y divide-[var(--rule)]">
+                                {children}
+                              </tbody>
+                            ),
+                            tr: ({ children }) => (
+                              <tr className="even:bg-[var(--paper)]/50">
+                                {children}
+                              </tr>
+                            ),
+                            th: ({ children }) => (
+                              <th className="px-3 py-2 font-semibold text-[var(--ink)] whitespace-nowrap">
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children }) => (
+                              <td className="px-3 py-2 align-top text-[var(--ink-soft)] leading-relaxed">
+                                {children}
+                              </td>
+                            ),
+                          }}
+                        >
+                          {formatChatMarkdown(msg.content)}
+                        </ReactMarkdown>
                       </div>
                     ) : (
                       msg.content
