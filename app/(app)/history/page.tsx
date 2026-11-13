@@ -15,6 +15,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { downloadConsentPDF, printConsent } from "@/lib/pdf";
+import { track } from "@/lib/analytics";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
 function HistoryContent() {
@@ -127,6 +128,7 @@ function HistoryContent() {
   const handleModalPrint = async (entry: HistoryEntry) => {
     try {
       await printConsent(buildExportParams(entry));
+      track("print");
     } catch (err) {
       console.error("Print failed", err);
     }
@@ -138,6 +140,7 @@ function HistoryContent() {
       const opts = buildExportParams(entry);
       if (kind === "pdf") await downloadConsentPDF(opts);
       else await downloadConsentDOCX(opts);
+      track(kind === "pdf" ? "export_pdf" : "export_docx");
     } catch (err) {
       console.error(`${kind.toUpperCase()} export failed`, err);
     } finally {

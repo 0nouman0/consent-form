@@ -27,3 +27,4 @@ Review it for secrets before committing.
 |---|---|
 | `20261113000000_security_hardening` | RLS on `consent_history`, privileged-column trigger on `profiles`, lock credit functions to service role, drop `reset_password_direct` |
 | `20261113000100_refund_credit` | `refund_credit()` so credits can be reserved before generation and refunded on failure |
+| `20261113000200_observability` | first-party usage events and error reports (`app_events`, `app_errors`), admin-read-only, plus `purge_telemetry()` for the 12-month retention in the privacy policy |

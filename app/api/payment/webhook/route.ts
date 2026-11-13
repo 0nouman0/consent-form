@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { sendInvoiceEmail } from "@/lib/email";
 import crypto from "crypto";
+import { recordEvent, reportError } from "@/lib/monitor";
 
 /**
  * Cashfree Webhook Handler
@@ -135,6 +136,7 @@ export async function POST(req: NextRequest) {
 
   if (rpcError) {
     console.error("Cashfree webhook: RPC failed for order", orderId, rpcError);
+    void reportError("api/payment/webhook", rpcError.message || "credit RPC failed", { userId: tx.user_id });
     // Return 500 so Cashfree retries the webhook
     return NextResponse.json({ error: "Failed to credit account" }, { status: 500 });
   }
@@ -153,6 +155,7 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.error("Webhook invoice email failed:", e));
   }
 
+  void recordEvent({ event: "payment_succeeded", userId: tx.user_id, props: { amount: tx.amount / 100, credits: tx.credits, source: "webhook" } });
   console.log(`Cashfree webhook: credited ${tx.credits} credits for order ${orderId}`);
   return NextResponse.json({ received: true, credited: tx.credits });
 }

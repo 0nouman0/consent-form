@@ -21,6 +21,7 @@ import {
 } from "@/lib/consent-template";
 
 import { assessTranslation } from "@/lib/translation-quality";
+import { recordEvent, reportError } from "@/lib/monitor";
 
 export const maxDuration = 60;
 
@@ -367,10 +368,23 @@ export async function POST(req: NextRequest) {
             },
           });
 
+          void recordEvent({
+            event: "form_generated",
+            userId,
+            props: {
+              type: isResearch ? "research" : "clinical",
+              language: counselingLanguageOf(input, isResearch),
+              billing: reservation.mode,
+              source: contentSource,
+              translation,
+            },
+          });
           controller.close();
         } catch (err: any) {
           console.error("Error during generation:", err);
           const { refunded } = await settleFailure(reservation);
+          void reportError("api/generate", err, { userId });
+          void recordEvent({ event: "form_failed", userId, props: { type: isResearch ? "research" : "clinical", reason: err?.name || "Error" } });
           await updateAudit({
             status: "failed",
             credits_deducted: reservation.mode === "reserved" && !refunded ? 1 : 0,
@@ -394,6 +408,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Generation error:", error);
+    void reportError("api/generate", error, { userId });
     return Response.json(
       { error: "Failed to generate consent form. Please try again." },
       { status: 500 }

@@ -17,6 +17,7 @@ import { nowIST } from "@/lib/utils";
 import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
 import { saveConsentToHistory, updateHistoryEntry } from "@/lib/history";
 import { downloadConsentPDF, printConsent } from "@/lib/pdf";
+import { track } from "@/lib/analytics";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
 const CONSENT_TYPE_LABELS: Record<string, string> = {
@@ -221,6 +222,7 @@ export default function ConsentDocument({
   const handlePrint = async () => {
     try {
       await printConsent(exportParams());
+      track("print");
     } catch (err) {
       console.error("Print failed", err);
       setSaveError("Could not open the print view. Please try the PDF download instead.");
@@ -231,6 +233,7 @@ export default function ConsentDocument({
     setDownloadingPdf(true);
     try {
       await downloadConsentPDF(exportParams());
+      track("export_pdf");
     } catch (err) {
       console.error("PDF export failed", err);
       setSaveError("PDF export failed. Please try again or use the Word download.");
@@ -243,6 +246,7 @@ export default function ConsentDocument({
     setDownloadingDocx(true);
     try {
       await downloadConsentDOCX(exportParams());
+      track("export_docx");
     } catch (err) {
       console.error("Word export failed", err);
       setSaveError("Word export failed. Please try again or use the PDF download.");

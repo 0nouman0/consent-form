@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { track } from "@/lib/analytics";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -184,6 +185,7 @@ function OnboardingContent() {
       // Upsert into Supabase profiles
       const { error } = await supabase.from("profiles").upsert(profilePayload);
       if (error) throw error;
+      track("onboarding_completed");
 
       // Cache locally for instant auto-fill in consent wizard
       localStorage.setItem("consentgen_doctor_profile", JSON.stringify({

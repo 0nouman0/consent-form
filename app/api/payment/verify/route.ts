@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { recordEvent, reportError } from "@/lib/monitor";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { getCashfreeOrder, getCashfreeOrderPayments, getCashfreeConfig } from "@/lib/cashfree";
@@ -156,6 +157,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // the webhook may have credited this order first: record the success once
+    if (tx.status !== "paid") {
+      void recordEvent({ event: "payment_succeeded", userId: authResult.id, props: { amount: tx.amount / 100, credits: tx.credits, source: "return" } });
+    }
+
     const userEmail = authResult.email || "doctor@consentgen.in";
 
     // 6. Send invoice email asynchronously
@@ -180,6 +186,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Cashfree verification error:", error);
+    void reportError("api/payment/verify", error, { userId: authResult.id });
     return NextResponse.json(
       { error: error.message || "Internal verification error" },
       { status: 500 }

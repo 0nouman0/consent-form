@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { recordEvent, reportError } from "@/lib/monitor";
 import { createClient } from "@/lib/supabase/server";
 import { createCashfreeOrder, getCashfreeConfig } from "@/lib/cashfree";
 
@@ -116,6 +117,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    void recordEvent({ event: "payment_started", userId: authResult.id, props: { amount: selectedPackage.amount, credits: selectedPackage.credits } });
+
     return NextResponse.json({
       order_id: cfOrder.order_id,
       payment_session_id: cfOrder.payment_session_id,
@@ -125,6 +128,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Cashfree order creation error:", error);
+    void reportError("api/payment/order", error, { userId: authResult.id });
     return NextResponse.json(
       { error: error.message || "Failed to initiate payment. Please try again." },
       { status: 500 }

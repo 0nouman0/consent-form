@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { reportError } from "@/lib/monitor";
 import { buildTranslationPrompt } from "@/lib/consent-template";
 
 const MAX_TRANSLATE_CHARS = 20000;
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ translatedText });
   } catch (error: any) {
     console.error("Translation API error:", error);
+    void reportError("api/translate", error, { userId: user.id });
     // Return original text rather than 500 error so frontend never breaks
     return Response.json({ translatedText: "" }, { status: 200 });
   }

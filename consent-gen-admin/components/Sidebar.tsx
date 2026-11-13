@@ -6,6 +6,7 @@ import { useTheme } from "./ThemeProvider";
 import { createClient } from "@/lib/supabase/client";
 import {
   SquaresFour,
+  ChartLineUp,
   Users,
   FileText,
   CreditCard,
@@ -17,6 +18,7 @@ import {
 
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: SquaresFour },
+  { href: "/insights", label: "Insights", icon: ChartLineUp },
   { href: "/users", label: "Doctors & Accounts", icon: Users },
   { href: "/generations", label: "Generations Audit", icon: FileText },
   { href: "/payments", label: "Billing & Payments", icon: CreditCard },

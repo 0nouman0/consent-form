@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense, useId } from "react";
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -89,6 +90,7 @@ function LoginContent() {
       if (mode === "signin") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        track("login_success");
 
         // Check if clinician profile has been completed
         if (data.user) {
@@ -134,6 +136,7 @@ function LoginContent() {
           },
         });
         if (error) throw error;
+        track("signup_completed");
 
         if (data.user) {
           // Immediately update profile if session is established

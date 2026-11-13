@@ -3,6 +3,7 @@ import Groq from "groq-sdk";
 import { createClient } from "@/lib/supabase/server";
 import { hasPermission } from "@/lib/rbac";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { reportError } from "@/lib/monitor";
 
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_CHARS = 4000;
@@ -111,6 +112,7 @@ RESPONSE & FORMATTING STYLE (follow this structure consistently):
     return NextResponse.json({ role: "assistant", content: responseText });
   } catch (error: any) {
     console.error("Groq API Error:", error);
+    void reportError("api/chat", error, { userId: user.id });
     return NextResponse.json(
       { error: error.message || "Something went wrong" },
       { status: 500 }
