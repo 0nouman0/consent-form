@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
 import { createClient } from "@/lib/supabase/client";
 import { MagnifyingGlass, Gear, ShieldCheck } from "@phosphor-icons/react";
 
@@ -45,15 +44,12 @@ export default function AuditLogsList() {
   });
 
   return (
-    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header title="Admin Logs" subtitle="Security & Administrative Governance Trail" />
+    <AppShell title="Admin Logs" subtitle="Security & Administrative Governance Trail">
 
         <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Top Page Banner */}
           <div
-            className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div>
@@ -71,7 +67,7 @@ export default function AuditLogsList() {
 
           {/* Controls Bar */}
           <div
-            className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
+            className="rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             {/* Search */}
@@ -94,7 +90,7 @@ export default function AuditLogsList() {
 
           {/* Table Card */}
           <div
-            className="rounded-md overflow-hidden"
+            className="rounded-xl overflow-hidden"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div className="overflow-x-auto">
@@ -197,7 +193,6 @@ export default function AuditLogsList() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+      </AppShell>
   );
 }

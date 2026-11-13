@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
+import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/client";
 import {
   Clock,
@@ -11,7 +11,6 @@ import {
   TerminalWindow,
   Desktop,
   WarningCircle,
-  ArrowLeft,
   FileText,
   User,
 } from "@phosphor-icons/react";
@@ -94,10 +93,7 @@ export default function GenerationDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header title="Audit Inspector" />
+      <AppShell title="Audit Inspector">
           <div className="flex-1 flex flex-col items-center justify-center gap-3">
             <div
               className="w-8 h-8 border-2 rounded-full animate-spin"
@@ -107,36 +103,23 @@ export default function GenerationDetailPage() {
               Loading Generation Trace...
             </p>
           </div>
-        </div>
-      </div>
+        </AppShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header title={`Audit: ${auditDetail.id.slice(0, 18)}...`} subtitle="Diagnostic Telemetry Inspection" />
+    <AppShell title={`Audit: ${auditDetail.id.slice(0, 18)}...`} subtitle="Diagnostic Telemetry Inspection">
 
         <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Back Button */}
-          <div>
-            <button
-              onClick={() => router.push("/generations")}
-              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all hover:opacity-75 cursor-pointer"
-              style={{ color: "var(--ink)" }}
-            >
-              <ArrowLeft weight="bold" />
-              <span>Back to generations list</span>
-            </button>
-          </div>
+          <BackLink href="/generations" label="Back to generations list" />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Left Column: Diagnostics */}
             <div className="space-y-4 lg:col-span-1">
               {/* Audit Summary Card */}
               <div
-                className="rounded-md p-5 space-y-4"
+                className="rounded-xl p-5 space-y-4"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <h3 className="font-serif text-base font-bold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -200,7 +183,7 @@ export default function GenerationDetailPage() {
 
               {/* Patient and Doctor Details Card */}
               <div
-                className="rounded-md p-5 space-y-4"
+                className="rounded-xl p-5 space-y-4"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <h3 className="font-serif text-base font-bold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -245,7 +228,7 @@ export default function GenerationDetailPage() {
             <div className="lg:col-span-2 space-y-4">
               {auditDetail.status !== "success" ? (
                 <div
-                  className="rounded-md p-6"
+                  className="rounded-xl p-6"
                   style={{
                     backgroundColor: "rgba(190, 61, 42, 0.05)",
                     border: "1px solid rgba(190, 61, 42, 0.2)",
@@ -268,7 +251,7 @@ export default function GenerationDetailPage() {
                 </div>
               ) : (
                 <div
-                  className="rounded-md p-6 flex flex-col h-[600px]"
+                  className="rounded-xl p-6 flex flex-col h-[600px]"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <div className="flex items-center justify-between pb-3 mb-3" style={{ borderBottom: "1px solid var(--rule)" }}>
@@ -305,7 +288,6 @@ export default function GenerationDetailPage() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+      </AppShell>
   );
 }

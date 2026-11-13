@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
 import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
 import { withTimeout } from "@/lib/fetchWithTimeout";
@@ -73,10 +72,7 @@ export default function PaymentsList() {
 
   if (loading || error) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header title="Billing & Payments" />
+      <AppShell title="Billing & Payments">
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3">
               <div
@@ -90,21 +86,17 @@ export default function PaymentsList() {
           ) : (
             <NetworkErrorBanner message={error!} onRetry={fetchPayments} />
           )}
-        </div>
-      </div>
+        </AppShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen font-body transition-colors duration-150" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header title="Billing & Payments" subtitle="Gateway Reconciliations & Revenue Invoices" />
+    <AppShell title="Billing & Payments" subtitle="Gateway Reconciliations & Revenue Invoices">
 
         <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Top Page Banner */}
           <div
-            className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+            className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div>
@@ -122,12 +114,12 @@ export default function PaymentsList() {
 
           {/* Revenue Highlight Card */}
           <div
-            className="rounded-md p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+            className="rounded-xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div className="flex items-center gap-4">
               <div
-                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0 transition-colors"
                 style={{ backgroundColor: "var(--badge-dark-bg)" }}
               >
                 <CreditCard weight="duotone" className="w-5 h-5" style={{ color: "var(--badge-dark-text)" }} />
@@ -136,7 +128,7 @@ export default function PaymentsList() {
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Filtered Revenue Sum
                 </p>
-                <h2 className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
                   ₹{totalPaidRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </h2>
               </div>
@@ -158,7 +150,7 @@ export default function PaymentsList() {
 
           {/* Filters Bar */}
           <div
-            className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between transition-colors"
+            className="rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             {/* Search */}
@@ -202,7 +194,7 @@ export default function PaymentsList() {
 
           {/* Table Card */}
           <div
-            className="rounded-md overflow-hidden transition-colors"
+            className="rounded-xl overflow-hidden transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div className="overflow-x-auto">
@@ -338,7 +330,6 @@ export default function PaymentsList() {
             </div>
           </div>
         </main>
-      </div>
 
       {/* Invoice Modal */}
       {invoiceTx && (
@@ -372,7 +363,7 @@ export default function PaymentsList() {
           />
           <div
             id="printable-invoice-modal"
-            className="w-full max-w-[500px] rounded-md p-6 sm:p-8 shadow-2xl relative transition-colors"
+            className="w-full max-w-[500px] rounded-xl p-6 sm:p-8 shadow-2xl relative transition-colors"
             style={{
               backgroundColor: "var(--sheet)",
               border: "1px solid var(--rule)",
@@ -472,6 +463,6 @@ export default function PaymentsList() {
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }

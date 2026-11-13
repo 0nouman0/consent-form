@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
+import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, CheckCircle, Clock, XCircle, Receipt, Printer } from "@phosphor-icons/react";
+import { CheckCircle, Clock, XCircle, Receipt, Printer } from "@phosphor-icons/react";
 
 export default function PaymentDetail() {
   const { id } = useParams();
@@ -42,10 +42,7 @@ export default function PaymentDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header title="Payment Log Details" />
+      <AppShell title="Payment Log Details">
           <div className="flex-1 flex flex-col items-center justify-center gap-3">
             <div
               className="w-8 h-8 border-2 rounded-full animate-spin"
@@ -55,34 +52,22 @@ export default function PaymentDetail() {
               Loading Transaction Details...
             </p>
           </div>
-        </div>
-      </div>
+        </AppShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header title={`Transaction: ${tx.order_id}`} subtitle="Payment Audit & Receipt Breakdown" />
+    <AppShell title={`Transaction: ${tx.order_id}`} subtitle="Payment Audit & Receipt Breakdown">
 
-        <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-5xl w-full mx-auto pb-16">
+        <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Back Action */}
-          <div className="no-print">
-            <button
-              onClick={() => router.push("/payments")}
-              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-all hover:opacity-75 cursor-pointer"
-              style={{ color: "var(--ink)" }}
-            >
-              <ArrowLeft className="w-4 h-4" /> Back to Payments Ledger
-            </button>
-          </div>
+          <BackLink href="/payments" label="Back to payments ledger" />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Metadata Audit Card */}
             <div className="md:col-span-1 space-y-4 no-print">
               <div
-                className="rounded-md p-5 space-y-4"
+                className="rounded-xl p-5 space-y-4"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <h3 className="font-serif text-base font-bold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -160,7 +145,7 @@ export default function PaymentDetail() {
 
               {/* Gateway Metadata */}
               <div
-                className="rounded-md p-5 space-y-3"
+                className="rounded-xl p-5 space-y-3"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <h3 className="font-serif text-sm font-bold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -212,7 +197,7 @@ export default function PaymentDetail() {
               </div>
 
               <div
-                className="rounded-md p-6 sm:p-8"
+                className="rounded-xl p-6 sm:p-8"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div className="border-b pb-4 mb-5" style={{ borderColor: "var(--rule)" }}>
@@ -266,7 +251,6 @@ export default function PaymentDetail() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+      </AppShell>
   );
 }

@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
+import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/client";
 import { withTimeout } from "@/lib/fetchWithTimeout";
 import {
@@ -18,7 +18,6 @@ import {
   CheckCircle,
   XCircle,
   Gear,
-  ArrowLeft,
   MagnifyingGlass,
   Funnel,
   Eye,
@@ -594,10 +593,7 @@ export default function UserDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header title="User Administration" />
+      <AppShell title="User Administration">
           <div className="flex-1 flex flex-col items-center justify-center gap-3">
             <div
               className="w-8 h-8 border-2 rounded-full animate-spin"
@@ -607,15 +603,13 @@ export default function UserDetailPage() {
               Loading Doctor Dossier...
             </p>
           </div>
-        </div>
-      </div>
+        </AppShell>
     );
   }
 
   if (!userProfile) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
+      <AppShell title="User Administration">
         <div className="flex-1 flex flex-col p-8 items-center justify-center">
           <p className="text-sm font-serif" style={{ color: "var(--ink-muted)" }}>
             User record not found.
@@ -628,33 +622,21 @@ export default function UserDetailPage() {
             Back to Users List
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header
-          title={userProfile.doctor_name || "Doctor Profile"}
-          subtitle={`Account Dossier: ${userProfile.id.slice(0, 16)}...`}
-        />
+    <AppShell title={userProfile.doctor_name || "Doctor Profile"}
+          subtitle={`Account Dossier: ${userProfile.id.slice(0, 16)}...`}>
 
         <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Top Bar Navigation */}
           <div className="flex items-center justify-between">
-            <Link
-              href="/users"
-              className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.08em] font-semibold transition-colors hover:opacity-75"
-              style={{ color: "var(--ink)" }}
-            >
-              <ArrowLeft weight="bold" />
-              <span>Back to all doctors</span>
-            </Link>
+            <BackLink href="/users" label="Back to all doctors" />
 
             <span
-              className="text-xs font-mono px-2.5 py-1 rounded"
+              className="hidden md:inline-block text-xs font-mono px-2.5 py-1 rounded"
               style={{
                 backgroundColor: "var(--sheet)",
                 border: "1px solid var(--rule)",
@@ -667,7 +649,7 @@ export default function UserDetailPage() {
 
           {/* User Hero Banner */}
           <div
-            className="rounded-md p-6 sm:p-7 relative overflow-hidden"
+            className="rounded-xl p-6 sm:p-7 relative overflow-hidden"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -775,7 +757,7 @@ export default function UserDetailPage() {
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {/* 1. Subscription Plan */}
                 <div
-                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  className="rounded-xl p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
@@ -800,7 +782,7 @@ export default function UserDetailPage() {
 
                 {/* 2. Credits Balance */}
                 <div
-                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  className="rounded-xl p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
@@ -831,7 +813,7 @@ export default function UserDetailPage() {
 
                 {/* 3. Consents */}
                 <div
-                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  className="rounded-xl p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
@@ -856,7 +838,7 @@ export default function UserDetailPage() {
 
                 {/* 4. Total Paid */}
                 <div
-                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  className="rounded-xl p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
@@ -881,7 +863,7 @@ export default function UserDetailPage() {
 
                 {/* 5. Joined */}
                 <div
-                  className="rounded-md p-3 text-center flex flex-col justify-between"
+                  className="rounded-xl p-3 text-center flex flex-col justify-between"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   <div>
@@ -980,7 +962,7 @@ export default function UserDetailPage() {
           {activeTab === "consents" && (
             <div className="space-y-4">
               <div
-                className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
+                className="rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div className="relative w-full sm:max-w-md">
@@ -1025,7 +1007,7 @@ export default function UserDetailPage() {
 
               {/* Consents Table */}
               <div
-                className="rounded-md overflow-hidden"
+                className="rounded-xl overflow-hidden"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div className="overflow-x-auto">
@@ -1159,7 +1141,7 @@ export default function UserDetailPage() {
 
                 return (
                   <div
-                    className="rounded-md p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors"
+                    className="rounded-xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors"
                     style={{
                       backgroundColor: "var(--sheet)",
                       border: "1px solid var(--rule)",
@@ -1167,7 +1149,7 @@ export default function UserDetailPage() {
                   >
                     <div className="flex items-start sm:items-center gap-4">
                       <div
-                        className="w-12 h-12 rounded-md flex items-center justify-center shrink-0"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0"
                         style={{
                           backgroundColor: currentPlan.badgeBg,
                           border: `1px solid ${currentPlan.borderColor}`,
@@ -1242,7 +1224,7 @@ export default function UserDetailPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1257,7 +1239,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1272,7 +1254,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1289,7 +1271,7 @@ export default function UserDetailPage() {
 
               {/* Transactions Ledger Card */}
               <div
-                className="rounded-md overflow-hidden"
+                className="rounded-xl overflow-hidden"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div className="overflow-x-auto">
@@ -1392,7 +1374,7 @@ export default function UserDetailPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1423,7 +1405,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1438,7 +1420,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="rounded-md p-5"
+                  className="rounded-xl p-5"
                   style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
                 >
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
@@ -1455,7 +1437,7 @@ export default function UserDetailPage() {
 
               {/* History Table */}
               <div
-                className="rounded-md overflow-hidden"
+                className="rounded-xl overflow-hidden"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div className="overflow-x-auto">
@@ -1524,7 +1506,7 @@ export default function UserDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Doctor Profile Info */}
               <div
-                className="rounded-md p-6 space-y-4 lg:col-span-1"
+                className="rounded-xl p-6 space-y-4 lg:col-span-1"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <h3 className="font-serif text-base font-bold tracking-tight mb-4" style={{ color: "var(--ink)" }}>
@@ -1600,7 +1582,7 @@ export default function UserDetailPage() {
 
               {/* Right Column: Operations Console */}
               <div
-                className="rounded-md p-6 lg:col-span-2 space-y-6"
+                className="rounded-xl p-6 lg:col-span-2 space-y-6"
                 style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
               >
                 <div>
@@ -1613,7 +1595,7 @@ export default function UserDetailPage() {
                 </div>
 
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5 rounded-md"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5 rounded-xl"
                   style={{ backgroundColor: "var(--paper)", border: "1px solid var(--rule)" }}
                 >
                   {/* Subscription plan override */}
@@ -1776,13 +1758,12 @@ export default function UserDetailPage() {
             </div>
           )}
         </main>
-      </div>
 
       {/* QUICK VIEW CONSENT DOCUMENT MODAL */}
       {previewItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6 text-foreground font-body">
           <div
-            className="w-full max-w-3xl max-h-[85vh] rounded-md p-6 sm:p-8 flex flex-col shadow-2xl relative"
+            className="w-full max-w-3xl max-h-[85vh] rounded-xl p-6 sm:p-8 flex flex-col shadow-2xl relative"
             style={{
               backgroundColor: "var(--sheet)",
               border: "1px solid var(--rule)",
@@ -1912,7 +1893,7 @@ export default function UserDetailPage() {
           />
           <div
             id="printable-invoice-modal"
-            className="w-full max-w-[500px] rounded-md p-6 sm:p-8 shadow-2xl relative"
+            className="w-full max-w-[500px] rounded-xl p-6 sm:p-8 shadow-2xl relative"
             style={{
               backgroundColor: "var(--sheet)",
               border: "1px solid var(--rule)",
@@ -1999,7 +1980,7 @@ export default function UserDetailPage() {
       {subModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-foreground font-body">
           <div
-            className="w-full max-w-2xl max-h-[90vh] rounded-md p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
+            className="w-full max-w-2xl max-h-[90vh] rounded-xl p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
             style={{
               backgroundColor: "var(--sheet)",
               border: "1px solid var(--rule)",
@@ -2225,7 +2206,7 @@ export default function UserDetailPage() {
       {creditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-foreground font-body">
           <div
-            className="w-full max-w-lg max-h-[90vh] rounded-md p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
+            className="w-full max-w-lg max-h-[90vh] rounded-xl p-6 sm:p-7 flex flex-col shadow-2xl relative overflow-hidden"
             style={{
               backgroundColor: "var(--sheet)",
               border: "1px solid var(--rule)",
@@ -2474,6 +2455,6 @@ export default function UserDetailPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }

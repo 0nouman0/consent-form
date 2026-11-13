@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
 import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { createClient } from "@/lib/supabase/client";
 import { withTimeout } from "@/lib/fetchWithTimeout";
@@ -87,10 +86,7 @@ export default function UsersList() {
 
   if (loading || error) {
     return (
-      <div className="flex min-h-screen font-body" style={{ backgroundColor: "var(--paper)" }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header title="Doctors & Accounts" />
+      <AppShell title="Doctors & Accounts">
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3">
               <div
@@ -104,21 +100,17 @@ export default function UsersList() {
           ) : (
             <NetworkErrorBanner message={error!} onRetry={fetchUsers} />
           )}
-        </div>
-      </div>
+        </AppShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen font-body transition-colors duration-150" style={{ backgroundColor: "var(--paper)" }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen">
-        <Header title="Doctors & Accounts" subtitle="Practitioner Management & KYC Directory" />
+    <AppShell title="Doctors & Accounts" subtitle="Practitioner Management & KYC Directory">
 
         <main className="p-3 sm:p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto pb-16">
           {/* Top Page Banner */}
           <div
-            className="rounded-md px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+            className="rounded-xl px-6 sm:px-8 py-6 sm:py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div>
@@ -135,13 +127,13 @@ export default function UsersList() {
           </div>
 
           {/* Top KPI Metrics Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div
-              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              className="rounded-xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-sm"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
             >
               <div
-                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0 transition-colors"
                 style={{ backgroundColor: "var(--badge-dark-bg)" }}
               >
                 <Users weight="duotone" className="w-5 h-5" style={{ color: "var(--badge-dark-text)" }} />
@@ -150,18 +142,18 @@ export default function UsersList() {
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Registered Doctors
                 </p>
-                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                <p className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
                   {totalUsers}
                 </p>
               </div>
             </div>
 
             <div
-              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              className="rounded-xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-sm"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
             >
               <div
-                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0 transition-colors"
                 style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
               >
                 <CheckCircle weight="duotone" className="w-5 h-5 text-emerald-500" />
@@ -170,18 +162,18 @@ export default function UsersList() {
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Active Accounts
                 </p>
-                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5 text-emerald-500">
+                <p className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 text-emerald-500">
                   {activeCount}
                 </p>
               </div>
             </div>
 
             <div
-              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              className="rounded-xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-sm"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
             >
               <div
-                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0 transition-colors"
                 style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
               >
                 <XCircle weight="duotone" className="w-5 h-5" style={{ color: "var(--red)" }} />
@@ -190,18 +182,18 @@ export default function UsersList() {
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Deactivated
                 </p>
-                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--red)" }}>
+                <p className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--red)" }}>
                   {deactivatedCount}
                 </p>
               </div>
             </div>
 
             <div
-              className="rounded-md p-5 flex items-center gap-4 transition-all hover:shadow-sm"
+              className="rounded-xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-sm"
               style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
             >
               <div
-                className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 transition-colors"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0 transition-colors"
                 style={{ backgroundColor: "var(--badge-light-bg)", border: "1px solid var(--rule)" }}
               >
                 <Coins weight="duotone" className="w-5 h-5" style={{ color: "var(--ink)" }} />
@@ -210,7 +202,7 @@ export default function UsersList() {
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--ink-muted)" }}>
                   Circulating Credits
                 </p>
-                <p className="font-serif text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                <p className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-0.5" style={{ color: "var(--ink)" }}>
                   {totalCredits}
                 </p>
               </div>
@@ -219,7 +211,7 @@ export default function UsersList() {
 
           {/* Controls Bar */}
           <div
-            className="rounded-md p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between transition-colors"
+            className="rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-center justify-between transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             {/* Search */}
@@ -299,7 +291,7 @@ export default function UsersList() {
 
           {/* Table Card */}
           <div
-            className="rounded-md overflow-hidden transition-colors"
+            className="rounded-xl overflow-hidden transition-colors"
             style={{ backgroundColor: "var(--sheet)", border: "1px solid var(--rule)" }}
           >
             <div className="overflow-x-auto">
@@ -477,7 +469,6 @@ export default function UsersList() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+      </AppShell>
   );
 }
