@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { createCashfreeOrder, getCashfreeConfig } from "@/lib/cashfree";
 
@@ -20,6 +21,9 @@ export async function POST(req: NextRequest) {
     );
   }
   const authResult = user;
+
+  const limited = rateLimit(`payment-order:${user.id}`, 6, 60_000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfter);
 
   try {
     const { amount } = await req.json();

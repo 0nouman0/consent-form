@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { createClient } from "@/lib/supabase/server";
 import { hasPermission } from "@/lib/rbac";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+
+const MAX_MESSAGES = 20;
+const MAX_MESSAGE_CHARS = 4000;
 
 // Initialize the Groq client
 const groq = new Groq({
@@ -36,19 +40,33 @@ export async function POST(req: Request) {
     );
   }
 
-  try {
-    const { messages } = await req.json();
+  const limited = rateLimit(`chat:${user.id}`, 20, 60_000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfter, "You are sending messages too quickly. Please wait a moment.");
 
-    if (!messages || !Array.isArray(messages)) {
+  try {
+    const { messages: rawMessages } = await req.json();
+
+    if (!rawMessages || !Array.isArray(rawMessages)) {
       return NextResponse.json(
         { error: "Messages array is required" },
         { status: 400 }
       );
     }
 
+    // Only user/assistant turns are accepted (a client must not inject its own "system" prompt),
+    // capped in count and size so one request cannot run up the model bill.
+    const messages = rawMessages
+      .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .slice(-MAX_MESSAGES)
+      .map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content.slice(0, MAX_MESSAGE_CHARS) }));
+
+    if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
+      return NextResponse.json({ error: "A user message is required" }, { status: 400 });
+    }
+
     // Add a system prompt to define the assistant's persona
     const systemPrompt = {
-      role: "system",
+      role: "system" as const,
       content: `You are ConsentGen AI, a specialized medico-legal assistant for doctors operating on the "ConsentGen" platform.
 ConsentGen is an AI-powered web application that generates legally binding, India-specific informed consent forms, preventing medical negligence lawsuits by adhering to Indian Medical Law and Ethics.
 

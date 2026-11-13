@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { getCashfreeOrder, getCashfreeOrderPayments, getCashfreeConfig } from "@/lib/cashfree";
@@ -15,6 +16,9 @@ export async function POST(req: NextRequest) {
   }
   const authResult = user;
 
+  const limited = rateLimit(`payment-verify:${user.id}`, 20, 60_000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfter);
+
   try {
     const body = await req.json();
     const orderId = body.order_id || body.orderId || body.cf_order_id;
@@ -24,6 +28,11 @@ export async function POST(req: NextRequest) {
         { error: "Missing required order_id for payment verification" },
         { status: 400 }
       );
+    }
+
+    if (!hasServiceRole()) {
+      console.error("payment/verify: SUPABASE_SERVICE_ROLE_KEY is not configured");
+      return NextResponse.json({ error: "Payments are temporarily unavailable" }, { status: 503 });
     }
 
     const config = getCashfreeConfig();
@@ -126,7 +135,7 @@ export async function POST(req: NextRequest) {
     };
 
     // 5. Call verify_and_add_credits RPC function
-    const { data: newBalance, error: rpcError } = await (hasServiceRole() ? createAdminClient() : supabase).rpc(
+    const { data: newBalance, error: rpcError } = await createAdminClient().rpc(
       "verify_and_add_credits",
       {
         p_user_id: authResult.id,

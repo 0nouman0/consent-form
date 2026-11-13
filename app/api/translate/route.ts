@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 const MAX_TRANSLATE_CHARS = 20000;
 
@@ -9,6 +10,9 @@ export async function POST(req: NextRequest) {
   if (!user || !hasPermission(user.role, "generate")) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const limited = rateLimit(`translate:${user.id}`, 15, 60_000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfter);
 
   try {
     const { text, targetLanguage } = await req.json();

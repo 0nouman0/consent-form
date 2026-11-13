@@ -1,3 +1,8 @@
+-- LEGACY / OUTDATED - kept for reference only. Do NOT run.
+-- This file predates the live schema (verify_and_add_credits here has 6 args; the live one has 7,
+-- and reset_password_direct / consent_history policies were never recorded here).
+-- The source of truth is supabase/migrations/. See supabase/README.md.
+
 -- Add credits to profiles table
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS credits integer NOT NULL DEFAULT 0;
 
