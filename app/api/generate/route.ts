@@ -20,6 +20,8 @@ import {
   type ProcedureContent,
 } from "@/lib/consent-template";
 
+import { assessTranslation } from "@/lib/translation-quality";
+
 export const maxDuration = 60;
 
 const CONTENT_MODEL = process.env.GROQ_CONTENT_MODEL || "openai/gpt-oss-120b";
@@ -218,7 +220,8 @@ export async function POST(req: NextRequest) {
         let promptTokens = 0;
         let completionTokens = 0;
         let contentSource: "model" | "clinician_text" | "n/a" = "n/a";
-        let translation: "none" | "streamed" | "client_fallback" = "none";
+        let translation: "none" | "verified" | "client_fallback" = "none";
+        let translationIssues: string[] = [];
 
         try {
           // First chunk: consent ID so the client can capture it
@@ -275,43 +278,53 @@ export async function POST(req: NextRequest) {
           // ── 2. Counselling-language copy (translation of the finished English form) ──
           if (counselingLanguageOf(input, isResearch) !== "English") {
             const lang = counselingLanguageOf(input, isResearch);
-            const tp = buildTranslationPrompt(englishMd, lang);
-            let startedTranslation = false;
+            const protectedTerms = protectedTermsOf(input, isResearch);
 
-            try {
-              const stream = await groq.chat.completions.create(
-                {
-                  model: TRANSLATION_MODEL,
-                  messages: [
-                    { role: "system", content: tp.system },
-                    { role: "user", content: tp.user },
-                  ],
-                  temperature: 0.1,
-                  max_tokens: 8000,
-                  stream: true,
-                },
-                { timeout: 90_000, maxRetries: 0 }
-              );
-
-              let translated = "";
-              for await (const chunk of stream) {
-                const text = chunk.choices[0]?.delta?.content ?? "";
-                if (!text) continue;
-                if (!startedTranslation) {
-                  startedTranslation = true;
-                  controller.enqueue(encoder.encode(`\n${LANG_SEPARATOR}\n`));
+            // The translation is checked BEFORE it is released: it must be complete, in the right script and
+            // structurally identical. One stricter retry; if it still fails the patient is not given a
+            // half-English "translation" — the English form stands and the app translates client-side as before.
+            let accepted: string | null = null;
+            let lastIssues: string[] = [];
+            for (let attempt = 0; attempt < 2 && !accepted; attempt++) {
+              const tp = buildTranslationPrompt(englishMd, lang, { strict: attempt > 0 });
+              try {
+                const completion = await withRateLimitRetry(() =>
+                  groq.chat.completions.create(
+                    {
+                      model: TRANSLATION_MODEL,
+                      messages: [
+                        { role: "system", content: tp.system },
+                        { role: "user", content: tp.user },
+                      ],
+                      temperature: 0.1,
+                      max_tokens: 8000,
+                      stream: false,
+                    },
+                    { timeout: 90_000, maxRetries: 0 }
+                  )
+                );
+                promptTokens += completion.usage?.prompt_tokens ?? Math.round((tp.system.length + tp.user.length) / 4);
+                completionTokens += completion.usage?.completion_tokens ?? 0;
+                const text = (completion.choices[0]?.message?.content ?? "").trim();
+                const quality = assessTranslation(englishMd, text, lang, protectedTerms);
+                if (quality.ok) accepted = text;
+                else {
+                  lastIssues = quality.issues;
+                  console.warn(`generate: ${lang} translation rejected (attempt ${attempt + 1}): ${quality.issues.join("; ")}`);
                 }
-                translated += text;
-                controller.enqueue(encoder.encode(text));
+              } catch (translateErr) {
+                lastIssues = [String((translateErr as Error)?.message || translateErr).slice(0, 160)];
+                console.warn(`generate: ${lang} translation call failed (attempt ${attempt + 1})`, translateErr);
               }
-              completionTokens += Math.round(translated.length / 4);
-              promptTokens += Math.round((tp.system.length + tp.user.length) / 4);
-              translation = startedTranslation ? "streamed" : "client_fallback";
-            } catch (translateErr) {
-              if (startedTranslation) throw translateErr; // truncated translation on the page: a real failure
-              // Nothing sent yet: the English form is complete and the app translates it client-side as before.
-              console.warn("generate: translation unavailable, client will translate", translateErr);
+            }
+
+            if (accepted) {
+              controller.enqueue(encoder.encode(`\n${LANG_SEPARATOR}\n`));
+              for (const piece of chunkText(accepted)) controller.enqueue(encoder.encode(piece));
+              translation = "verified";
+            } else {
               translation = "client_fallback";
+              translationIssues = lastIssues;
             }
           }
 
@@ -350,6 +363,7 @@ export async function POST(req: NextRequest) {
               billingMode: reservation.mode,
               contentSource,
               translation,
+              ...(translationIssues.length ? { translationIssues } : {}),
             },
           });
 
@@ -389,4 +403,31 @@ export async function POST(req: NextRequest) {
 
 function counselingLanguageOf(input: any, isResearch: boolean): string {
   return isResearch ? input.study.counselingLanguage : input.clinical.counselingLanguage;
+}
+
+/** Names and identifiers that legitimately stay in English inside a translated form. */
+function protectedTermsOf(input: any, isResearch: boolean): string[] {
+  if (isResearch) {
+    const s = input.study ?? {};
+    return [s.institutionName, s.studyTitle, s.principalInvestigator, s.department, input.participant?.participantName].filter(Boolean);
+  }
+  const c = input.clinical ?? {};
+  return [c.procedureName, c.diagnosis, c.hospitalName, c.doctorName, c.doctorRegistrationNo, input.patient?.patientName, input.patient?.guardianName].filter(Boolean);
+}
+
+/**
+ * The model provider limits tokens per minute (8,000 on the current plan: one Indian-language translation uses
+ * about 5,000). On a 429 wait for the time it asks for (max 20s) and try once more.
+ */
+async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err: any) {
+    if (err?.status !== 429) throw err;
+    const hinted = /try again in ([\d.]+)s/i.exec(String(err?.message ?? ""));
+    const waitS = Math.min(20, Math.ceil(Number(hinted?.[1] ?? 10)) + 1);
+    console.warn(`generate: model rate limit reached, retrying in ${waitS}s`);
+    await new Promise((r) => setTimeout(r, waitS * 1000));
+    return fn();
+  }
 }

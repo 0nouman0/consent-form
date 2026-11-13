@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { getUserWithRole, hasPermission } from "@/lib/rbac";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { buildTranslationPrompt } from "@/lib/consent-template";
 
 const MAX_TRANSLATE_CHARS = 20000;
 
@@ -31,22 +32,17 @@ export async function POST(req: NextRequest) {
 
     const groq = new Groq({ apiKey });
 
+    // Same strengthened prompt as the generator. The old 2,000-token cap cut Indian-language forms off mid-way
+    // (a full form needs roughly 3,500-5,000 tokens).
+    const tp = buildTranslationPrompt(text, targetLanguage);
     const completion = await groq.chat.completions.create({
       model: "openai/gpt-oss-20b",
       messages: [
-        {
-          role: "system",
-          content: `You are a medical translator in India. Translate the provided English medical consent text into ${targetLanguage}.
-Maintain all markdown formatting, headings (##), lists (-), and medical accuracy.
-Return ONLY the translated markdown text. No preamble or conversational text.`
-        },
-        {
-          role: "user",
-          content: text
-        }
+        { role: "system", content: tp.system },
+        { role: "user", content: tp.user },
       ],
       temperature: 0.1,
-      max_tokens: 2000,
+      max_tokens: 8000,
     });
 
     const translatedText = completion.choices[0]?.message?.content?.trim() || text;
