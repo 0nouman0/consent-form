@@ -2,7 +2,7 @@
 
 ## Legal Review Pack for Counsel
 
-Clause library version: 2026.11.0    |    Current status: PENDING LEGAL REVIEW    |    Prepared: 2026-11-13
+Clause library version: 2026.11.1    |    Current status: PENDING LEGAL REVIEW    |    Prepared: 2026-11-13
 
 ConsentGen generates informed-consent forms for doctors in India. The legally significant wording of every form is fixed text, reproduced in full in this pack. An AI model does not write that wording. This document is for a qualified lawyer to review, correct and approve it. It is not legal advice and nothing in it has been approved yet.
 
@@ -241,7 +241,7 @@ These are produced by the software with placeholders in place of real data. The 
 - **Alternatives Discussed:**
   - [Alternative 1]
   - [Alternative 2]
-  - The risks of refusing or delaying treatment were also explained.
+- **Refusal or Delay:** The risks of refusing or delaying treatment were also explained.
 - **Authorization:** The patient authorises Dr. [Doctor Name] and the treating team to perform the named procedure only — [Procedure Name]. This is not a blanket consent.
 - **Capacity:** The patient is an adult of sound mind and was not under the influence of any intoxicant when consenting (BNS §§24–27).
 - **Voluntariness & Right to Withdraw:** Consent is given voluntarily, without duress, undue influence or misrepresentation. The patient retains the absolute statutory right to withdraw consent at any time before the procedure begins, without affecting ongoing standard care (BNS §§24–30; Consumer Protection Act 2019).
@@ -311,7 +311,7 @@ These are produced by the software with placeholders in place of real data. The 
 - **Alternatives Discussed:**
   - [Alternative 1]
   - [Alternative 2]
-  - The risks of refusing or delaying treatment were also explained.
+- **Refusal or Delay:** The risks of refusing or delaying treatment were also explained.
 - **Authorization:** The patient authorises Dr. [Doctor Name] and the treating team to perform the named procedure only — [Procedure Name]. This is not a blanket consent.
 - **Capacity:** The patient is a minor or is not competent to consent. Consent is given by the guardian, [Guardian Name] ([Relationship]) (BNS §§26–27).
 - **Voluntariness & Right to Withdraw:** This consent is given freely, without pressure or false promises. The patient can change their mind and withdraw consent at any time before the procedure starts, and their ongoing care will not be affected (BNS §§24–30; Consumer Protection Act 2019).
@@ -381,7 +381,7 @@ These are produced by the software with placeholders in place of real data. The 
 - **Alternatives Discussed:**
   - [Alternative 1]
   - [Alternative 2]
-  - The risks of refusing or delaying treatment were also explained.
+- **Refusal or Delay:** The risks of refusing or delaying treatment were also explained.
 - **Authorization:** The patient authorises Dr. [Doctor Name] and the treating team to perform the named procedure only — [Procedure Name]. This is not a blanket consent.
 - **Capacity:** The patient is an adult of sound mind and was not under the influence of any intoxicant when consenting (BNS §§24–27).
 - **Voluntariness & Right to Withdraw:** Consent is given voluntarily, without duress, undue influence or misrepresentation. The patient retains the absolute statutory right to withdraw consent at any time before the procedure begins, without affecting ongoing standard care (BNS §§24–30; Consumer Protection Act 2019).

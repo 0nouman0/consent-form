@@ -16,7 +16,7 @@ import {
 import { nowIST } from "@/lib/utils";
 import { ConsentFormSchema, ResearchConsentFormSchema } from "@/lib/schema";
 import { saveConsentToHistory, updateHistoryEntry } from "@/lib/history";
-import { downloadConsentPDF } from "@/lib/pdf";
+import { downloadConsentPDF, printConsent } from "@/lib/pdf";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
 const CONSENT_TYPE_LABELS: Record<string, string> = {
@@ -207,110 +207,33 @@ export default function ConsentDocument({
     }
   };
 
-  const handlePrint = () => {
-    const element = document.getElementById("consent-document-body");
-    if (!element) {
-      window.print();
-      return;
+  // Print, PDF and Word all use the same layout engine and the same inputs.
+  const exportParams = () => ({
+    markdown: activeMarkdown,
+    consentId,
+    hospitalName,
+    timestamp,
+    isResearch: !!isResearch,
+    formData,
+    language: activeTab === "other" ? counselingLanguage : "English",
+  });
+
+  const handlePrint = async () => {
+    try {
+      await printConsent(exportParams());
+    } catch (err) {
+      console.error("Print failed", err);
+      setSaveError("Could not open the print view. Please try the PDF download instead.");
     }
-
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.right = "0";
-    iframe.style.bottom = "0";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    iframe.style.visibility = "hidden";
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow?.document;
-    if (!doc) {
-      window.print();
-      return;
-    }
-
-    const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
-      .map((s) => s.outerHTML)
-      .join("\n");
-
-    doc.open();
-    doc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Consent Form - ${consentId}</title>
-          ${styles}
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 8mm 10mm;
-            }
-            body {
-              background: #ffffff !important;
-              color: #0f172a !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Kannada", "Noto Sans Malayalam", "Noto Sans Bengali", "Noto Sans Gujarati", "Noto Sans Gurmukhi", "Noto Sans Oriya", "Noto Sans Arabic" !important;
-              font-size: 8.5pt !important;
-              line-height: 1.35 !important;
-            }
-            #consent-document-body {
-              background: #ffffff !important;
-              color: #0f172a !important;
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-              margin: 0 !important;
-              width: 100% !important;
-              page-break-inside: avoid !important;
-              page-break-after: avoid !important;
-            }
-            h1 { display: none !important; }
-            h2 { font-size: 9pt !important; margin: 4.5pt 0 2pt !important; background: #f1f5f9 !important; padding: 2pt 4pt !important; border-left: 3pt solid #1e293b !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-weight: bold !important; text-transform: uppercase !important; }
-            h3 { font-size: 8.5pt !important; margin: 2.5pt 0 1.5pt !important; font-weight: bold !important; }
-            p  { font-size: 8.5pt !important; line-height: 1.35 !important; margin: 0 0 3pt !important; }
-            ul, ol { font-size: 8.5pt !important; margin: 0 0 3pt 12pt !important; padding: 0 !important; }
-            li { margin: 0 0 1pt !important; line-height: 1.35 !important; }
-            hr { margin: 3pt 0 !important; border-color: #cbd5e1 !important; }
-            table { font-size: 8pt !important; width: 100% !important; border-collapse: collapse !important; margin: 3pt 0 !important; }
-            th { font-size: 8pt !important; padding: 2.5pt 4pt !important; border: 1px solid #cbd5e1 !important; background: #f1f5f9 !important; font-weight: bold !important; text-transform: uppercase !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            td { font-size: 8pt !important; padding: 3pt 4pt !important; border: 1px solid #cbd5e1 !important; vertical-align: top !important; line-height: 1.35 !important; }
-            .print-hide { display: none !important; }
-            [contenteditable] { outline: none !important; }
-          </style>
-        </head>
-        <body>
-          <div id="consent-document-body">
-            ${element.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
-    doc.close();
-
-    setTimeout(() => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-      setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      }, 1000);
-    }, 300);
   };
 
   const handleDownloadPDF = async () => {
     setDownloadingPdf(true);
     try {
-      await downloadConsentPDF({
-        markdown: activeMarkdown,
-        consentId,
-        hospitalName,
-        timestamp,
-        isResearch: !!isResearch,
-        formData,
-      });
+      await downloadConsentPDF(exportParams());
+    } catch (err) {
+      console.error("PDF export failed", err);
+      setSaveError("PDF export failed. Please try again or use the Word download.");
     } finally {
       setDownloadingPdf(false);
     }
@@ -319,14 +242,10 @@ export default function ConsentDocument({
   const handleDownloadDOCX = async () => {
     setDownloadingDocx(true);
     try {
-      await downloadConsentDOCX({
-        markdown: activeMarkdown,
-        consentId,
-        hospitalName,
-        timestamp,
-        isResearch: !!isResearch,
-        formData,
-      });
+      await downloadConsentDOCX(exportParams());
+    } catch (err) {
+      console.error("Word export failed", err);
+      setSaveError("Word export failed. Please try again or use the PDF download.");
     } finally {
       setDownloadingDocx(false);
     }
@@ -505,56 +424,6 @@ export default function ConsentDocument({
 
   return (
     <div>
-      {/* Print: show only the consent document body */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @page {
-          size: A4 portrait;
-          margin: 8mm 10mm;
-        }
-        @media print {
-          html, body {
-            height: auto !important;
-            overflow: visible !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            color: #0f172a !important;
-            font-size: 8.5pt !important;
-            line-height: 1.35 !important;
-          }
-          .print-hide, nav, header, sidebar {
-            display: none !important;
-          }
-          #consent-document-body {
-            position: relative !important;
-            width: 100% !important;
-            height: auto !important;
-            overflow: visible !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            background: white !important;
-            color: #0f172a !important;
-            page-break-after: avoid !important;
-            page-break-inside: avoid !important;
-          }
-          #consent-document-body h1 { display: none !important; }
-          #consent-document-body h2 { font-size: 9pt !important; margin: 4.5pt 0 2pt !important; background: #f1f5f9 !important; padding: 2pt 4pt !important; border-left: 3pt solid #1e293b !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-weight: bold !important; text-transform: uppercase !important; }
-          #consent-document-body h3 { font-size: 8.5pt !important; margin: 2.5pt 0 1.5pt !important; font-weight: bold !important; }
-          #consent-document-body p  { font-size: 8.5pt !important; line-height: 1.35 !important; margin: 0 0 3pt !important; }
-          #consent-document-body ul,
-          #consent-document-body ol  { font-size: 8.5pt !important; margin: 0 0 3pt 12pt !important; padding: 0 !important; }
-          #consent-document-body li  { margin: 0 0 1pt !important; line-height: 1.35 !important; }
-          #consent-document-body hr  { margin: 3pt 0 !important; border-color: #cbd5e1 !important; }
-          #consent-document-body table { font-size: 8pt !important; width: 100% !important; border-collapse: collapse !important; margin: 3pt 0 !important; }
-          #consent-document-body th { font-size: 8pt !important; padding: 2.5pt 4pt !important; border: 1px solid #cbd5e1 !important; background: #f1f5f9 !important; font-weight: bold !important; text-transform: uppercase !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          #consent-document-body td { font-size: 8pt !important; padding: 3pt 4pt !important; border: 1px solid #cbd5e1 !important; vertical-align: top !important; line-height: 1.35 !important; }
-          #consent-document-body [contenteditable]:focus { outline: none !important; }
-        }
-      ` }} />
-
-
       {saveError && (
         <div
           className="mb-3 px-4 py-3 rounded-md text-sm font-medium"

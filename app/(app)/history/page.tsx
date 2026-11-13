@@ -14,7 +14,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { downloadConsentPDF } from "@/lib/pdf";
+import { downloadConsentPDF, printConsent } from "@/lib/pdf";
 import { downloadConsentDOCX } from "@/lib/docx-gen";
 
 function HistoryContent() {
@@ -108,18 +108,38 @@ function HistoryContent() {
     });
   };
 
+  // Same layout engine and the same inputs as the generate page, rebuilt from the saved form data.
+  const buildExportParams = (entry: HistoryEntry) => {
+    const fd: any = entry.form_data;
+    const isResearch = entry.consent_type === "research";
+    const lang: string = (isResearch ? fd?.study?.counselingLanguage : fd?.clinical?.counselingLanguage) || "English";
+    return {
+      markdown: getActiveMarkdown(entry),
+      consentId: entry.consent_id ?? "",
+      hospitalName: entry.hospital_name ?? "",
+      timestamp: new Date(entry.created_at).toLocaleString("en-IN"),
+      isResearch,
+      formData: fd ?? undefined,
+      language: activeTab === "other" ? lang : "English",
+    };
+  };
+
+  const handleModalPrint = async (entry: HistoryEntry) => {
+    try {
+      await printConsent(buildExportParams(entry));
+    } catch (err) {
+      console.error("Print failed", err);
+    }
+  };
+
   const handleModalDownload = async (entry: HistoryEntry, kind: "pdf" | "docx") => {
     setModalDownloading(kind);
     try {
-      const opts = {
-        markdown: getActiveMarkdown(entry),
-        consentId: entry.consent_id ?? "",
-        hospitalName: entry.hospital_name ?? "",
-        timestamp: new Date(entry.created_at).toLocaleString("en-IN"),
-        isResearch: entry.consent_type === "research",
-      };
+      const opts = buildExportParams(entry);
       if (kind === "pdf") await downloadConsentPDF(opts);
       else await downloadConsentDOCX(opts);
+    } catch (err) {
+      console.error(`${kind.toUpperCase()} export failed`, err);
     } finally {
       setModalDownloading(null);
     }
@@ -338,7 +358,7 @@ function HistoryContent() {
                     {modalCopied ? "Copied" : "Copy"}
                   </button>
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => handleModalPrint(selectedEntry)}
                     title="Print"
                     className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all hover:bg-[var(--paper)]"
                     style={{ border: "1px solid var(--rule)", color: "var(--ink-soft)" }}
