@@ -53,7 +53,7 @@ export default function AppHeader() {
 
   return (
     <header
-      className="hidden md:flex items-center justify-between px-5 py-2.5 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-xl shrink-0"
+      className="hidden md:flex items-center justify-between px-5 py-2.5 mx-3 mt-3 sm:mx-4 sm:mt-4 rounded-xl shrink-0 relative z-40"
       style={{
         background: "rgba(252,251,247,0.9)",
         backdropFilter: "blur(16px)",

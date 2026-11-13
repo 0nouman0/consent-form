@@ -91,7 +91,7 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
   const roleLabel = ROLE_LABELS[profile?.role ?? "doctor"];
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className={`relative ${open ? "z-50" : ""}`} ref={menuRef}>
       {/* Trigger */}
       <button
         type="button"
@@ -132,11 +132,11 @@ export default function UserMenu({ compact = false }: { compact?: boolean }) {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-72 rounded-md z-[9999]"
+          className="absolute right-0 top-full mt-2 w-72 rounded-xl z-[9999]"
           style={{
             background: "var(--sheet)",
             border: "1px solid var(--rule)",
-            boxShadow: "0 12px 32px rgba(23,20,16,0.10), 0 2px 8px rgba(23,20,16,0.05)",
+            boxShadow: "0 16px 40px -4px rgba(23,20,16,0.18), 0 4px 16px -2px rgba(23,20,16,0.08)",
             overflow: "hidden",
           }}
         >
