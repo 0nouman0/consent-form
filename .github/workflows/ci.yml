@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Placeholder values: enough to build and boot both apps. None of them reach a real service.
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: placeholder-publishable-key
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+  CASHFREE_SECRET_KEY: placeholder-cashfree-secret
+  CASHFREE_APP_ID: placeholder
+  PATIENT_NAME_ENCRYPTION_KEY: placeholder-encryption-key
+  GROQ_API_KEY: placeholder
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  unit:
+    name: Typecheck and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test
+
+  app:
+    name: Build both apps and run web checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            consent-gen-admin/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: consent-gen-admin
+      - name: Build main app
+        run: npm run build
+      - name: Build admin panel
+        run: npm run build
+        working-directory: consent-gen-admin
+      - name: Start both apps
+        run: |
+          nohup npm start -- -p 3000 > main.log 2>&1 &
+          (cd consent-gen-admin && nohup npx next start -p 3001 > ../admin.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:3000/login && curl -s -o /dev/null http://localhost:3001/login && exit 0
+            sleep 2
+          done
+          echo "apps did not start"; cat main.log admin.log; exit 1
+      - name: Web checks (redirects, API protection, headers, telemetry, admin bypass)
+        env:
+          BASE_URL: http://localhost:3000
+          ADMIN_URL: http://localhost:3001
+          REQUIRE_APP: "1"   # an unreachable app fails the job instead of silently skipping every test
+        run: npm run test:http
+      - name: Show server logs on failure
+        if: failure()
+        run: |
+          echo "--- main"; tail -n 80 main.log || true
+          echo "--- admin"; tail -n 80 admin.log || true
+
+  access:
+    name: Access-control tests (live database)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Secrets are not available to pull requests from forks; the tests then skip with an explanation.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      TEST_DOCTOR_EMAIL: ${{ secrets.TEST_DOCTOR_EMAIL }}
+      TEST_DOCTOR_PASSWORD: ${{ secrets.TEST_DOCTOR_PASSWORD }}
+      TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+      TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Say clearly when the secrets are missing
+        run: |
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "::warning title=Access-control tests skipped::Add the repository secrets listed in docs/TESTING.md to run them."
+          fi
+      - name: Access-control tests
+        run: npm run test:access

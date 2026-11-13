@@ -10,7 +10,10 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "legal-pack": "tsx scripts/export-legal-review.ts"
+    "legal-pack": "tsx scripts/export-legal-review.ts",
+    "test:access": "tsx --test tests/access/*.test.ts",
+    "test:http": "tsx --test tests/http/*.test.ts",
+    "test:all": "npm test && npm run test:access && npm run test:http"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.6",
